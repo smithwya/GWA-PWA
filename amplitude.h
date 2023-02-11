@@ -2,7 +2,7 @@
 #include <iostream>
 #include<vector>
 #include "channel.h"
-#include <Eigen/Dense>
+#include <eigen3/Eigen/Dense>
 
 using namespace std;
 using Eigen::MatrixXd;
