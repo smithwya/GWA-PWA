@@ -3,6 +3,7 @@
 #include<vector>
 #include "amplitude.h"
 #include "channel.h"
+#include "TCanvas.h"
 #include <Eigen/Dense>
 
 using namespace std;
@@ -13,7 +14,7 @@ typedef std::complex<double> comp;
 int main()
 {
 	//All stuff needed to make amplitude:
-
+	int x = 3.0;
 	//Create list of matrices to parameterize the polynomial in the k-matrix.
 	//the matrices must be NxN matrices, where N is the number of channels
 	MatrixXcd c = MatrixXcd::Zero(2, 2);
@@ -50,5 +51,8 @@ int main()
 
 	//print the k matrix at s
 	comp s = comp(3.4, 0);
-	cout << "k-matrix at s = " << s << endl<< A.getKMatrix(s);
+	cout << "k-matrix at s = " << s << endl<< A.getKMatrix(s)<<endl;
+	//TCanvas *c1 = new TCanvas("canvas","canvas");
+	//c1->SaveAs("canvas.pdf");
+	return 0;
 }
