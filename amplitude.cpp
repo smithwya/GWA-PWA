@@ -43,20 +43,30 @@ amplitude::amplitude(comp j, comp alp, comp ssl, vector<channel> chans, vector<M
 
 //calculate the nth chebyshev polynomial T_n(x) (probably ok to replace with some library)
 comp amplitude::chebyshev(comp x, int n) {
-	//fill in w/ giorgio's code
-
-	return comp(1.0);
-
+	
+	if (n == 0) return comp(1.0);
+    if (n == 1) return x;
+    if (n > 1) return 2. * x * chebyshev(x, n - 1) - chebyshev(x, n - 2);
+	return comp(0,0);
 };
 
 
-//calculates omega
-comp amplitude::omega(comp s, int i) {
+//calculates omega_s
+comp amplitude::omega_s(comp s) {
 
+	return s/(s + s0);
+};
 
-	//TODO: fill in with giorgio's code
+//calculates omega_p
+comp amplitude::omega_p(comp s) {
 
-	return comp(1.0);
+	return 2. * (s - smin)/(smax - smin) - 1.;
+};
+
+//calculates omega_ps
+comp amplitude::omega_ps(comp s) {
+
+	return 2. * (omega_p(s) - omega_p(smin))/(omega_p(smin) - omega_p(smax)) - 1.;
 };
 
 comp amplitude::getValue(int chan, comp s) {

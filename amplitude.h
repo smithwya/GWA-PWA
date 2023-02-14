@@ -17,7 +17,9 @@ public:
 	amplitude();
 	amplitude(comp j, comp alpha, comp sl, vector<channel> c, vector<MatrixXcd> kParams, comp s0, comp smin, comp smax);
 	comp chebyshev(comp x, int n);
-	comp omega(comp s, int i);
+	comp omega_s(comp s);
+	comp omega_p(comp s);
+	comp omega_ps(comp s);
 	comp getValue(int chan, comp s);
 	VectorXcd getNumerator(comp s, int type);
 	MatrixXcd getRhoN(comp s);
@@ -25,6 +27,7 @@ public:
 	MatrixXcd getKMatrix(comp s);
 	comp getMomentum(int particle, comp s);
 	friend ostream& operator<<(std::ostream& os, amplitude const& m);
+
 private:
 	vector<channel> channels;
 	vector<MatrixXcd> kParameters;
