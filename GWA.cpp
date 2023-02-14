@@ -52,7 +52,7 @@ int main()
 	//print the k matrix at s
 	comp s = comp(3.4, 0);
 	cout << "k-matrix at s = " << s << endl<< A.getKMatrix(s)<<endl;
-	//TCanvas *c1 = new TCanvas("canvas","canvas");
-	//c1->SaveAs("canvas.pdf");
+	TCanvas *c1 = new TCanvas("canvas","canvas");
+	c1->SaveAs("canvas.pdf");
 	return 0;
 }
