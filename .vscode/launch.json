@@ -8,7 +8,7 @@
             "name": "(Linux) Launch",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceRoot}/program.exe",
+            "program": "${workspaceRoot}/test.out",
             "args": [],
             "stopAtEntry": false,
             "cwd"  :"${workspaceRoot}",

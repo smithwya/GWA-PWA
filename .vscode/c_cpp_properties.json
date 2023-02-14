@@ -4,10 +4,10 @@
             "name": "Linux",
             "includePath": [
                 "${workspaceFolder}/**",
-                "/usr/include/eigen3/"
+                "/usr/include/eigen3"
             ],
             "defines": [],
-            "compilerPath": "/usr/bin/gcc",
+            "compilerPath": "/usr/bin/g++",
             "cStandard": "gnu17",
             "cppStandard": "gnu++14",
             "intelliSenseMode": "linux-gcc-x64"
