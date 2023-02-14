@@ -10,7 +10,7 @@
 #include<string>
 #include "channel.h"
 #include "amplitude.h"
-#include <eigen3/Eigen/Dense>
+#include <Eigen/Dense>
 using namespace std;
 using Eigen::MatrixXd;
 using Eigen::VectorXd;
