@@ -20,7 +20,7 @@ public:
 	comp omega_s(comp s);
 	comp omega_p(comp s);
 	comp omega_ps(comp s);
-	comp getValue(int chan, comp s);
+	VectorXcd getValue(comp s);
     comp omega(comp s, int type);
     VectorXcd getNumerator(comp s, int type);
     MatrixXcd getRhoN(comp s);
