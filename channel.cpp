@@ -56,6 +56,10 @@ void channel::setMass(comp m)
 	mass = m;
 }
 
+comp channel::getMomentum(comp s){
+return 0.5*sqrt(s-4.0*pow(mass,2));
+}
+
 ostream& operator<<(ostream& os, channel const& m) {
 	os << "mass =" << m.mass << endl;
 	os << "couplings = { ";

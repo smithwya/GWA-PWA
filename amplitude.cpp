@@ -51,6 +51,8 @@ comp amplitude::chebyshev(comp x, int n) {
 };
 
 
+
+
 //calculates omega_s
 comp amplitude::omega_s(comp s) {
 
@@ -71,24 +73,50 @@ comp amplitude::omega_ps(comp s) {
 
 comp amplitude::getValue(int chan, comp s) {
 	//TODO: return E_gamma * p_i * numerator * denominator.inverse()
+
 	return comp(1, 0);
 }
 
+comp amplitude::omega(comp s, int type){
 
-	VectorXcd amplitude::getNumerator(comp s, int type)
-{
+	switch (type)
+	{
+	case 1: return omega_s(s);
+	case 2: return omega_p(s);
+	case 3: return omega_ps(s);
+	}
+
+	return 0;
+}
+
+//returns the numerator function for an amplitude, where each entry is the entry for the kth channel expressed in terms of chebyshev polynomials
+//n_k = sum(a_n * T_n(omega(s)))
+VectorXcd amplitude::getNumerator(comp s, int type){
+
 	VectorXcd numerator = VectorXcd::Zero(numChannels);
+
+	for(int k = 0; k< numChannels; k++){
+		comp n_k = comp(0,0);
+		int ncoeffs = channels[k].getChebyCoeffs().size();
+
+		for(int n = 0; n<ncoeffs; n++){
+			n_k+=channels[k].getChebyCoeff(n)*chebyshev(omega(s,type),n);
+		}
+
+		numerator[k]=n_k;
+	}
 	return numerator;
 }
 
-
-
-
-
+//calculates rhoN_ki(s') = delta_ki * (2p_i)^{2J+1}/(s'+sL)^{2J+alpha}
 MatrixXcd amplitude::getRhoN(comp sprime)
 {
-	//TODO: calculate delta_ki (2p_i)^2J+1/(sprime + sL)^2J + alpha
-	return MatrixXcd();
+	MatrixXcd rhoN = MatrixXcd::Identity(numChannels,numChannels);
+	for(int i = 0; i <numChannels; i++){
+		rhoN(i,i) = pow(2.0*channels[i].getMomentum(sprime),2.0*J+1.0)/pow(sprime + sL,2.0*J+alpha);
+	}
+
+	return rhoN
 }
 
 

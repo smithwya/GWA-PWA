@@ -14,7 +14,7 @@ private:
 public:
     channel();
     channel(vector<comp> couplings, vector<comp> chebyCoefficients, comp m);
-    comp getMomentum(int particle, comp s);
+    comp getMomentum(comp s);
     vector<comp> getCouplings();
     void setCouplings(vector<comp> c);
     comp getCoupling(int i);

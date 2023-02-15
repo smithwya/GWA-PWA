@@ -21,8 +21,9 @@ public:
 	comp omega_p(comp s);
 	comp omega_ps(comp s);
 	comp getValue(int chan, comp s);
-	VectorXcd getNumerator(comp s, int type);
-	MatrixXcd getRhoN(comp s);
+    comp omega(comp s, int type);
+    VectorXcd getNumerator(comp s, int type);
+    MatrixXcd getRhoN(comp s);
 	MatrixXcd getDenominator(comp s);
 	MatrixXcd getKMatrix(comp s);
 	comp getMomentum(int particle, comp s);
