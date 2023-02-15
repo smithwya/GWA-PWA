@@ -71,10 +71,18 @@ comp amplitude::omega_ps(comp s) {
 	return 2. * (omega_p(s) - omega_p(smin))/(omega_p(smin) - omega_p(smax)) - 1.;
 };
 
-comp amplitude::getValue(int chan, comp s) {
-	//TODO: return E_gamma * p_i * numerator * denominator.inverse()
+	// return E_gamma * p_i * numerator * denominator.inverse()
+VectorXcd amplitude::getValue(comp s) {
+	comp Egamma = (1,0);
+	VectorXcd a=VectorXcd::Zero(numChannels);
 
-	return comp(1, 0);
+	a=getDenominator(s).inverse()*getNumerator(s,1);
+
+	for(int i = 0; i < numChannels; i++){
+		a(i)*=channels[i].getMomentum(s);
+	}
+
+	return a*Egamma;
 }
 
 comp amplitude::omega(comp s, int type){
