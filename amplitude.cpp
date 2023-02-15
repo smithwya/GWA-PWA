@@ -116,7 +116,7 @@ MatrixXcd amplitude::getRhoN(comp sprime)
 		rhoN(i,i) = pow(2.0*channels[i].getMomentum(sprime),2.0*J+1.0)/pow(sprime + sL,2.0*J+alpha);
 	}
 
-	return rhoN
+	return rhoN;
 }
 
 
