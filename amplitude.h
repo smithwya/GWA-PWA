@@ -3,6 +3,7 @@
 #include<vector>
 #include "channel.h"
 #include <Eigen/Dense>
+#include "TF1.h"
 
 using namespace std;
 using Eigen::MatrixXd;
@@ -23,11 +24,14 @@ public:
 	VectorXcd getValue(comp s);
     comp omega(comp s, int type);
     VectorXcd getNumerator(comp s, int type);
-    MatrixXcd getRhoN(comp s);
+    comp getRhoN(comp s, int k);
 	MatrixXcd getDenominator(comp s);
 	MatrixXcd getKMatrix(comp s);
 	comp getMomentum(int particle, comp s);
 	friend ostream& operator<<(std::ostream& os, amplitude const& m);
+	comp getInt(comp s, comp mth,int k);
+	comp getInt(double s, comp mth,int k);
+	double getIntegrand(comp s, comp sp,int k,bool real);
 
 private:
 	vector<channel> channels;
@@ -39,4 +43,5 @@ private:
 	comp s0;
 	comp smin;
 	comp smax;
+	const double epsilon = 1e-6;
 };

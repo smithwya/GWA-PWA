@@ -11,6 +11,7 @@
 #include "channel.h"
 #include "amplitude.h"
 #include <Eigen/Dense>
+#include "TF1.h"
 using namespace std;
 using Eigen::MatrixXd;
 using Eigen::VectorXd;
@@ -117,17 +118,18 @@ VectorXcd amplitude::getNumerator(comp s, int type){
 }
 
 //calculates rhoN_ki(s') = delta_ki * (2p_i)^{2J+1}/(s'+sL)^{2J+alpha}
-MatrixXcd amplitude::getRhoN(comp sprime)
+comp amplitude::getRhoN(comp sprime,int k)
 {
-	MatrixXcd rhoN = MatrixXcd::Identity(numChannels,numChannels);
-	for(int i = 0; i <numChannels; i++){
-		rhoN(i,i) = pow(2.0*channels[i].getMomentum(sprime),2.0*J+1.0)/pow(sprime + sL,2.0*J+alpha);
-	}
+		comp x = pow(2.0*channels[k].getMomentum(sprime),2.0*J+1.0)/pow(sprime + sL,2.0*J+alpha);
 
-	return rhoN;
+	return x;
 }
 
+double amplitude::getIntegrand(comp s, comp sp,int k, bool r){
 
+	if(r) return (getRhoN(sp,k)/(sp*(sp-s-comp(0,1)*epsilon))).real();
+	return (getRhoN(sp,k)/(sp*(sp-s-comp(0,1)*epsilon))).imag();
+}
 
 
 MatrixXcd amplitude::getDenominator(comp s)
@@ -135,9 +137,34 @@ MatrixXcd amplitude::getDenominator(comp s)
 	MatrixXcd D = MatrixXcd::Zero(numChannels, numChannels);
 
 	MatrixXcd Kinv = getKMatrix(s).inverse();
+
+	MatrixXcd M = MatrixXcd::Zero(numChannels,numChannels);
+
+	for(int k = 0; k < numChannels; k++){
+		comp m_k = channels[k].getMass();
+
+		for(int i = 0; i <= k; i++){
+			
+			M(k,i)=getInt(s,4.0*pow(m_k,2),k);
+
+		}
+
+
+	}
 	//TODO: calculate -s/pi * int(rho N/s'(s'-s-iepsilon),4mk^2, infty)
 
 	return D;
+}
+
+//integratoe f(function, lower bound, upper bound)
+comp amplitude::getInt(comp s, comp mth,int k){
+
+return 0;
+}
+
+comp amplitude::getInt(double s, comp mth){
+
+
 }
 
 
