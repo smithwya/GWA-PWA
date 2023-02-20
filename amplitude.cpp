@@ -159,8 +159,8 @@ comp amplitude::getIntegral(comp s,int k){
 	
 	double threshold = 4*pow(channels[k].getMass().real(),2);
 
-	double realpart = intRe.IntegralUp(1.0);
-	double imagpart = intIm.IntegralUp(1.0);
+	double realpart = intRe.IntegralUp(threshold);
+	double imagpart = intIm.IntegralUp(threshold);
 	
 
 	return comp(realpart,imagpart);
