@@ -12,6 +12,14 @@
 #include "amplitude.h"
 #include <Eigen/Dense>
 #include "TF1.h"
+#include "TMath.h"
+#include "TH1.h"
+#include "Math/Integrator.h"
+#include "Math/Functor.h"
+#include "Math/WrappedFunction.h"
+#include "Math/IFunction.h"
+
+
 using namespace std;
 using Eigen::MatrixXd;
 using Eigen::VectorXd;
@@ -63,7 +71,7 @@ comp amplitude::omega_s(comp s) {
 //calculates omega_p
 comp amplitude::omega_p(comp s) {
 
-	return 2. * (s - smin)/(smax - smin) - 1.;
+	return 2. * (s - smin)/(smax - smin) - 1.0;
 };
 
 //calculates omega_ps
@@ -125,11 +133,31 @@ comp amplitude::getRhoN(comp sprime,int k)
 	return x;
 }
 
-double amplitude::getIntegrand(comp s, comp sp,int k, bool r){
-
-	if(r) return (getRhoN(sp,k)/(sp*(sp-s-comp(0,1)*epsilon))).real();
-	return (getRhoN(sp,k)/(sp*(sp-s-comp(0,1)*epsilon))).imag();
+double amplitude::getIntegrandRe(double sp){
+	return (getRhoN(sp,kk)/(sp*(sp-ss-comp(0,1)*epsilon))).real();
 }
+
+double amplitude::getIntegrandIm(double sp){
+	return (getRhoN(sp,kk)/(sp*(sp-ss-comp(0,1)*epsilon))).imag();
+}
+
+double amplitude::getIntegral(comp s,int k, bool r){
+	ss = s;
+	kk = k;
+
+	if(r){
+		ROOT::Math::Functor1D f1(& getIntegrandRe);
+		ROOT::Math::Integrator ig(f1,ROOT::Math::IntegrationOneDim::kGAUSS,1.E-12,1.E-12);
+		return ig.IntegralUp(4*pow(real(channels[k].getMass()),2));
+	}
+	else{
+		ROOT::Math::Functor1D f1(& getIntegrandIm);
+		ROOT::Math::Integrator ig(f1,ROOT::Math::IntegrationOneDim::kGAUSS,1.E-12,1.E-12);
+		return ig.IntegralUp(4*pow(real(channels[k].getMass()),2));
+	}
+	return 0;
+}
+
 
 
 MatrixXcd amplitude::getDenominator(comp s)
@@ -145,7 +173,7 @@ MatrixXcd amplitude::getDenominator(comp s)
 
 		for(int i = 0; i <= k; i++){
 			
-			M(k,i)=getInt(s,4.0*pow(m_k,2),k);
+			M(k,i)=comp(getIntegral(s,k,true),getIntegral(s,k,false));
 
 		}
 
@@ -157,16 +185,6 @@ MatrixXcd amplitude::getDenominator(comp s)
 }
 
 //integratoe f(function, lower bound, upper bound)
-comp amplitude::getInt(comp s, comp mth,int k){
-
-return 0;
-}
-
-comp amplitude::getInt(double s, comp mth){
-
-
-}
-
 
 comp amplitude::getMomentum(int chan, comp s)
 {

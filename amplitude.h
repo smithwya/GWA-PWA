@@ -29,10 +29,9 @@ public:
 	MatrixXcd getKMatrix(comp s);
 	comp getMomentum(int particle, comp s);
 	friend ostream& operator<<(std::ostream& os, amplitude const& m);
-	comp getInt(comp s, comp mth,int k);
-	comp getInt(double s, comp mth,int k);
-	double getIntegrand(comp s, comp sp,int k,bool real);
-
+	double getIntegral(comp s, int k,bool real);
+	double getIntegrandRe(double s);
+	double getIntegrandIm(double s);
 private:
 	vector<channel> channels;
 	vector<MatrixXcd> kParameters;
@@ -43,5 +42,7 @@ private:
 	comp s0;
 	comp smin;
 	comp smax;
+	comp ss=0;
+	int kk=0;
 	const double epsilon = 1e-6;
 };
