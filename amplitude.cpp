@@ -134,7 +134,7 @@ comp amplitude::getRhoN(comp sprime,int k)
 }
 
 comp amplitude::getIntegrand(double sp,comp s, int k){
-	
+
 	return getRhoN(sp,k)/(sp*(sp-s-comp(0,1)*epsilon));
 
 }
@@ -154,13 +154,13 @@ comp amplitude::getIntegral(comp s,int k){
 	ROOT::Math::Functor1D re(realIntegrand);
 	ROOT::Math::Functor1D im(imagIntegrand);
 
-	ROOT::Math::Integrator iRe(re,ROOT::Math::IntegrationOneDim::kGAUSS,1.E-12,1.E-12);
-	ROOT::Math::Integrator iIm(im,ROOT::Math::IntegrationOneDim::kGAUSS,1.E-12,1.E-12);
+	ROOT::Math::Integrator intRe(re,ROOT::Math::IntegrationOneDim::kGAUSS,1.E-12,1.E-12);
+	ROOT::Math::Integrator intIm(im,ROOT::Math::IntegrationOneDim::kGAUSS,1.E-12,1.E-12);
 	
 	double threshold = 4*pow(channels[k].getMass().real(),2);
 
-	double realpart = iRe.IntegralUp(1.0);
-	double imagpart = iRe.IntegralUp(1.0);
+	double realpart = intRe.IntegralUp(1.0);
+	double imagpart = intIm.IntegralUp(1.0);
 	
 
 	return comp(realpart,imagpart);
