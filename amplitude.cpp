@@ -133,29 +133,37 @@ comp amplitude::getRhoN(comp sprime,int k)
 	return x;
 }
 
-double amplitude::getIntegrandRe(double sp){
-	return (getRhoN(sp,kk)/(sp*(sp-ss-comp(0,1)*epsilon))).real();
+comp amplitude::getIntegrand(double sp,comp s, int k){
+	
+	return getRhoN(sp,k)/(sp*(sp-s-comp(0,1)*epsilon));
+
 }
 
-double amplitude::getIntegrandIm(double sp){
-	return (getRhoN(sp,kk)/(sp*(sp-ss-comp(0,1)*epsilon))).imag();
-}
 
-double amplitude::getIntegral(comp s,int k, bool r){
-	ss = s;
-	kk = k;
+comp amplitude::getIntegral(comp s,int k){
 
-	if(r){
-		ROOT::Math::Functor1D f1(& getIntegrandRe);
-		ROOT::Math::Integrator ig(f1,ROOT::Math::IntegrationOneDim::kGAUSS,1.E-12,1.E-12);
-		return ig.IntegralUp(4*pow(real(channels[k].getMass()),2));
-	}
-	else{
-		ROOT::Math::Functor1D f1(& getIntegrandIm);
-		ROOT::Math::Integrator ig(f1,ROOT::Math::IntegrationOneDim::kGAUSS,1.E-12,1.E-12);
-		return ig.IntegralUp(4*pow(real(channels[k].getMass()),2));
-	}
-	return 0;
+ 	auto realIntegrand = [&](double sp)
+    {
+        return getIntegrand(sp,s,k).real();
+    };
+	auto imagIntegrand = [&](double sp)
+    {
+        return getIntegrand(sp,s,k).imag();
+    };
+
+	ROOT::Math::Functor1D re(realIntegrand);
+	ROOT::Math::Functor1D im(imagIntegrand);
+
+	ROOT::Math::Integrator iRe(re,ROOT::Math::IntegrationOneDim::kGAUSS,1.E-12,1.E-12);
+	ROOT::Math::Integrator iIm(im,ROOT::Math::IntegrationOneDim::kGAUSS,1.E-12,1.E-12);
+	
+	double threshold = 4*pow(channels[k].getMass().real(),2);
+
+	double realpart = iRe.IntegralUp(1.0);
+	double imagpart = iRe.IntegralUp(1.0);
+	
+
+	return comp(realpart,imagpart);
 }
 
 
@@ -169,11 +177,10 @@ MatrixXcd amplitude::getDenominator(comp s)
 	MatrixXcd M = MatrixXcd::Zero(numChannels,numChannels);
 
 	for(int k = 0; k < numChannels; k++){
-		comp m_k = channels[k].getMass();
 
 		for(int i = 0; i <= k; i++){
 			
-			M(k,i)=comp(getIntegral(s,k,true),getIntegral(s,k,false));
+			M(k,i)=getIntegral(s,k);
 
 		}
 
