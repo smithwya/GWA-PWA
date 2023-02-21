@@ -18,6 +18,8 @@
 #include "Math/Functor.h"
 #include "Math/WrappedFunction.h"
 #include "Math/IFunction.h"
+#include "Math/GSLIntegrator.h"
+#include "Math/IFunction.h"
 
 
 using namespace std;
@@ -77,7 +79,7 @@ comp amplitude::omega_p(comp s) {
 //calculates omega_ps
 comp amplitude::omega_ps(comp s) {
 
-	return 2. * (omega_p(s) - omega_p(smin))/(omega_p(smin) - omega_p(smax)) - 1.;
+	return 2. * (omega_p(s) - omega_p(smin))/(omega_p(smax) - omega_p(smin)) - 1.;
 };
 
 	// return E_gamma * p_i * numerator * denominator.inverse()
@@ -125,37 +127,38 @@ VectorXcd amplitude::getNumerator(comp s, int type){
 	return numerator;
 }
 
-//calculates rhoN_ki(s') = delta_ki * (2p_i)^{2J+1}/(s'+sL)^{2J+alpha}
+//calculates rhoN_ki(s') = delta_ki * (2p_i)^{2J+1}/(s'+sL)^{J+alpha}
 comp amplitude::getRhoN(comp sprime,int k)
 {
-		comp x = pow(2.0*channels[k].getMomentum(sprime),2.0*J+1.0)/pow(sprime + sL,2.0*J+alpha);
+		comp x = pow(2.0*channels[k].getMomentum(sprime),2.0*J+1.0)/pow(sprime + sL,J+alpha);
 
 	return x;
 }
 
+//overload later for other sheets
 comp amplitude::getIntegrand(double sp,comp s, int k){
 
-	return getRhoN(sp,k)/(sp*(sp-s-comp(0,1)*epsilon));
+	return getRhoN(sp,k)*s/(sp*(sp-s-comp(0,1)*epsilon))/TMath::Pi();
 
 }
 
 
 comp amplitude::getIntegral(comp s,int k){
-
+	//add parameter to select sheet, "+-++" etc
  	auto realIntegrand = [&](double sp)
     {
-        return getIntegrand(sp,s,k).real();
+        return amplitude::getIntegrand(sp,s,k).real();
     };
 	auto imagIntegrand = [&](double sp)
     {
-        return getIntegrand(sp,s,k).imag();
+        return amplitude::getIntegrand(sp,s,k).imag();
     };
 
 	ROOT::Math::Functor1D re(realIntegrand);
 	ROOT::Math::Functor1D im(imagIntegrand);
 
-	ROOT::Math::Integrator intRe(re,ROOT::Math::IntegrationOneDim::kGAUSS,1.E-12,1.E-12);
-	ROOT::Math::Integrator intIm(im,ROOT::Math::IntegrationOneDim::kGAUSS,1.E-12,1.E-12);
+	ROOT::Math::Integrator intRe(re,ROOT::Math::IntegrationOneDim::kGAUSS,1.E-9,1.E-6);
+	ROOT::Math::Integrator intIm(im,ROOT::Math::IntegrationOneDim::kGAUSS,1.E-9,1.E-6);
 	
 	double threshold = 4*pow(channels[k].getMass().real(),2);
 
@@ -181,14 +184,13 @@ MatrixXcd amplitude::getDenominator(comp s)
 		for(int i = 0; i <= k; i++){
 			
 			M(k,i)=getIntegral(s,k);
-
+			M(i,k) = M(k,i);
 		}
 
 
 	}
-	//TODO: calculate -s/pi * int(rho N/s'(s'-s-iepsilon),4mk^2, infty)
 
-	return D;
+	return D-M;
 }
 
 //integratoe f(function, lower bound, upper bound)
