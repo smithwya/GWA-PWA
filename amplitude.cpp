@@ -40,7 +40,7 @@ amplitude::amplitude() {
 	smax = 0;
 }
 
-amplitude::amplitude(comp j, comp alp, comp ssl, vector<channel> chans, vector<MatrixXcd> kParams, comp ss0, comp ssmin, comp ssmax) {
+amplitude::amplitude(comp j, comp alp, comp ssl, vector<channel> chans, vector<MatrixXcd> kParams,vector<double> rmasses, comp ss0, comp ssmin, comp ssmax) {
 	channels = chans;
 	kParameters = kParams;
 	numChannels = channels.size();
@@ -50,6 +50,7 @@ amplitude::amplitude(comp j, comp alp, comp ssl, vector<channel> chans, vector<M
 	s0 = ss0;
 	smin = ssmin;
 	smax = ssmax;
+	resmasses =rmasses;
 }
 
 //calculate the nth chebyshev polynomial T_n(x) (probably ok to replace with some library)
@@ -84,16 +85,15 @@ comp amplitude::omega_ps(comp s) {
 
 	// return E_gamma * p_i * numerator * denominator.inverse()
 VectorXcd amplitude::getValue(comp s) {
-	comp Egamma = (1,0);
 	VectorXcd a=VectorXcd::Zero(numChannels);
 
-	a=getDenominator(s).inverse()*getNumerator(s,1);
+	a=getDenominator(s).inverse()*getNumerator(s,3);
 
 	for(int i = 0; i < numChannels; i++){
 		a(i)*=channels[i].getMomentum(s);
 	}
 
-	return a*Egamma;
+	return a;
 }
 
 comp amplitude::omega(comp s, int type){
@@ -209,7 +209,7 @@ MatrixXcd amplitude::getKMatrix(comp s) {
 			comp tempMatrixTerm = 0;
 
 			for (int R = 0; R < numChannels; R++) {
-				tempMatrixTerm += channels[k].getCoupling(R) * channels[i].getCoupling(R) / (pow(channels[R].getMass(), 2) - s);
+				tempMatrixTerm += channels[k].getCoupling(R) * channels[i].getCoupling(R) / (resmasses[R] - s);
 			}
 
 			kmat(k, i) += tempMatrixTerm;
@@ -231,6 +231,11 @@ ostream& operator<<(ostream& os, amplitude const& m) {
 	for (int i = 0; i < m.numChannels; i++) {
 		os << "channel " << i << ": " << endl << m.channels[i] << endl<<endl;
 	}
+	os<<"resmasses: ";
+	for (int i = 0; i < m.resmasses.size(); i++) {
+		os << m.resmasses[i]<<" ";
+	}
+	os<<endl;
 	os << endl << endl;
 	os << "k-matrix parameters: " << endl;
 	for (int i = 0; i < m.kParameters.size(); i++) {

@@ -16,7 +16,7 @@ class amplitude {
 
 public:
 	amplitude();
-	amplitude(comp j, comp alpha, comp sl, vector<channel> c, vector<MatrixXcd> kParams, comp s0, comp smin, comp smax);
+	amplitude(comp j, comp alpha, comp sl, vector<channel> c, vector<MatrixXcd> kParams,vector<double> resmasses, comp s0, comp smin, comp smax);
 	comp chebyshev(comp x, int n);
 	comp omega_s(comp s);
 	comp omega_p(comp s);
@@ -43,4 +43,5 @@ private:
 	comp smin;
 	comp smax;
 	const double epsilon = 1e-6;
+	vector<double> resmasses;
 };
