@@ -96,21 +96,20 @@ int main()
 
 	double lower_sqrt_s = 0.27;
 	double upper_sqrt_s = 3.;
-	int numb_points = 10;
-	double delta = (upper_sqrt_s - lower_sqrt_s)/numb_points;
-	comp ch1 = wave_1.getMomentum(0, lower_sqrt_s);
-	std::cout << ch1 << endl;
+	int num_bins = 134;
+	double delta = (upper_sqrt_s - lower_sqrt_s)/num_bins;
 
 	//1st channel, 1st wave:
 
-	TH1D *ch1_wv1 = new TH1D("ch1_wv1","ch = 1, J = 0", 6000, lower_sqrt_s, upper_sqrt_s); //without the normalization constant
-	TH1D *ch1_wv2 = new TH1D("ch1_wv2","ch = 1, J = 2", 6000, lower_sqrt_s, upper_sqrt_s);
-	TH1D *ch1_relative_phases = new TH1D("ch1_relative_phases", "ch1 relative phases SD", 6000, lower_sqrt_s, upper_sqrt_s);
+	TH1D *ch1_wv1 = new TH1D("ch1_wv1","ch = 1, J = 0", num_bins, lower_sqrt_s, upper_sqrt_s); //without the normalization constant
+	TH1D *ch1_wv2 = new TH1D("ch1_wv2","ch = 1, J = 2", num_bins, lower_sqrt_s, upper_sqrt_s);
+	TH1D *ch1_relative_phases = new TH1D("ch1_relative_phases", "ch1 relative phases SD", num_bins, lower_sqrt_s, upper_sqrt_s);
 
-	for(int i = 0; i < numb_points; i++){
-		ch1_wv1->SetBinContent(i + 1,  real(wave_1.getMomentum(0, s)) * abs(wave_1.getValue(lower_sqrt_s + delta/2 + i * delta)(0)));
-		ch1_wv2->SetBinContent(i + 1,  real(wave_2.getMomentum(0, s)) * abs(wave_2.getValue(lower_sqrt_s + delta/2 + i * delta)(0)));
-		ch1_relative_phases->SetBinContent(i + 1, arg(wave_1.getValue(lower_sqrt_s + delta/2 + i * delta)(0)) - arg(wave_2.getValue(lower_sqrt_s + delta/2 + i * delta)(0)));
+	for(int i = 0; i < num_bins; i++){
+		s = lower_sqrt_s + delta/2 + i * delta;
+		ch1_wv1->SetBinContent(i + 1,  real(wave_1.getMomentum(0, s)) * pow(abs(wave_1.getValue(s)(0)), 2));
+		ch1_wv2->SetBinContent(i + 1,  real(wave_2.getMomentum(0, s)) * pow(abs(wave_2.getValue(s)(0)), 2));
+		ch1_relative_phases->SetBinContent(i + 1, arg(wave_1.getValue(s)(0)) - arg(wave_2.getValue(s)(0)));
 	}
 
 	TFile file("pdf_folder.root", "recreate");
