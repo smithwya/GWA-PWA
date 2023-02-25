@@ -5,6 +5,8 @@
 #include "channel.h"
 #include "TCanvas.h"
 #include <Eigen/Dense>
+#include "TH1D.h"
+#include "TFile.h"
 
 using namespace std;
 using Eigen::MatrixXcd;
@@ -25,7 +27,7 @@ int main()
 	comp smin = comp(1, 0);
 	comp smax = comp(2.5, 0);
 
-	//specify the masses of the particles in output from each channel:
+	//specify the masses (in GeV) of the particles in output from each channel (we're considering the case of identical particles in output):
 
 	comp mass1 = comp(0.13498, 0.);
 	comp mass2 = comp(0.49761, 0.);
@@ -90,7 +92,39 @@ int main()
 
 	std::cout<<"num2"<<endl<<wave_2.getValue(s)<<endl;
 
-	
+	// Plotting:
+
+	double lower_sqrt_s = 0.27;
+	double upper_sqrt_s = 3.;
+	int numb_points = 10;
+	double delta = (upper_sqrt_s - lower_sqrt_s)/numb_points;
+	comp ch1 = wave_1.getMomentum(0, lower_sqrt_s);
+	std::cout << ch1 << endl;
+
+	//1st channel, 1st wave:
+
+	TH1D *ch1_wv1 = new TH1D("ch1_wv1","ch = 1, J = 0", 6000, lower_sqrt_s, upper_sqrt_s); //without the normalization constant
+	TH1D *ch1_wv2 = new TH1D("ch1_wv2","ch = 1, J = 2", 6000, lower_sqrt_s, upper_sqrt_s);
+	TH1D *ch1_relative_phases = new TH1D("ch1_relative_phases", "ch1 relative phases SD", 6000, lower_sqrt_s, upper_sqrt_s);
+
+	for(int i = 0; i < numb_points; i++){
+		ch1_wv1->SetBinContent(i + 1,  real(wave_1.getMomentum(0, s)) * abs(wave_1.getValue(lower_sqrt_s + delta/2 + i * delta)(0)));
+		ch1_wv2->SetBinContent(i + 1,  real(wave_2.getMomentum(0, s)) * abs(wave_2.getValue(lower_sqrt_s + delta/2 + i * delta)(0)));
+		ch1_relative_phases->SetBinContent(i + 1, arg(wave_1.getValue(lower_sqrt_s + delta/2 + i * delta)(0)) - arg(wave_2.getValue(lower_sqrt_s + delta/2 + i * delta)(0)));
+	}
+
+	TFile file("pdf_folder.root", "recreate");
+	TCanvas canv;
+	ch1_wv1->Write();
+	ch1_wv1->Draw();
+	canv.SaveAs("ch1_wv1.pdf");
+	ch1_wv2->Write();
+	ch1_wv2->Draw();
+	canv.SaveAs("ch1_wv2.pdf");
+	ch1_relative_phases->Write();
+	ch1_relative_phases->Draw();
+	canv.SaveAs("ch1_relative_phases.pdf");
+	file.Close();
 
 	return 0;
 }
