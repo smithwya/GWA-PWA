@@ -167,7 +167,7 @@ int main()
 
 		for(int k = 0; k < num_bins + 1; k++){
 			s = lower_sqrt_s + delta/2 + k * delta; //centroid
-			phase_graf.at(i - 1)->SetBinContent(k + 1, arg(wave_1.getValue(s)(i - 1)) - arg(wave_2.getValue(s)(i - 1))); //(#)
+			phase_graf.at(i - 1)->SetBinContent(k + 1, arg(wv_list.at(0).getValue(s)(i - 1)) - arg(wv_list.at(1).getValue(s)(i - 1))); //(#)
 		}
 
 		phase_graf.at(i - 1)->Draw();
