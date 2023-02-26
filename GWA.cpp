@@ -7,6 +7,8 @@
 #include <Eigen/Dense>
 #include "TH1D.h"
 #include "TFile.h"
+#include <sstream>
+#include "TString.h"
 
 using namespace std;
 using Eigen::MatrixXcd;
@@ -99,14 +101,14 @@ int main()
 	int num_bins = 134;
 	double delta = (upper_sqrt_s - lower_sqrt_s)/num_bins;
 
-	//1st channel, 1st wave:
+	/*//1st channel:
 
 	TH1D *ch1_wv1 = new TH1D("ch1_wv1","ch = 1, J = 0", num_bins, lower_sqrt_s, upper_sqrt_s); //without the normalization constant
 	TH1D *ch1_wv2 = new TH1D("ch1_wv2","ch = 1, J = 2", num_bins, lower_sqrt_s, upper_sqrt_s);
 	TH1D *ch1_relative_phases = new TH1D("ch1_relative_phases", "ch1 relative phases SD", num_bins, lower_sqrt_s, upper_sqrt_s);
 
 	for(int i = 0; i < num_bins; i++){
-		s = lower_sqrt_s + delta/2 + i * delta;
+		s = lower_sqrt_s + delta/2 + i * delta; //centroid
 		ch1_wv1->SetBinContent(i + 1,  real(wave_1.getMomentum(0, s)) * pow(abs(wave_1.getValue(s)(0)), 2));
 		ch1_wv2->SetBinContent(i + 1,  real(wave_2.getMomentum(0, s)) * pow(abs(wave_2.getValue(s)(0)), 2));
 		ch1_relative_phases->SetBinContent(i + 1, arg(wave_1.getValue(s)(0)) - arg(wave_2.getValue(s)(0)));
@@ -123,7 +125,56 @@ int main()
 	ch1_relative_phases->Write();
 	ch1_relative_phases->Draw();
 	canv.SaveAs("ch1_relative_phases.pdf");
-	file.Close();
+	file.Close();*/
+
+	vector<int> chan_list = {0, 1, 2}; //user has to modify only these three lines writing the number of each channel considered and...
+	vector<amplitude> wv_list = {wave_1, wave_2}; 
+	vector<int> J_list = {0, 2}; // ..the waves considered for every channel, and the (#) line for specifing the waves which you want the relative phase of.
+
+	vector<TH1D*> amp_graf; 
+	vector<TH1D*> phase_graf;
+
+	char amp_name[10];
+	char phase_name[20];
+
+	stringstream dynamic_name1;
+	stringstream dynamic_name2;
+
+	TFile file("pdf_folder.root", "recreate");
+	TCanvas canv;
+
+	for(int i = 1; i <= chan_list.size(); i++){
+		for(int j = 1; j <= J_list.size(); j++){
+			dynamic_name1 << "ch" << i << "_wv" << j;
+			dynamic_name1 >> amp_name;
+			std::cout << amp_name << endl;
+			amp_graf.push_back(new TH1D(amp_name, Form("ch = %i, J = %i", chan_list.at(i - 1), J_list.at(j - 1)), num_bins, lower_sqrt_s, upper_sqrt_s));
+
+			for(int k = 0; k < num_bins + 1; k++){
+				s = lower_sqrt_s + delta/2 + k * delta; //centroid
+				amp_graf.at((i - 1) * J_list.size() + j - 1)->SetBinContent(k + 1, real(wv_list.at(j - 1).getMomentum(j - 1, s)) * pow(abs(wv_list.at(j - 1).getValue(s)(j - 1)), 2));
+			}
+
+			amp_graf.at((i - 1) * J_list.size() + j - 1)->Draw();
+			amp_graf.at((i - 1) * J_list.size() + j - 1)->Write();
+			canv.SaveAs(Form("%s.pdf", amp_name));
+			dynamic_name1.clear();
+		}
+		dynamic_name2 << "ch" << i << "_relative_phases";
+		dynamic_name2 >> phase_name;
+		std::cout << phase_name << endl;
+		phase_graf.push_back(new TH1D(phase_name, Form("ch = %i relative phases", chan_list.at(i - 1)), num_bins, lower_sqrt_s, upper_sqrt_s));
+
+		for(int k = 0; k < num_bins + 1; k++){
+			s = lower_sqrt_s + delta/2 + k * delta; //centroid
+			phase_graf.at(i - 1)->SetBinContent(k + 1, arg(wave_1.getValue(s)(i - 1)) - arg(wave_2.getValue(s)(i - 1))); //(#)
+		}
+
+		phase_graf.at(i - 1)->Draw();
+		phase_graf.at(i - 1)->Write();
+		canv.SaveAs(Form("%s.pdf", phase_name));
+		dynamic_name2.clear();
+	}
 
 	return 0;
 }
