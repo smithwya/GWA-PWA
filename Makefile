@@ -21,7 +21,7 @@ GWA : GWA.o amplitude.o observable.o channel.o
 	$(LD) $(CPPFLAGS) -o GWA  GWA.o amplitude.o observable.o channel.o $(LDFLAGS)
 
 
-%.o : %.cpp
+%.o : %.cpp %.h
 	$(CXX) $(CPPFLAGS) -o $@ -c $<
 
 clean :

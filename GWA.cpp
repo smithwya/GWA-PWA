@@ -23,11 +23,11 @@ int main()
 	// and parameter alpha for controlling asymptotic behavior of integrand when calculating the K-matrix
 	comp J1 = comp(0, 0);
 	comp J2 = comp(2, 0);
-	comp alpha = comp(0, 0);
+	comp alpha = comp(1., 0);
 	comp sL = comp(0.6, 0);
 	comp s0 = comp(1, 0);
-	comp smin = comp(1, 0);
-	comp smax = comp(2.5, 0);
+	comp smin = comp(pow(1., 2), 0);
+	comp smax = comp(pow(2.5, 2), 0);
 
 	//specify the masses (in GeV) of the particles in output from each channel (we're considering the case of identical particles in output):
 
@@ -88,30 +88,31 @@ int main()
 	std::cout << "2nd-wave amplitude: "<<endl << wave_2 << endl;
 
 	//print the k matrix at s
-	comp s = comp(3.4, 0);
+	comp s = comp(1,0);
 
-	std::cout<<"num1"<<endl<<wave_1.getValue(s)<<endl;
-
-	std::cout<<"num2"<<endl<<wave_2.getValue(s)<<endl;
+	std::cout << chan1_1.getMomentum(s) << endl;
+	std::cout << wave_1.getRhoN(s, 0) << endl;
 
 	// Plotting:
 
-	double lower_sqrt_s = 0.27;
-	double upper_sqrt_s = 3.;
-	int num_bins = 134;
+	double lower_sqrt_s = 1;
+	double upper_sqrt_s = 2.5;
+	int num_bins = 300;
 	double delta = (upper_sqrt_s - lower_sqrt_s)/num_bins;
 
-	/*//1st channel:
+	//1st channel:
 
 	TH1D *ch1_wv1 = new TH1D("ch1_wv1","ch = 1, J = 0", num_bins, lower_sqrt_s, upper_sqrt_s); //without the normalization constant
 	TH1D *ch1_wv2 = new TH1D("ch1_wv2","ch = 1, J = 2", num_bins, lower_sqrt_s, upper_sqrt_s);
+	TH1D *integral = new TH1D("integral","ch = 1, J = 0", num_bins, lower_sqrt_s, upper_sqrt_s);
 	TH1D *ch1_relative_phases = new TH1D("ch1_relative_phases", "ch1 relative phases SD", num_bins, lower_sqrt_s, upper_sqrt_s);
-
+	comp sqrtS = comp(1.0,0);
 	for(int i = 0; i < num_bins; i++){
-		s = lower_sqrt_s + delta/2 + i * delta; //centroid
-		ch1_wv1->SetBinContent(i + 1,  real(wave_1.getMomentum(0, s)) * pow(abs(wave_1.getValue(s)(0)), 2));
-		ch1_wv2->SetBinContent(i + 1,  real(wave_2.getMomentum(0, s)) * pow(abs(wave_2.getValue(s)(0)), 2));
-		ch1_relative_phases->SetBinContent(i + 1, arg(wave_1.getValue(s)(0)) - arg(wave_2.getValue(s)(0)));
+		sqrtS = lower_sqrt_s + delta/2 + i * delta; //centroid
+		ch1_wv1->SetBinContent(i + 1,  real(wave_1.getMomentum(0, pow(sqrtS, 2))) * pow(abs(wave_1.getValue(pow(sqrtS, 2))(0)), 2));
+		ch1_wv2->SetBinContent(i + 1,  real(wave_2.getMomentum(0, pow(sqrtS, 2))) * pow(abs(wave_2.getValue(pow(sqrtS, 2))(0)), 2));
+		integral->SetBinContent(i + 1, imag(wave_1.getIntegral(pow(sqrtS, 2), 1)));
+		ch1_relative_phases->SetBinContent(i + 1, arg(wave_1.getValue(pow(sqrtS, 2))(0)) - arg(wave_2.getValue(pow(sqrtS, 2))(0)));
 	}
 
 	TFile file("pdf_folder.root", "recreate");
@@ -125,9 +126,12 @@ int main()
 	ch1_relative_phases->Write();
 	ch1_relative_phases->Draw();
 	canv.SaveAs("ch1_relative_phases.pdf");
-	file.Close();*/
+	integral->Write();
+	integral->Draw();
+	canv.SaveAs("integral.pdf");
+	file.Close();
 
-	vector<int> chan_list = {0, 1, 2}; //user has to modify only these three lines writing the number of each channel considered and...
+	/*vector<int> chan_list = {0, 1, 2}; //user has to modify only these three lines writing the number of each channel considered and...
 	vector<amplitude> wv_list = {wave_1, wave_2}; 
 	vector<int> J_list = {0, 2}; // ..the waves considered for every channel, and the (#) line for specifing the waves which you want the relative phase of.
 
@@ -174,7 +178,7 @@ int main()
 		phase_graf.at(i - 1)->Write();
 		canv.SaveAs(Form("%s.pdf", phase_name));
 		dynamic_name2.clear();
-	}
+	}*/
 
 	return 0;
 }

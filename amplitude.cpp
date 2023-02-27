@@ -66,13 +66,13 @@ comp amplitude::chebyshev(comp x, int n) {
 
 
 //calculates omega_s
-comp amplitude::omega_s(comp s) {
+comp amplitude::omega_p(comp s) {
 
 	return s/(s + s0);
 };
 
 //calculates omega_p
-comp amplitude::omega_p(comp s) {
+comp amplitude::omega_s(comp s) {
 
 	return 2. * (s - smin)/(smax - smin) - 1.0;
 };
@@ -87,10 +87,13 @@ comp amplitude::omega_ps(comp s) {
 VectorXcd amplitude::getValue(comp s) {
 	VectorXcd a=VectorXcd::Zero(numChannels);
 
-	a=getDenominator(s).inverse()*getNumerator(s,3);
+	double m_JPsi = 3.0969;
+
+	comp Egamma = (pow(m_JPsi, 2) - s) / (2.0 * sqrt(s));
+	a=getNumerator(s,3).transpose()*getDenominator(s).inverse();
 
 	for(int i = 0; i < numChannels; i++){
-		a(i)*=channels[i].getMomentum(s);
+		a(i)*=Egamma * channels[i].getMomentum(s);
 	}
 
 	return a;
@@ -138,7 +141,7 @@ comp amplitude::getRhoN(comp sprime,int k)
 //overload later for other sheets
 comp amplitude::getIntegrand(double sp,comp s, int k){
 
-	return getRhoN(sp,k)*s/(sp*(sp-s-comp(0,1)*epsilon))/TMath::Pi();
+	return getRhoN(sp,k)*s/(sp*(sp-s-comp(0,1)*epsilon)*TMath::Pi());
 
 }
 
@@ -159,7 +162,7 @@ comp amplitude::getIntegral(comp s,int k){
 
 	ROOT::Math::Integrator intRe(re,ROOT::Math::IntegrationOneDim::kGAUSS,1.E-9,1.E-6);
 	ROOT::Math::Integrator intIm(im,ROOT::Math::IntegrationOneDim::kGAUSS,1.E-9,1.E-6);
-	
+
 	double threshold = 4*pow(channels[k].getMass().real(),2);
 
 	double realpart = intRe.IntegralUp(threshold);
@@ -173,7 +176,6 @@ comp amplitude::getIntegral(comp s,int k){
 
 MatrixXcd amplitude::getDenominator(comp s)
 {
-	MatrixXcd D = MatrixXcd::Zero(numChannels, numChannels);
 
 	MatrixXcd Kinv = getKMatrix(s).inverse();
 
@@ -190,7 +192,7 @@ MatrixXcd amplitude::getDenominator(comp s)
 
 	}
 
-	return D-M;
+	return Kinv-M;
 }
 
 //integratoe f(function, lower bound, upper bound)
@@ -213,7 +215,7 @@ MatrixXcd amplitude::getKMatrix(comp s) {
 			}
 
 			kmat(k, i) += tempMatrixTerm;
-			kmat(i, k) += tempMatrixTerm;
+			if(i!=k) kmat(i, k) += tempMatrixTerm;
 		}
 	}
 
