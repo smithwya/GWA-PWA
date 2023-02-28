@@ -88,7 +88,7 @@ int main()
 	std::cout << "2nd-wave amplitude: "<<endl << wave_2 << endl;
 
 	//print the k matrix at s
-	comp s = comp(1,0);
+	comp s = comp(1.4,0);
 
 	std::cout << chan1_1.getMomentum(s) << endl;
 	std::cout << wave_1.getRhoN(s, 0) << endl;
