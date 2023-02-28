@@ -92,6 +92,7 @@ int main()
 
 	std::cout << chan1_1.getMomentum(s) << endl;
 	std::cout << wave_1.getRhoN(s, 0) << endl;
+	std::cout << wave_1.getKMatrix(s) << endl;
 
 	// Plotting:
 
