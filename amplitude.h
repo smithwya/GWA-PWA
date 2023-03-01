@@ -43,6 +43,6 @@ private:
 	comp s0;
 	comp smin;
 	comp smax;
-	const double epsilon = 1e-6;
+	const double epsilon = 1e-3;
 	
 };
