@@ -5,6 +5,10 @@
 #include "channel.h"
 #include "TCanvas.h"
 #include <Eigen/Dense>
+#include "TH1D.h"
+#include "TFile.h"
+#include <sstream>
+#include "TString.h"
 
 using namespace std;
 using Eigen::MatrixXcd;
@@ -79,6 +83,44 @@ int main()
 
 	//print the k matrix at s
 	comp s = comp(1.0,0);
-	std::cout << wave_1.getKMatrix(s) << endl;
+	std::cout << wave_1.getDenominator(s) << endl;
+
+
+double lower_sqrt_s = 1;
+	double upper_sqrt_s = 2.5;
+	int num_bins = 300;
+	double delta = (upper_sqrt_s - lower_sqrt_s)/num_bins;
+
+	//1st channel:
+
+	TH1D *ch1_wv1 = new TH1D("ch1_wv1","ch = 1, J = 0", num_bins, lower_sqrt_s, upper_sqrt_s); //without the normalization constant
+	TH1D *ch1_wv2 = new TH1D("ch1_wv2","ch = 1, J = 2", num_bins, lower_sqrt_s, upper_sqrt_s);
+	TH1D *integral = new TH1D("integral","ch = 1, J = 0", num_bins, lower_sqrt_s, upper_sqrt_s);
+	TH1D *ch1_relative_phases = new TH1D("ch1_relative_phases", "ch1 relative phases SD", num_bins, lower_sqrt_s, upper_sqrt_s);
+	comp sqrtS = comp(1.0,0);
+	for(int i = 0; i < num_bins; i++){
+		sqrtS = lower_sqrt_s + delta/2 + i * delta; //centroid
+		ch1_wv1->SetBinContent(i + 1,  real(wave_1.getMomentum(0, pow(sqrtS, 2))) * pow(abs(wave_1.getValue(pow(sqrtS, 2))(0)), 2));
+		ch1_wv2->SetBinContent(i + 1,  real(wave_2.getMomentum(0, pow(sqrtS, 2))) * pow(abs(wave_2.getValue(pow(sqrtS, 2))(0)), 2));
+		integral->SetBinContent(i + 1, imag(wave_1.getIntegral(pow(sqrtS, 2), 1)));
+		ch1_relative_phases->SetBinContent(i + 1, arg(wave_1.getValue(pow(sqrtS, 2))(0)) - arg(wave_2.getValue(pow(sqrtS, 2))(0)));
+	}
+
+	TFile file("pdf_folder.root", "recreate");
+	TCanvas canv;
+	ch1_wv1->Write();
+	ch1_wv1->Draw();
+	canv.SaveAs("ch1_wv1.pdf");
+	ch1_wv2->Write();
+	ch1_wv2->Draw();
+	canv.SaveAs("ch1_wv2.pdf");
+	ch1_relative_phases->Write();
+	ch1_relative_phases->Draw();
+	canv.SaveAs("ch1_relative_phases.pdf");
+	integral->Write();
+	integral->Draw();
+	canv.SaveAs("integral.pdf");
+	file.Close();
+
 	return 0;
 }
