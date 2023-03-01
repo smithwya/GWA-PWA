@@ -13,6 +13,7 @@ typedef std::complex<double> comp;
 
 int main()
 {
+	//please work
 	//All stuff needed to make amplitude:
 	int x = 3.0;
 	//Create list of matrices to parameterize the polynomial in the k-matrix.
