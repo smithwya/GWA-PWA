@@ -40,7 +40,7 @@ amplitude::amplitude() {
 	smax = 0;
 }
 
-amplitude::amplitude(comp j, comp alp, comp ssl, vector<channel> chans, vector<MatrixXcd> kParams, comp ss0, comp ssmin, comp ssmax) {
+amplitude::amplitude(comp j, comp alp, comp ssl, vector<channel> chans, vector<MatrixXcd> kParams, vector<double> rmasses, comp ss0, comp ssmin, comp ssmax) {
 	channels = chans;
 	kParameters = kParams;
 	numChannels = channels.size();
@@ -50,6 +50,7 @@ amplitude::amplitude(comp j, comp alp, comp ssl, vector<channel> chans, vector<M
 	s0 = ss0;
 	smin = ssmin;
 	smax = ssmax;
+	resmasses = rmasses;
 }
 
 //calculate the nth chebyshev polynomial T_n(x) (probably ok to replace with some library)
@@ -65,13 +66,13 @@ comp amplitude::chebyshev(comp x, int n) {
 
 
 //calculates omega_s
-comp amplitude::omega_s(comp s) {
+comp amplitude::omega_p(comp s) {
 
 	return s/(s + s0);
 };
 
 //calculates omega_p
-comp amplitude::omega_p(comp s) {
+comp amplitude::omega_s(comp s) {
 
 	return 2. * (s - smin)/(smax - smin) - 1.0;
 };
@@ -84,16 +85,18 @@ comp amplitude::omega_ps(comp s) {
 
 	// return E_gamma * p_i * numerator * denominator.inverse()
 VectorXcd amplitude::getValue(comp s) {
-	comp Egamma = (1,0);
+	
 	VectorXcd a=VectorXcd::Zero(numChannels);
+	double m_JPsi = 3.0969;
 
-	a=getDenominator(s).inverse()*getNumerator(s,1);
+	comp Egamma = (pow(m_JPsi, 2) - s) / (2.0 * sqrt(s));
+	a=getNumerator(s,3).transpose()*getDenominator(s).inverse();
 
 	for(int i = 0; i < numChannels; i++){
-		a(i)*=channels[i].getMomentum(s);
+		a(i)*=Egamma * channels[i].getMomentum(s);
 	}
 
-	return a*Egamma;
+	return a;
 }
 
 comp amplitude::omega(comp s, int type){
@@ -138,7 +141,7 @@ comp amplitude::getRhoN(comp sprime,int k)
 //overload later for other sheets
 comp amplitude::getIntegrand(double sp,comp s, int k){
 
-	return getRhoN(sp,k)*s/(sp*(sp-s-comp(0,1)*epsilon))/TMath::Pi();
+	return getRhoN(sp,k)*s/(sp*(sp-s-comp(0,1)*epsilon)*TMath::Pi());
 
 }
 
@@ -173,8 +176,6 @@ comp amplitude::getIntegral(comp s,int k){
 
 MatrixXcd amplitude::getDenominator(comp s)
 {
-	MatrixXcd D = MatrixXcd::Zero(numChannels, numChannels);
-
 	MatrixXcd Kinv = getKMatrix(s).inverse();
 
 	MatrixXcd M = MatrixXcd::Zero(numChannels,numChannels);
@@ -190,7 +191,7 @@ MatrixXcd amplitude::getDenominator(comp s)
 
 	}
 
-	return D-M;
+	return Kinv-M;
 }
 
 //integratoe f(function, lower bound, upper bound)
@@ -209,11 +210,11 @@ MatrixXcd amplitude::getKMatrix(comp s) {
 			comp tempMatrixTerm = 0;
 
 			for (int R = 0; R < numChannels; R++) {
-				tempMatrixTerm += channels[k].getCoupling(R) * channels[i].getCoupling(R) / (pow(channels[R].getMass(), 2) - s);
+				tempMatrixTerm += channels[k].getCoupling(R) * channels[i].getCoupling(R) / (resmasses[R] - s);
 			}
 
 			kmat(k, i) += tempMatrixTerm;
-			kmat(i, k) += tempMatrixTerm;
+			if(i!=k) kmat(i, k) += tempMatrixTerm;
 		}
 	}
 
@@ -231,6 +232,11 @@ ostream& operator<<(ostream& os, amplitude const& m) {
 	for (int i = 0; i < m.numChannels; i++) {
 		os << "channel " << i << ": " << endl << m.channels[i] << endl<<endl;
 	}
+	os<<"resmasses: ";
+	for (int i = 0; i < m.resmasses.size(); i++) {
+		os << m.resmasses[i]<<" ";
+	}
+	os<<endl;
 	os << endl << endl;
 	os << "k-matrix parameters: " << endl;
 	for (int i = 0; i < m.kParameters.size(); i++) {
