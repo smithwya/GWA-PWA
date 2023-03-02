@@ -20,8 +20,8 @@ typedef std::complex<double> comp;
 
 //plots a function which takes in a single double and returns a double
 void makePlot(string pdfname, function<double(double)> func){
-	double lower_bound = 1;
-	double upper_bound = 2.5;
+	double lower_bound = 0;
+	double upper_bound = 10;
 	int num_bins = 300;
 	double delta = (upper_bound - lower_bound)/num_bins;
 
@@ -110,26 +110,28 @@ int main()
 	};
 
 	//plotComp(" intensity", intensity);
+	int k = 0;
+	int n_amp = 0;
+	vector<amplitude> amps = {wave_1,wave_2};
 
-	auto numfunc = [&](double x){
-        return 1.0;
-    };
+	cout<<amps[n_amp].getIntegrand(11.0,2.3,k)<<endl;
 
-	auto AmpVal = [&](double x){
-        return wave_1.getValue(x)(0);
-    };
-	auto rhoNom = [&](double x){
-        return wave_1.getRhoN(x,0);
-    };
 
 	auto integrandFunc = [&](double x){
-        return wave_1.getIntegrand(11.0,x,0);
+        return amps[n_amp].getIntegrand(11.0,x,k);
     };
+
+	plotComp("integrand", integrandFunc);
 
 	auto integralFunc = [&](double x){
         return wave_1.getIntegral(x,0);
     };
 
-	//plotComp(" integral",integralFunc);
+	auto kmatFunc = [&](double x){
+        return wave_1.getKMatrix(x)(0,0);
+    };
+
+
+	plotComp("kmat 00",kmatFunc);
 	return 0;
 }

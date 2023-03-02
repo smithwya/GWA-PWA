@@ -184,7 +184,7 @@ MatrixXcd amplitude::getDenominator(comp s)
 
 		for(int i = 0; i <= k; i++){
 			
-			M(k,i)=getIntegral(s,k);
+			M(k,i) = getIntegral(s,k);
 			M(i,k) = M(k,i);
 		}
 
