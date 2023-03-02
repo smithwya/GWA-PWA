@@ -198,8 +198,7 @@ MatrixXcd amplitude::getDenominator(comp s)
 
 comp amplitude::getMomentum(int chan, comp s)
 {
-	comp mass = channels[chan].getMass();
-	return sqrt(s - 4.0 * pow(mass, 2));
+	return channels[chan].getMomentum(s);
 }
 
 MatrixXcd amplitude::getKMatrix(comp s) {
