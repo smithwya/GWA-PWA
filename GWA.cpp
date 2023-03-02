@@ -18,6 +18,7 @@ typedef std::complex<double> comp;
 
 
 
+//plots a function which takes in a single double and returns a double
 void makePlot(string pdfname, function<double(double)> func){
 	double lower_bound = 1;
 	double upper_bound = 2.5;
@@ -42,6 +43,7 @@ void makePlot(string pdfname, function<double(double)> func){
 }
 
 
+//plots a function which takes in a double and returns a complex number
 void plotComp(string pdfname,function<comp(double)> func){
 
 	auto realFunc = [&](double x){
