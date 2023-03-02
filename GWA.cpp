@@ -53,8 +53,8 @@ void plotComp(string pdfname,function<comp(double)> func){
         return func(x).imag();
 	};
 
-	makePlot("Re"+pdfname, realFunc);
-	makePlot("Im"+pdfname, imagFunc);
+	makePlot("Re "+pdfname, realFunc);
+	makePlot("Im "+pdfname, imagFunc);
 
 }
 
