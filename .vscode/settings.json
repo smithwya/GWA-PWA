@@ -26,6 +26,7 @@
         "functional": "cpp",
         "tuple": "cpp",
         "utility": "cpp",
-        "complex": "cpp"
+        "complex": "cpp",
+        "cmath": "cpp"
     }
 }

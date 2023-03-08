@@ -31,6 +31,7 @@ public:
 	friend ostream& operator<<(std::ostream& os, amplitude const& m);
 	comp getIntegral(comp s, int k);
 	comp getIntegrand(double sp, comp s, int k);
+	comp getPV(comp s, int k);
 
 private:
 	vector<channel> channels;

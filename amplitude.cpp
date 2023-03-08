@@ -27,6 +27,7 @@ using Eigen::MatrixXd;
 using Eigen::VectorXd;
 using Eigen::MatrixXcd;
 using Eigen::VectorXcd;
+
 typedef std::complex<double> comp;
 //typdef comp param;
 
@@ -86,17 +87,18 @@ comp amplitude::omega_ps(comp s) {
 	// return E_gamma * p_i * numerator * denominator.inverse()
 VectorXcd amplitude::getValue(comp s) {
 	
-	VectorXcd a=VectorXcd::Zero(numChannels);
 	double m_JPsi = 3.0969;
 
-	comp Egamma = (pow(m_JPsi, 2) - s) / (2.0 * sqrt(s));
-	a=getNumerator(s,3).transpose()*getDenominator(s).inverse();
+	comp Egamma = pow((s-pow(m_JPsi,2)),2)/(4.0*s);
+	
+	MatrixXcd phsp = MatrixXcd::Identity(numChannels,numChannels);
+
 
 	for(int i = 0; i < numChannels; i++){
-		a(i)*=Egamma * channels[i].getMomentum(s);
+		phsp(i)=sqrt(Egamma*pow(channels[i].getMomentum(s),2.0*J.real()+1.0));
 	}
-
-	return a;
+	
+	return getNumerator(s,3).transpose()*getDenominator(s).inverse()*phsp;
 }
 
 comp amplitude::omega(comp s, int type){
@@ -165,14 +167,39 @@ comp amplitude::getIntegral(comp s,int k){
 	
 	double threshold = 4*pow(channels[k].getMass().real(),2);
 
-	double realpart = intRe.IntegralUp(threshold);
-	double imagpart = intIm.IntegralUp(threshold);
+	double realpart = intRe.IntegralUp(threshold+.0001);
+	double imagpart = intIm.IntegralUp(threshold+.0001);
 	
 
 	return comp(realpart,imagpart);
 }
 
+comp amplitude::getPV(comp s, int k){ //this only for real s
+	// if s is real then getRhoN is real so i can take the real part of getrhon freely
 
+	//double imagpart = amplitude::getRhoN(temp, k) * RooStats::Heaviside::Heaviside(temp);
+	
+	double threshold = 4*pow(channels[k].getMass().real(),2);
+
+	double imagpart = 0;
+
+	if(s.real()> threshold) imagpart = getRhoN(s, k).real();
+
+	auto Integrand = [&](double sp)
+    {
+        return ((getRhoN(sp,k)-getRhoN(s,k))/(sp*(sp-s))).real();
+    };
+
+	ROOT::Math::Functor1D in(Integrand);
+
+	ROOT::Math::Integrator integr(in,ROOT::Math::IntegrationOneDim::kGAUSS,1.E-6,1.E-3);
+
+	double realpart = (s.real()* integr.IntegralUp(threshold) + getRhoN(s,k).real()*log(threshold / (s.real() - threshold)))/ TMath::Pi();
+
+	if(s.real()<=threshold) return s*integr.IntegralUp(threshold)/TMath::Pi();
+
+	return comp(realpart,imagpart);
+}
 
 MatrixXcd amplitude::getDenominator(comp s)
 {
@@ -212,8 +239,8 @@ MatrixXcd amplitude::getKMatrix(comp s) {
 				tempMatrixTerm += channels[k].getCoupling(R) * channels[i].getCoupling(R) / (resmasses[R] - s);
 			}
 
-			kmat(k, i) += tempMatrixTerm;
-			if(i!=k) kmat(i, k) += tempMatrixTerm;
+			kmat(k, i) = tempMatrixTerm;
+			kmat(i, k) = tempMatrixTerm;
 		}
 	}
 

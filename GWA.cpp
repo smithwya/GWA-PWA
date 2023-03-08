@@ -8,6 +8,7 @@
 #include "TH1D.h"
 #include "TFile.h"
 #include <sstream>
+#include <fstream>
 #include "TString.h"
 
 using namespace std;
@@ -20,18 +21,23 @@ typedef std::complex<double> comp;
 
 //plots a function which takes in a single double and returns a double
 void makePlot(string pdfname, function<double(double)> func){
-	double lower_bound = 0;
-	double upper_bound = 10;
+	double lower_bound = 1.0;
+	double upper_bound = 2.5;
 	int num_bins = 300;
 	double delta = (upper_bound - lower_bound)/num_bins;
 
 	TH1D *plotter = new TH1D(pdfname.c_str(),pdfname.c_str(), num_bins, lower_bound, upper_bound);
+	//plotter->SetMinimum(-60.0);
+	//plotter->SetMaximum(90.0);
 	double sqrtS = 1.0;
 
 	for(int i = 0; i < num_bins; i++){
 		sqrtS = lower_bound + delta/2 + i * delta; //centroid
-		plotter->SetBinContent(i + 1,  func(sqrtS));
+		double val = func(sqrtS);
+		if(isnan(val)) plotter->SetBinContent(i + 1,  0);
+		else plotter->SetBinContent(i + 1,  val);
 	}
+
 
 	TFile file("pdf_folder.root", "recreate");
 	TCanvas canv;
@@ -39,6 +45,22 @@ void makePlot(string pdfname, function<double(double)> func){
 	plotter->Draw();
 	canv.SaveAs(("Plots/"+pdfname+".pdf").c_str());
 	file.Close();
+	return;
+}
+
+void makeTable(string filename, function<double(double)> func){
+	ofstream outfile("Tables/"+filename+".txt");
+	double lower_bound = 1.0;
+	double upper_bound = 2.5;
+	int num_bins = 300;
+	double delta = (upper_bound - lower_bound)/num_bins;
+	double sqrtS = 1.0;
+
+	for(int i = 0; i < num_bins; i++){
+		sqrtS = lower_bound + delta/2 + i * delta; //centroid
+		outfile<< sqrtS<<" "<<func(sqrtS) << endl;
+	}
+	outfile.close();
 	return;
 }
 
@@ -65,7 +87,7 @@ int main()
 	comp J1 = comp(0, 0);
 	comp J2 = comp(2, 0);
 	comp alpha = comp(1., 0);
-	comp sL = comp(0.6, 0);
+	comp sL = comp(1, 0);
 	comp s0 = comp(1, 0);
 	comp smin = comp(pow(1., 2), 0);
 	comp smax = comp(pow(2.5, 2), 0);
@@ -100,38 +122,56 @@ int main()
 	amplitude wave_1 = amplitude(J1, alpha, sL, chans_1, kparams_1,rmasses_1,s0,smin,smax);
 	amplitude wave_2 = amplitude(J2, alpha, sL, chans_2, kparams_2,rmasses_2,s0,smin,smax);
 
-	//checked: getRhoN, 
+	auto waveFunc = [&](double x){
+        return wave_1.getValue(pow(x,2))(0);
+    };
+	//plotComp("S_Val",waveFunc);
+
 
 	auto intensity = [&](double x){
 		comp value = wave_1.getValue(pow(x,2))(0);
 		double mom = wave_1.getMomentum(0,pow(x,2)).real();
-		return mom*value*conj(value);
+		return (value*conj(value)).real();
 
 	};
 
-	//plotComp(" intensity", intensity);
-	int k = 0;
-	int n_amp = 0;
-	vector<amplitude> amps = {wave_1,wave_2};
+	//makePlot("S_intensity", intensity);
 
-	cout<<amps[n_amp].getIntegrand(11.0,2.3,k)<<endl;
+	auto rhoN = [&](double x){
+		return wave_1.getRhoN(pow(x,2),0).real();
+	};
+
+	//plotComp("S_rhoN",rhoN);
+
+	auto integrFunc= [&](double x){
+
+		return wave_1.getIntegral(pow(x,2),0);
+	};
+
+	//plotComp("S_integral_PiPi",integrFunc);
+
+	int ch1 = 0;
+	int ch2 = 0;
+
+	auto denomFunc = [&](double x){
+		return wave_1.getDenominator(pow(x,2))(ch1,ch2).real();
+	};
+
+	for(ch1 = 0; ch1<3; ch1++){
+		for(ch2 = 0; ch2<3; ch2++){
+			makeTable("Re_denom"+std::to_string(ch1)+std::to_string(ch2),denomFunc);
+
+		}
+	}
+
+	//plotComp("S_denomInv_PiPi",denomFunc);
+
+	auto numFunc = [&](double x){
+		return wave_1.getNumerator(pow(x,2),3)(0);
+	};
+
+	//plotComp("S_num_PiPi",numFunc);
 
 
-	auto integrandFunc = [&](double x){
-        return amps[n_amp].getIntegrand(11.0,x,k);
-    };
-
-	plotComp("integrand", integrandFunc);
-
-	auto integralFunc = [&](double x){
-        return wave_1.getIntegral(x,0);
-    };
-
-	auto kmatFunc = [&](double x){
-        return wave_1.getKMatrix(x)(0,0);
-    };
-
-
-	plotComp("kmat 00",kmatFunc);
 	return 0;
 }
