@@ -166,12 +166,12 @@ int main()
 	};
 
 	auto kmatFunc = [&](double x){
-		return wave_1.getKMatrix(pow(x,2))(ch1,ch2).real();
+		return wave_1.getKMatrix(pow(x,2)).inverse()(ch1,ch2).real();
 	};
 
 	for(ch1 = 0; ch1<3; ch1++){
 		for(ch2 = 0; ch2<3; ch2++){
-			makeTable("kmat"+std::to_string(ch1)+std::to_string(ch2),kmatFunc);
+			makeTable("kmatinv"+std::to_string(ch1)+std::to_string(ch2),kmatFunc);
 
 		}
 	}
