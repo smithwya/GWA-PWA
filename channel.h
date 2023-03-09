@@ -14,10 +14,13 @@ private:
 public:
     channel();
     channel(vector<comp> couplings, vector<comp> chebyCoefficients, comp m);
+    channel(vector<double> particlemasses);
+
     comp getMomentum(comp s);
     vector<comp> getCouplings();
     void setCouplings(vector<comp> c);
     comp getCoupling(int i);
+    
     void setChebyCoeffs(vector<comp> c);
     void setChebyCoeff(int i, comp c);
     vector<comp> getChebyCoeffs();

@@ -17,6 +17,8 @@ class amplitude {
 public:
 	amplitude();
 	amplitude(comp j, comp alpha, comp sl, vector<channel> c, vector<MatrixXcd> kParams, vector<double> rmasses,comp s0, comp smin, comp smax);
+	amplitude(double smin, double smax, vector<channel> chans);
+
 	comp chebyshev(comp x, int n);
 	comp omega_s(comp s);
 	comp omega_p(comp s);
@@ -31,7 +33,9 @@ public:
 	friend ostream& operator<<(std::ostream& os, amplitude const& m);
 	comp getIntegral(comp s, int k);
 	comp getIntegrand(double sp, comp s, int k);
-	comp getPV(comp s, int k);
+	void setChebyCoeffs(int channel, int type, double s0, vector<double> coeffs);
+	void setKParams(int power, vector<vector<double>> kparamlist);
+	void addPole(double mass, vector<double> couplings);
 
 private:
 	vector<channel> channels;

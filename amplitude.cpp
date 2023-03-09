@@ -54,6 +54,11 @@ amplitude::amplitude(comp j, comp alp, comp ssl, vector<channel> chans, vector<M
 	resmasses = rmasses;
 }
 
+amplitude::amplitude(double smin, double smax, vector<channel> chans){
+
+
+}
+
 //calculate the nth chebyshev polynomial T_n(x) (probably ok to replace with some library)
 comp amplitude::chebyshev(comp x, int n) {
 	
@@ -95,7 +100,7 @@ VectorXcd amplitude::getValue(comp s) {
 
 
 	for(int i = 0; i < numChannels; i++){
-		phsp(i)=sqrt(Egamma*pow(channels[i].getMomentum(s),2.0*J.real()+1.0));
+		phsp(i,i)=sqrt(Egamma*pow(channels[i].getMomentum(s),2.0*J.real()+1.0));
 	}
 	
 	return (phsp*getDenominator(s).inverse())*(getNumerator(s,3));
@@ -174,32 +179,6 @@ comp amplitude::getIntegral(comp s,int k){
 	return comp(realpart,imagpart);
 }
 
-comp amplitude::getPV(comp s, int k){ //this only for real s
-	// if s is real then getRhoN is real so i can take the real part of getrhon freely
-
-	//double imagpart = amplitude::getRhoN(temp, k) * RooStats::Heaviside::Heaviside(temp);
-	
-	double threshold = 4*pow(channels[k].getMass().real(),2);
-
-	double imagpart = 0;
-
-	if(s.real()> threshold) imagpart = getRhoN(s, k).real();
-
-	auto Integrand = [&](double sp)
-    {
-        return ((getRhoN(sp,k)-getRhoN(s,k))/(sp*(sp-s))).real();
-    };
-
-	ROOT::Math::Functor1D in(Integrand);
-
-	ROOT::Math::Integrator integr(in,ROOT::Math::IntegrationOneDim::kGAUSS,1.E-6,1.E-3);
-
-	double realpart = (s.real()* integr.IntegralUp(threshold) + getRhoN(s,k).real()*log(threshold / (s.real() - threshold)))/ TMath::Pi();
-
-	if(s.real()<=threshold) return s*integr.IntegralUp(threshold)/TMath::Pi();
-
-	return comp(realpart,imagpart);
-}
 
 MatrixXcd amplitude::getDenominator(comp s)
 {
@@ -244,6 +223,21 @@ MatrixXcd amplitude::getKMatrix(comp s) {
 	}
 
 	return kmat.real();
+}
+
+void amplitude::setChebyCoeffs(int channel, int type, double s0, vector<double> coeffs){
+
+
+}
+
+
+void amplitude::setKParams(int power, vector<vector<double>> kparamlist){
+
+}
+
+void amplitude::addPole(double mass, vector<double> couplings){
+
+	
 }
 
 ostream& operator<<(ostream& os, amplitude const& m) {

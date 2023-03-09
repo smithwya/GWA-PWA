@@ -10,6 +10,10 @@ channel::channel(vector<comp> cp, vector<comp> ch, comp m) {
 	mass = m;
 }
 
+channel::channel(vector<double> masses){
+	
+}
+
 vector<comp> channel::getCouplings()
 {
 	return couplings;
