@@ -208,14 +208,7 @@ MatrixXcd amplitude::getDenominator(comp s)
 	MatrixXcd M = MatrixXcd::Zero(numChannels,numChannels);
 
 	for(int k = 0; k < numChannels; k++){
-
-		for(int i = 0; i <= k; i++){
-			
-			M(k,i) = getIntegral(s,k);
-			M(i,k) = M(k,i);
-		}
-
-
+		M(k,k) = getIntegral(s,k);
 	}
 
 	return Kinv-M;
@@ -250,7 +243,7 @@ MatrixXcd amplitude::getKMatrix(comp s) {
 
 	}
 
-	return kmat;
+	return kmat.real();
 }
 
 ostream& operator<<(ostream& os, amplitude const& m) {

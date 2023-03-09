@@ -135,8 +135,6 @@ int main()
 
 	};
 
-	cout<<wave_1<<endl;
-
 	//makePlot("S_intensity", intensity);
 
 	auto rhoN = [&](double x){
@@ -152,7 +150,7 @@ int main()
 	};
 
 	for (q =0; q<3; q++){
-		//makeTable("Im_integral"+std::to_string(q),integrFunc);
+		makeTable("Im_integral"+std::to_string(q),integrFunc);
 
 	}
 
@@ -161,7 +159,10 @@ int main()
 	int ch1 = 0;
 	int ch2 = 0;
 
-	auto denomFunc = [&](double x){
+	auto redenomFunc = [&](double x){
+		return wave_1.getDenominator(pow(x,2))(ch1,ch2).real();
+	};
+	auto imdenomFunc = [&](double x){
 		return wave_1.getDenominator(pow(x,2))(ch1,ch2).imag();
 	};
 
@@ -171,8 +172,8 @@ int main()
 
 	for(ch1 = 0; ch1<3; ch1++){
 		for(ch2 = 0; ch2<3; ch2++){
-			makeTable("kmatinv"+std::to_string(ch1)+std::to_string(ch2),kmatFunc);
-
+			makeTable("Re_denom"+std::to_string(ch1)+std::to_string(ch2),redenomFunc);
+			makeTable("Im_denom"+std::to_string(ch1)+std::to_string(ch2),imdenomFunc);
 		}
 	}
 
