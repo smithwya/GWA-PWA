@@ -98,7 +98,7 @@ VectorXcd amplitude::getValue(comp s) {
 		phsp(i)=sqrt(Egamma*pow(channels[i].getMomentum(s),2.0*J.real()+1.0));
 	}
 	
-	return getNumerator(s,3).transpose()*getDenominator(s).inverse()*phsp;
+	return (phsp*getDenominator(s).inverse())*(getNumerator(s,3));
 }
 
 comp amplitude::omega(comp s, int type){
@@ -247,7 +247,9 @@ MatrixXcd amplitude::getKMatrix(comp s) {
 }
 
 ostream& operator<<(ostream& os, amplitude const& m) {
-	os << "J = " << m.J << ", alpha = " << m.alpha << ", sL = " << m.sL <<"num_channels ="<<m.numChannels<< endl<<endl;
+	os << "J = " << m.J << ", alpha = " << m.alpha << ", sL = " << m.sL <<" num_channels = "<<m.numChannels<<" kmat_mat_params = " <<m.kParameters.size() <<endl;
+	os<<"numPoles = "<<m.resmasses.size() <<" s0= "<<m.s0<<" smin = "<<m.smin<<" smax ="<<m.smax<<endl<<endl;
+
 	for (int i = 0; i < m.numChannels; i++) {
 		os << "channel " << i << ": " << endl << m.channels[i] << endl<<endl;
 	}

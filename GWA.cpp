@@ -65,6 +65,7 @@ void makeTable(string filename, function<double(double)> func){
 }
 
 
+
 //plots a function which takes in a double and returns a complex number
 void plotComp(string pdfname,function<comp(double)> func){
 
@@ -122,74 +123,19 @@ int main()
 	amplitude wave_1 = amplitude(J1, alpha, sL, chans_1, kparams_1,rmasses_1,s0,smin,smax);
 	amplitude wave_2 = amplitude(J2, alpha, sL, chans_2, kparams_2,rmasses_2,s0,smin,smax);
 
-	auto waveFunc = [&](double x){
-        return wave_1.getValue(pow(x,2))(0);
-    };
-	//plotComp("S_Val",waveFunc);
-
-
+	int ch = 0;
 	auto intensity = [&](double x){
-		comp value = wave_1.getValue(pow(x,2))(0);
-		double mom = wave_1.getMomentum(0,pow(x,2)).real();
+		comp value = wave_1.getValue(pow(x,2))(ch);
 		return (value*conj(value)).real();
 
 	};
-
-	//makePlot("S_intensity", intensity);
-
-	auto rhoN = [&](double x){
-		return wave_1.getRhoN(pow(x,2),0).real();
-	};
-
-	//plotComp("S_rhoN",rhoN);
-
-	int q = 0;
-	auto integrFunc= [&](double x){
-
-		return wave_1.getIntegral(pow(x,2),q).imag();
-	};
-
-	for (q =0; q<3; q++){
-		makeTable("Im_integral"+std::to_string(q),integrFunc);
-
+	for(ch = 0; ch<3;ch++){
+	makePlot("intensity_"+std::to_string(ch), intensity);
 	}
 
-	//plotComp("S_integral_PiPi",integrFunc);
-
-	int ch1 = 0;
-	int ch2 = 0;
-
-	auto redenomFunc = [&](double x){
-		return wave_1.getDenominator(pow(x,2))(ch1,ch2).real();
-	};
-	auto imdenomFunc = [&](double x){
-		return wave_1.getDenominator(pow(x,2))(ch1,ch2).imag();
-	};
-
-	auto kmatFunc = [&](double x){
-		return wave_1.getKMatrix(pow(x,2)).inverse()(ch1,ch2).real();
-	};
-
-	for(ch1 = 0; ch1<3; ch1++){
-		for(ch2 = 0; ch2<3; ch2++){
-			//makeTable("Re_denomInv"+std::to_string(ch1)+std::to_string(ch2),redenomFunc);
-			//makeTable("Im_denomInv"+std::to_string(ch1)+std::to_string(ch2),imdenomFunc);
-		}
-	}
-
-	//plotComp("S_denomInv_PiPi",denomFunc);
-
-	auto renumFunc = [&](double x){
-		return wave_1.getNumerator(pow(x,2),3)(ch1).real();
-	};
-	auto imnumFunc = [&](double x){
-		return wave_1.getNumerator(pow(x,2),3)(ch1).imag();
-	};
-
-	for(ch1 = 0; ch1<3; ch1++){
-	makeTable("Re_num"+std::to_string(ch1),renumFunc);
-	makeTable("Im_num"+std::to_string(ch1),imnumFunc);
-	}
+	ofstream outfile("wave_1.txt");
+	outfile<<wave_1<<endl;
+	outfile.close();
 
 	return 0;
 }
