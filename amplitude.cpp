@@ -247,7 +247,7 @@ MatrixXcd amplitude::getKMatrix(comp s) {
 }
 
 ostream& operator<<(ostream& os, amplitude const& m) {
-	os << "J = " << m.J << ", alpha = " << m.alpha << ", sL = " << m.sL << endl<<endl;
+	os << "J = " << m.J << ", alpha = " << m.alpha << ", sL = " << m.sL <<"num_channels ="<<m.numChannels<< endl<<endl;
 	for (int i = 0; i < m.numChannels; i++) {
 		os << "channel " << i << ": " << endl << m.channels[i] << endl<<endl;
 	}
