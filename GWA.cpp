@@ -89,7 +89,7 @@ int main()
 	comp alpha = comp(1., 0);
 	comp sL = comp(1, 0);
 	comp s0 = comp(1, 0);
-	comp smin = comp(pow(1., 2), 0);
+	comp smin = comp(pow(0.997, 2), 0);
 	comp smax = comp(pow(2.5, 2), 0);
 	comp mass1 = comp(0.13498, 0.);
 	comp mass2 = comp(0.49761, 0.);
@@ -143,10 +143,16 @@ int main()
 
 	//plotComp("S_rhoN",rhoN);
 
+	int q = 0;
 	auto integrFunc= [&](double x){
 
-		return wave_1.getIntegral(pow(x,2),0);
+		return wave_1.getIntegral(pow(x,2),q).imag();
 	};
+
+	for (q =0; q<3; q++){
+		makeTable("Im_integral"+std::to_string(q),integrFunc);
+
+	}
 
 	//plotComp("S_integral_PiPi",integrFunc);
 
@@ -154,12 +160,12 @@ int main()
 	int ch2 = 0;
 
 	auto denomFunc = [&](double x){
-		return wave_1.getDenominator(pow(x,2))(ch1,ch2).real();
+		return wave_1.getDenominator(pow(x,2))(ch1,ch2).imag();
 	};
 
 	for(ch1 = 0; ch1<3; ch1++){
 		for(ch2 = 0; ch2<3; ch2++){
-			makeTable("Re_denom"+std::to_string(ch1)+std::to_string(ch2),denomFunc);
+			//makeTable("Im_denom"+std::to_string(ch1)+std::to_string(ch2),denomFunc);
 
 		}
 	}
