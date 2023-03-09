@@ -172,19 +172,24 @@ int main()
 
 	for(ch1 = 0; ch1<3; ch1++){
 		for(ch2 = 0; ch2<3; ch2++){
-			makeTable("Re_denom"+std::to_string(ch1)+std::to_string(ch2),redenomFunc);
-			makeTable("Im_denom"+std::to_string(ch1)+std::to_string(ch2),imdenomFunc);
+			//makeTable("Re_denomInv"+std::to_string(ch1)+std::to_string(ch2),redenomFunc);
+			//makeTable("Im_denomInv"+std::to_string(ch1)+std::to_string(ch2),imdenomFunc);
 		}
 	}
 
 	//plotComp("S_denomInv_PiPi",denomFunc);
 
-	auto numFunc = [&](double x){
-		return wave_1.getNumerator(pow(x,2),3)(0);
+	auto renumFunc = [&](double x){
+		return wave_1.getNumerator(pow(x,2),3)(ch1).real();
+	};
+	auto imnumFunc = [&](double x){
+		return wave_1.getNumerator(pow(x,2),3)(ch1).imag();
 	};
 
-	//plotComp("S_num_PiPi",numFunc);
-
+	for(ch1 = 0; ch1<3; ch1++){
+	makeTable("Re_num"+std::to_string(ch1),renumFunc);
+	makeTable("Im_num"+std::to_string(ch1),imnumFunc);
+	}
 
 	return 0;
 }
