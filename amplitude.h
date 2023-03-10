@@ -36,6 +36,7 @@ public:
 	void setChebyCoeffs(int channel, int type, double s0, vector<double> coeffs);
 	void setKParams(int power, vector<vector<double>> kparamlist);
 	void addPole(double mass, vector<double> couplings);
+	void readFile(string filename);
 
 private:
 	vector<channel> channels;

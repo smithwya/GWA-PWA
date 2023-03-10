@@ -20,9 +20,7 @@ typedef std::complex<double> comp;
 
 
 //plots a function which takes in a single double and returns a double
-void makePlot(string pdfname, function<double(double)> func){
-	double lower_bound = 1.0;
-	double upper_bound = 2.5;
+void makePlot(string pdfname, function<double(double)> func, double lower_bound = 1.0, double upper_bound = 2.5){
 	int num_bins = 300;
 	double delta = (upper_bound - lower_bound)/num_bins;
 
@@ -80,31 +78,6 @@ void plotComp(string pdfname,function<comp(double)> func){
 	makePlot("Im "+pdfname, imagFunc);
 
 }
-
-vector<amplitude> readInput(string filename){
-
-//if you read AddChannel("pipi", 0.13498, 0.13498)
-channel c1 = channel({0.13498, 0.13498});
-
-//if you read AddWave("S","kmat","nominal", 0, 1.0)
-
-amplitude a1 = amplitude(0,0,1.0,{c1});
-
-//if you read ChebyCoeffs("S", "PiPi","p+s=1.0", {-2173.73, 3272.05, -1553.73, 361.79})
-
-a1.setChebyCoeffs(0,3,1.0,{-2173.73, 3272.05, -1553.73, 361.79});
-
-//if you read AddPole("S",0.00631603,{-6.05845,-7.24665,1.95572} )
-
-a1.addPole(0.00631603,{-6.05845,-7.24665,1.95572});
-
-//if you read AddKmatBackground("S", 0, {{16.1903, 18.3081 ,0}, {19.2388, 0}, {-15.811}})
-
-a1.setKParams(0,{{16.1903, 18.3081 ,0}, {19.2388, 0}, {-15.811}});
-
-}
-
-
 
 int main()
 {

@@ -7,6 +7,7 @@
 #include<random>
 #include<vector>
 #include<fstream>
+#include <sstream>
 #include<string>
 #include "channel.h"
 #include "amplitude.h"
@@ -20,6 +21,7 @@
 #include "Math/IFunction.h"
 #include "Math/GSLIntegrator.h"
 #include "Math/IFunction.h"
+#include <regex>
 
 
 using namespace std;
@@ -270,5 +272,51 @@ ostream& operator<<(ostream& os, amplitude const& m) {
 	}
 	os << endl;
 	return os;
+
+}
+
+void amplitude::readFile(string filename){
+
+    ifstream infile(filename + ".txt");
+    string line;
+    vector<string> lines = {};
+
+    for (std::string line; getline(infile, line); )
+    {
+		if (line != "") {lines.push_back(line);}
+        
+    }
+    infile.close();
+
+	/*regex reg("man");
+    if (regex_search("", reg))
+        cout << "matched" << endl;
+    else
+        cout << "not matched" << endl;
+
+	for(int i = 0; i < lines.size(); i++){
+
+		regex reg1("^SetSeed\s*\(([0-9])*\s*\)$")
+
+		//if you read AddChannel("pipi", 0.13498, 0.13498)
+		channel c1 = channel({0.13498, 0.13498});
+
+		//if you read AddWave("S","kmat","nominal", 0, 1.0)
+
+		amplitude a1 = amplitude(0,0,1.0,{c1});
+
+		//if you read ChebyCoeffs("S", "PiPi","p+s=1.0", {-2173.73, 3272.05, -1553.73, 361.79})
+
+		a1.setChebyCoeffs(0,3,1.0,{-2173.73, 3272.05, -1553.73, 361.79});
+
+		//if you read AddPole("S",0.00631603,{-6.05845,-7.24665,1.95572} )
+
+		a1.addPole(0.00631603,{-6.05845,-7.24665,1.95572});
+
+		//if you read AddKmatBackground("S", 0, {{16.1903, 18.3081 ,0}, {19.2388, 0}, {-15.811}})
+
+		a1.setKParams(0,{{16.1903, 18.3081 ,0}, {19.2388, 0}, {-15.811}});
+
+	}*/
 
 }
