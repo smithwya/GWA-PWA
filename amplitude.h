@@ -16,8 +16,8 @@ class amplitude {
 
 public:
 	amplitude();
-	amplitude(comp j, comp alpha, comp sl, vector<channel> c, vector<MatrixXcd> kParams, vector<double> rmasses,comp s0, comp smin, comp smax);
-	amplitude(double smin, double smax, vector<channel> chans);
+	amplitude(int j, double alpha, double sl, vector<channel> c, vector<MatrixXcd> kParams, vector<double> rmasses,double s0, double smin, double smax);
+	amplitude(int J, double smin, double smax, vector<channel> chans);
 
 	comp chebyshev(comp x, int n);
 	comp omega_s(comp s);
@@ -42,12 +42,12 @@ private:
 	vector<MatrixXcd> kParameters;
 	vector<double> resmasses;
 	int numChannels;
-	comp J;
-	comp alpha;
-	comp sL;
-	comp s0;
-	comp smin;
-	comp smax;
+	int J;
+	double alpha;
+	double sL;
+	double s0;
+	double smin;
+	double smax;
 	const double epsilon = 1e-3;
 	
 };

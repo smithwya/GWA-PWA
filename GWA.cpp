@@ -88,7 +88,7 @@ channel c1 = channel({0.13498, 0.13498});
 
 //if you read AddWave("S","kmat","nominal", 0, 1.0)
 
-amplitude a1 = amplitude(0,1.0,{c1});
+amplitude a1 = amplitude(0,0,1.0,{c1});
 
 //if you read ChebyCoeffs("S", "PiPi","p+s=1.0", {-2173.73, 3272.05, -1553.73, 361.79})
 
@@ -108,18 +108,18 @@ a1.setKParams(0,{{16.1903, 18.3081 ,0}, {19.2388, 0}, {-15.811}});
 
 int main()
 {
-	comp J1 = comp(0, 0);
-	comp J2 = comp(2, 0);
-	comp alpha = comp(1., 0);
-	comp sL = comp(1, 0);
-	comp s0 = comp(1, 0);
-	comp smin = comp(pow(0.997, 2), 0);
+	int J1 = 0;
+	int J2 = 2;
+	double alpha = 1;
+	double sL = 1.0;
+	double s0 = 1.0;
+	double smin = comp(pow(0.997, 2), 0);
 	comp smax = comp(pow(2.5, 2), 0);
-	comp mass1 = comp(0.13498, 0.);
-	comp mass2 = comp(0.49761, 0.);
-	comp mass3 = comp(0.762, 0.);
+	double mass1 = 0.13498;
+	double mass2 = 0.49761;
+	double mass3 = 0.762;
 	// 1st wave
-	channel chan1_1= channel({ comp(-6.0584496703077093, 0), comp(-0.23587420969943196, 0), comp(8.2951842306611070, 0)}, { comp(-2173.7290154401403,0.), comp(3272.0517220458223,0.), comp(-1553.7255278262101,0.),  comp(361.78951904504214,0.)}, mass1);
+	channel chan1_1= channel({-6.0584496703077093,-0.23587420969943196,8.2951842306611070}, {-2173.7290154401403,3272.0517220458223,-1553.7255278262101, 361.78951904504214}, {mass1,mass1});
 	channel chan2_1 = channel({ comp(-7.2466452617409232, 0), comp(-1.0918936513389781, 0), comp(12.908191623140738, 0)}, { comp(1927.4952345586573, 0.), comp(-2996.8378548561377, 0.), comp(1354.3272596278623, 0.), comp(-287.15761634573755, 0.)}, mass2);
 	channel chan3_1 = channel({ comp(1.9557195508523364, 0), comp(-0.23250771304628870, 0), comp(-1.0490788402175895, 0)}, { comp(0, 0) },mass3);
 	vector<channel> chans_1 = { chan1_1, chan2_1, chan3_1 };

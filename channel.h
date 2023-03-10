@@ -8,24 +8,26 @@ using namespace std;
 class channel {
 
 private:
-    vector<comp> couplings;
-    vector<comp> chebyCoefficients;
-    comp mass;
+    string name;
+    vector<double> couplings;
+    vector<double> chebyCoefficients;
+    vector<double> masses;
+    int poletype;
+    double s0;
 public:
     channel();
-    channel(vector<comp> couplings, vector<comp> chebyCoefficients, comp m);
+    channel(vector<double> couplings, vector<double> chebyCoefficients, vector<double> m);
     channel(vector<double> particlemasses);
 
     comp getMomentum(comp s);
-    vector<comp> getCouplings();
-    void setCouplings(vector<comp> c);
-    comp getCoupling(int i);
+    vector<double> getCouplings();
+    void setCouplings(vector<double> c);
+    double getCoupling(int i);
     
-    void setChebyCoeffs(vector<comp> c);
-    void setChebyCoeff(int i, comp c);
-    vector<comp> getChebyCoeffs();
-    comp getChebyCoeff(int i);
+    void setChebyCoeffs(int ptype, double s0,vector<double> c);
+    vector<double> getChebyCoeffs();
+    double getChebyCoeff(int i);
     friend ostream& operator<<(std::ostream& os, channel const& m);
-    comp getMass();
-    void setMass(comp m);
+    vector<double> getMasses();
+    double getThreshold();
 };

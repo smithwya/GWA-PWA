@@ -41,7 +41,7 @@ amplitude::amplitude() {
 	smax = 0;
 }
 
-amplitude::amplitude(comp j, comp alp, comp ssl, vector<channel> chans, vector<MatrixXcd> kParams, vector<double> rmasses, comp ss0, comp ssmin, comp ssmax) {
+amplitude::amplitude(int j, double alp, double ssl, vector<channel> chans, vector<MatrixXcd> kParams, vector<double> rmasses, double ss0, double ssmin, double ssmax) {
 	channels = chans;
 	kParameters = kParams;
 	numChannels = channels.size();
@@ -54,8 +54,11 @@ amplitude::amplitude(comp j, comp alp, comp ssl, vector<channel> chans, vector<M
 	resmasses = rmasses;
 }
 
-amplitude::amplitude(double smin, double smax, vector<channel> chans){
-
+amplitude::amplitude(int Jj, double ssmin, double ssmax, vector<channel> chans){
+	J = Jj;
+	channels = chans;
+	smin = ssmin;
+	smax = ssmax;
 
 }
 
@@ -100,7 +103,7 @@ VectorXcd amplitude::getValue(comp s) {
 
 
 	for(int i = 0; i < numChannels; i++){
-		phsp(i,i)=sqrt(Egamma*pow(channels[i].getMomentum(s),2.0*J.real()+1.0));
+		phsp(i,i)=sqrt(Egamma*pow(channels[i].getMomentum(s),2.0*J+1.0));
 	}
 	
 	return (phsp*getDenominator(s).inverse())*(getNumerator(s,3));
@@ -170,7 +173,7 @@ comp amplitude::getIntegral(comp s,int k){
 	ROOT::Math::Integrator intRe(re,ROOT::Math::IntegrationOneDim::kGAUSS,1.E-9,1.E-6);
 	ROOT::Math::Integrator intIm(im,ROOT::Math::IntegrationOneDim::kGAUSS,1.E-9,1.E-6);
 	
-	double threshold = 4*pow(channels[k].getMass().real(),2);
+	double threshold = channels[k].getThreshold();
 
 	double realpart = intRe.IntegralUp(threshold+.0001);
 	double imagpart = intIm.IntegralUp(threshold+.0001);
@@ -225,13 +228,21 @@ MatrixXcd amplitude::getKMatrix(comp s) {
 	return kmat.real();
 }
 
-void amplitude::setChebyCoeffs(int channel, int type, double s0, vector<double> coeffs){
+void amplitude::setChebyCoeffs(int chan_number, int poletype, double s0, vector<double> coeffs){
 
+	channels[chan_number].setChebyCoeffs(poletype,s0,coeffs);
 
 }
 
 
 void amplitude::setKParams(int power, vector<vector<double>> kparamlist){
+	int nParams = kParameters.size();
+
+	if(power-1>nParams){
+
+		kParameters.push_back(MatrixXcd::Zero(numChannels,numChannels));
+
+	}
 
 }
 

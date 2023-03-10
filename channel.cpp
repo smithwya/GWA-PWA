@@ -1,71 +1,92 @@
 #include "channel.h"
 
 channel::channel() {
+	masses = {};
 	couplings = {};
+	chebyCoefficients = {};
+	poletype = 1;
+
 }
 
-channel::channel(vector<comp> cp, vector<comp> ch, comp m) {
+channel::channel(vector<double> cp, vector<double> ch, vector<double> m) {
 	couplings = cp;
 	chebyCoefficients = ch;
-	mass = m;
+	masses = m;
+	poletype = 3;
+	s0 = 1.0;
 }
 
 channel::channel(vector<double> masses){
+	couplings = {};
+	chebyCoefficients = {};
+	poletype = 1;
+	s0 = 1.0;
 	
 }
 
-vector<comp> channel::getCouplings()
+vector<double> channel::getCouplings()
 {
 	return couplings;
 }
 
-void channel::setCouplings(vector<comp> c)
+void channel::setCouplings(vector<double> c)
 {
 	couplings = c;
 }
 
 
-comp channel::getCoupling(int i)
+double channel::getCoupling(int i)
 {
 	return couplings[i];
 }
 
-void channel::setChebyCoeffs(vector<comp> c)
+void channel::setChebyCoeffs(int ptype, double ss0, vector<double> c)
 {
 	chebyCoefficients = c;
+	poletype = ptype;
+	s0 = ss0;
 }
 
-void channel::setChebyCoeff(int i, comp c)
-{
-	chebyCoefficients[i] = c;
-}
-
-vector<comp> channel::getChebyCoeffs()
+vector<double> channel::getChebyCoeffs()
 {
 	return chebyCoefficients;
 }
 
-comp channel::getChebyCoeff(int i)
+double channel::getChebyCoeff(int i)
 {
 	return chebyCoefficients[i];
 }
 
-comp channel::getMass()
+vector<double> channel::getMasses()
 {
-	return mass;
-}
-
-void channel::setMass(comp m)
-{
-	mass = m;
+	return masses;
 }
 
 comp channel::getMomentum(comp s){
-return 0.5*sqrt(s-4.0*pow(mass,2));
+	double masssq =0;
+	for(double m : masses){
+		masssq +=m;
+	}
+
+return 0.5*sqrt(s-pow(masssq,2));
+}
+
+double channel::getThreshold(){
+	double masssq =0;
+	for(double m : masses){
+		masssq +=m;
+	}
+
+	return pow(masssq,2);
+
 }
 
 ostream& operator<<(ostream& os, channel const& m) {
-	os << "mass =" << m.mass << endl;
+	os << "masses =";
+	for(double mass : m.masses){
+		os<< mass<<" ";
+	}
+	os<<endl;
 	os << "couplings = { ";
 	for (int i = 0; i < m.couplings.size(); i++) {
 		os << m.couplings[i] << ", ";
