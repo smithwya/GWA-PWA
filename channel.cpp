@@ -5,6 +5,7 @@ channel::channel() {
 	couplings = {};
 	chebyCoefficients = {};
 	poletype = 1;
+	channel_name = "no_name";
 
 }
 
@@ -14,14 +15,17 @@ channel::channel(vector<double> cp, vector<double> ch, vector<double> m) {
 	masses = m;
 	poletype = 3;
 	s0 = 1.0;
+	channel_name = "no_name";
+	chebyCoefficients = {0};
 }
 
-channel::channel(vector<double> masses){
+channel::channel(string cname, vector<double> m){
 	couplings = {};
 	chebyCoefficients = {};
 	poletype = 1;
 	s0 = 1.0;
-	
+	channel_name = cname;
+	masses = m;
 }
 
 vector<double> channel::getCouplings()
@@ -31,6 +35,7 @@ vector<double> channel::getCouplings()
 
 void channel::setCouplings(vector<double> c)
 {
+
 	couplings = c;
 }
 
@@ -79,6 +84,25 @@ double channel::getThreshold(){
 
 	return pow(masssq,2);
 
+}
+
+double channel::getS0(){
+	return s0;
+}
+
+void channel::setName(string cname){
+	channel_name = cname;
+}
+
+string channel::getName(){
+	return channel_name;
+}
+
+void channel::addCoupling(double x){
+	
+	couplings.push_back(x);
+
+	return;
 }
 
 ostream& operator<<(ostream& os, channel const& m) {

@@ -1,6 +1,6 @@
 #pragma once
 #include <iostream>
-#include<vector>
+#include <vector>
 #include <complex>
 typedef std::complex<double> comp;
 using namespace std;
@@ -8,7 +8,7 @@ using namespace std;
 class channel {
 
 private:
-    string name;
+    string channel_name;
     vector<double> couplings;
     vector<double> chebyCoefficients;
     vector<double> masses;
@@ -17,7 +17,7 @@ private:
 public:
     channel();
     channel(vector<double> couplings, vector<double> chebyCoefficients, vector<double> m);
-    channel(vector<double> particlemasses);
+    channel(string cname, vector<double> particlemasses);
 
     comp getMomentum(comp s);
     vector<double> getCouplings();
@@ -30,4 +30,8 @@ public:
     friend ostream& operator<<(std::ostream& os, channel const& m);
     vector<double> getMasses();
     double getThreshold();
+    double getS0();
+    void setName(string cname);
+    string getName();
+    void addCoupling(double coup);
 };

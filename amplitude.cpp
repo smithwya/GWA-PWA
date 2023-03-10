@@ -1,25 +1,17 @@
 #pragma once
 #include <iostream>
-#include<complex>
-#include<algorithm>
-#include<math.h>
-#include<chrono>
-#include<random>
-#include<vector>
-#include<fstream>
-#include<string>
+#include <complex>
+#include <algorithm>
+#include <math.h>
+#include <vector>
+#include <string>
+#include <Eigen/Dense>
 #include "channel.h"
 #include "amplitude.h"
-#include <Eigen/Dense>
-#include "TF1.h"
 #include "TMath.h"
 #include "TH1.h"
 #include "Math/Integrator.h"
 #include "Math/Functor.h"
-#include "Math/WrappedFunction.h"
-#include "Math/IFunction.h"
-#include "Math/GSLIntegrator.h"
-#include "Math/IFunction.h"
 
 
 using namespace std;
@@ -55,12 +47,39 @@ amplitude::amplitude(int j, double alp, double ssl, vector<channel> chans, vecto
 }
 
 amplitude::amplitude(int Jj, double ssmin, double ssmax, vector<channel> chans){
+	numChannels = chans.size();
 	J = Jj;
 	channels = chans;
 	smin = ssmin;
 	smax = ssmax;
+	alpha = 1.0;
+	sL = 1.0;
+	s0 = 1.0;
+	for(channel c: chans){
+		channel_names.push_back(c.getName());
+	}
 
 }
+
+
+	// return E_gamma * p_i * numerator * denominator.inverse()
+VectorXcd amplitude::getValue(comp s) {
+	
+	double m_JPsi = 3.0969;
+
+	comp Egamma = pow((s-pow(m_JPsi,2)),2)/(4.0*s);
+	
+	MatrixXcd phsp = MatrixXcd::Identity(numChannels,numChannels);
+
+
+	for(int i = 0; i < numChannels; i++){
+		phsp(i,i)=sqrt(Egamma*pow(channels[i].getMomentum(s),2.0*J+1.0));
+	}
+	
+	return (phsp*getDenominator(s).inverse())*(getNumerator(s,3));
+}
+
+
 
 //calculate the nth chebyshev polynomial T_n(x) (probably ok to replace with some library)
 comp amplitude::chebyshev(comp x, int n) {
@@ -92,22 +111,7 @@ comp amplitude::omega_ps(comp s) {
 	return 2. * (omega_p(s) - omega_p(smin))/(omega_p(smax) - omega_p(smin)) - 1.;
 };
 
-	// return E_gamma * p_i * numerator * denominator.inverse()
-VectorXcd amplitude::getValue(comp s) {
-	
-	double m_JPsi = 3.0969;
 
-	comp Egamma = pow((s-pow(m_JPsi,2)),2)/(4.0*s);
-	
-	MatrixXcd phsp = MatrixXcd::Identity(numChannels,numChannels);
-
-
-	for(int i = 0; i < numChannels; i++){
-		phsp(i,i)=sqrt(Egamma*pow(channels[i].getMomentum(s),2.0*J+1.0));
-	}
-	
-	return (phsp*getDenominator(s).inverse())*(getNumerator(s,3));
-}
 
 comp amplitude::omega(comp s, int type){
 
@@ -132,6 +136,7 @@ VectorXcd amplitude::getNumerator(comp s, int type){
 		int ncoeffs = channels[k].getChebyCoeffs().size();
 
 		for(int n = 0; n<ncoeffs; n++){
+			s0 = channels[k].getS0();
 			n_k+=channels[k].getChebyCoeff(n)*chebyshev(omega(s,type),n);
 		}
 
@@ -228,9 +233,18 @@ MatrixXcd amplitude::getKMatrix(comp s) {
 	return kmat.real();
 }
 
-void amplitude::setChebyCoeffs(int chan_number, int poletype, double s0, vector<double> coeffs){
+void amplitude::setChebyCoeffs(string cname, int poletype, double s0, vector<double> coeffs){
 
-	channels[chan_number].setChebyCoeffs(poletype,s0,coeffs);
+	auto it = find(channel_names.begin(),channel_names.end(),cname);
+
+	if(it==channel_names.end()){
+		cout<<"channel not found"<<endl;
+		return;
+	} 
+
+	int index = it-channel_names.begin();
+
+	channels[index].setChebyCoeffs(poletype,s0,coeffs);
 
 }
 
@@ -238,18 +252,44 @@ void amplitude::setChebyCoeffs(int chan_number, int poletype, double s0, vector<
 void amplitude::setKParams(int power, vector<vector<double>> kparamlist){
 	int nParams = kParameters.size();
 
-	if(power-1>nParams){
-
+	while(kParameters.size()<power+1){
 		kParameters.push_back(MatrixXcd::Zero(numChannels,numChannels));
-
 	}
+	MatrixXcd newKParam = MatrixXcd::Zero(numChannels,numChannels);
 
+	for(int i = 0; i < numChannels; i++){
+		for(int j = numChannels-1; j>=i; j--){
+			newKParam(i,j) = kparamlist[i][j-i];
+			newKParam(j,i) = newKParam(i,j);
+
+		}
+	}
+	kParameters[power]=newKParam;
 }
 
-void amplitude::addPole(double mass, vector<double> couplings){
+void amplitude::addPole(double mass, vector<string> chan_names, vector<double> couplings){
 
-	
+	int nCouplings = chan_names.size();
+
+	if(nCouplings != couplings.size()) return;
+
+	resmasses.push_back(mass);
+
+	for(int i = 0; i < numChannels; i++){
+
+		auto it = find(chan_names.begin(),chan_names.end(),channels[i].getName());
+
+		if(it==chan_names.end()){
+			channels[i].addCoupling(0.0);
+			continue;
+		}
+
+		int index = it-chan_names.begin();
+		channels[i].addCoupling(couplings[index]);
+	} 
+	return;
 }
+
 
 ostream& operator<<(ostream& os, amplitude const& m) {
 	os << "J = " << m.J << ", alpha = " << m.alpha << ", sL = " << m.sL <<" num_channels = "<<m.numChannels<<" kmat_mat_params = " <<m.kParameters.size() <<endl;

@@ -33,14 +33,15 @@ public:
 	friend ostream& operator<<(std::ostream& os, amplitude const& m);
 	comp getIntegral(comp s, int k);
 	comp getIntegrand(double sp, comp s, int k);
-	void setChebyCoeffs(int channel, int type, double s0, vector<double> coeffs);
+	void setChebyCoeffs(string channel_name, int type, double s0, vector<double> coeffs);
 	void setKParams(int power, vector<vector<double>> kparamlist);
-	void addPole(double mass, vector<double> couplings);
-
+	void addPole(double mass,vector<string> chan_names, vector<double> couplings);
+	vector<string> getChanNames();
 private:
 	vector<channel> channels;
 	vector<MatrixXcd> kParameters;
 	vector<double> resmasses;
+	vector<string> channel_names;
 	int numChannels;
 	int J;
 	double alpha;
