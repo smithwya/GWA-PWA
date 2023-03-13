@@ -1,6 +1,7 @@
 #pragma once
 #include <iostream>
-#include<vector>
+#include <vector>
+#include <map>
 #include "channel.h"
 #include <Eigen/Dense>
 #include "TF1.h"
@@ -11,6 +12,31 @@ using Eigen::VectorXd;
 using Eigen::MatrixXcd;
 using Eigen::VectorXcd;
 typedef std::complex<double> comp;
+
+struct intKey{
+
+	comp s;
+	int k;
+
+	intKey(comp x, int y){
+		s = x;
+		k = y;
+	}
+
+	bool operator<(intKey const& other) const{
+
+		if(k!=other.k){
+			return k<other.k;
+		}
+		
+		if(s.real()!=other.s.real()) return s.real()<other.s.real();
+
+		return s.imag() < other.s.imag();
+		
+	}
+};
+
+
 
 class amplitude {
 
@@ -37,11 +63,13 @@ public:
 	void setKParams(int power, vector<vector<double>> kparamlist);
 	void addPole(double mass,vector<string> chan_names, vector<double> couplings);
 	vector<string> getChanNames();
+	void calcIntegrals(vector<comp> slist,int k);
 private:
 	vector<channel> channels;
 	vector<MatrixXcd> kParameters;
 	vector<double> resmasses;
 	vector<string> channel_names;
+	map<intKey, comp> integralList;
 	int numChannels;
 	int J;
 	double alpha;

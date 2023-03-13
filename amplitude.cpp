@@ -12,6 +12,7 @@
 #include "TH1.h"
 #include "Math/Integrator.h"
 #include "Math/Functor.h"
+#include <map>
 
 
 using namespace std;
@@ -21,7 +22,8 @@ using Eigen::MatrixXcd;
 using Eigen::VectorXcd;
 
 typedef std::complex<double> comp;
-//typdef comp param;
+
+
 
 //amplitude constructor
 amplitude::amplitude() {
@@ -31,6 +33,7 @@ amplitude::amplitude() {
 	s0 = 0;
 	smin = 0;
 	smax = 0;
+	integralList = {};
 }
 
 amplitude::amplitude(int j, double alp, double ssl, vector<channel> chans, vector<MatrixXcd> kParams, vector<double> rmasses, double ss0, double ssmin, double ssmax) {
@@ -44,6 +47,7 @@ amplitude::amplitude(int j, double alp, double ssl, vector<channel> chans, vecto
 	smin = ssmin;
 	smax = ssmax;
 	resmasses = rmasses;
+	integralList = {};
 }
 
 amplitude::amplitude(int Jj, double ssmin, double ssmax, vector<channel> chans){
@@ -55,6 +59,7 @@ amplitude::amplitude(int Jj, double ssmin, double ssmax, vector<channel> chans){
 	alpha = 1.0;
 	sL = 1.0;
 	s0 = 1.0;
+	integralList = {};
 	for(channel c: chans){
 		channel_names.push_back(c.getName());
 	}
@@ -163,6 +168,11 @@ comp amplitude::getIntegrand(double sp,comp s, int k){
 
 comp amplitude::getIntegral(comp s,int k){
 	//add parameter to select sheet, "+-++" etc
+	intKey skpair = intKey(s,k);
+	auto mapit = integralList.find(skpair);
+
+	if(mapit!=integralList.end()) return mapit->second;
+
  	auto realIntegrand = [&](double sp)
     {
         return amplitude::getIntegrand(sp,s,k).real();
@@ -183,10 +193,24 @@ comp amplitude::getIntegral(comp s,int k){
 	double realpart = intRe.IntegralUp(threshold+.0001);
 	double imagpart = intIm.IntegralUp(threshold+.0001);
 	
+	comp result = comp(realpart,imagpart);
 
-	return comp(realpart,imagpart);
+
+	integralList[skpair]=result;
+
+	return result;
 }
 
+
+void amplitude::calcIntegrals(vector<comp> slist,int k){
+
+	/*for(comp s : slist){
+	integralList.insert({make_pair(s,k),0});
+	}*/
+	
+
+	return;
+}
 
 MatrixXcd amplitude::getDenominator(comp s)
 {
