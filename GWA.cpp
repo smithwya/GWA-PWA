@@ -8,7 +8,9 @@
 #include <chrono>
 #include "amplitude.h"
 #include "channel.h"
+#include "observable.h"
 #include "GWAFunction.h"
+#include "filereader.h"
 #include "TCanvas.h"
 #include "TH1D.h"
 #include "TFile.h"
@@ -21,9 +23,6 @@
 #include "Minuit2/MnMinos.h"
 #include "Minuit2/MnContours.h"
 #include "Minuit2/MnPlot.h"
-
-
-
 
 
 using namespace std;
@@ -154,7 +153,8 @@ int main()
 		return (value*conj(value)).real();
 	};
 
-
+	filereader testReader("GWA_dataformat.txt");
+	testReader.printCommands();
 	/*
 	for(ch = 0; ch <3; ch ++){
 	makePlot("S_intensity_"+std::to_string(ch), intensityS);

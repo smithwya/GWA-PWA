@@ -57,7 +57,7 @@
         "mutex": "cpp",
         "sstream": "cpp",
         "stdexcept": "cpp",
-        "cinttypes": "cpp"
-    },
-    "C_Cpp.errorSquiggles": "disabled"
+        "cinttypes": "cpp",
+        "regex": "cpp"
+    }
 }

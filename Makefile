@@ -17,8 +17,8 @@ OBJ = $(SRC:.C=.o)
 
 all : GWA
 
-GWA : GWA.o amplitude.o observable.o channel.o
-	$(LD) $(CPPFLAGS) -o GWA  GWA.o amplitude.o observable.o channel.o $(LDFLAGS)
+GWA : GWA.o amplitude.o observable.o channel.o filereader.o
+	$(LD) $(CPPFLAGS) -o GWA  GWA.o amplitude.o observable.o channel.o filereader.o $(LDFLAGS)
 
 
 %.o : %.cpp %.h
