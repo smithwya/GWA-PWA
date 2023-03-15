@@ -50,14 +50,14 @@ amplitude::amplitude(int j, double alp, double ssl, vector<channel> chans, vecto
 	integralList = {};
 }
 
-amplitude::amplitude(int Jj, double ssmin, double ssmax, vector<channel> chans){
+amplitude::amplitude(int Jj,double ssL, double ssmin, double ssmax, vector<channel> chans){
 	numChannels = chans.size();
 	J = Jj;
 	channels = chans;
 	smin = ssmin;
 	smax = ssmax;
 	alpha = 1.0;
-	sL = 1.0;
+	sL = ssL;
 	s0 = 1.0;
 	integralList = {};
 	for(channel c: chans){
@@ -72,16 +72,18 @@ VectorXcd amplitude::getValue(comp s) {
 	
 	double m_JPsi = 3.0969;
 
-	comp Egamma = pow((s-pow(m_JPsi,2)),2)/(4.0*s);
-	
+	//comp Egamma = pow((s-pow(m_JPsi,2)),2)/(4.0*s);
+	comp Egamma = (pow(m_JPsi,2)-s)/(2.0*sqrt(s));
 	MatrixXcd phsp = MatrixXcd::Identity(numChannels,numChannels);
 
 
 	for(int i = 0; i < numChannels; i++){
-		phsp(i,i)=sqrt(Egamma*pow(channels[i].getMomentum(s),2.0*J+1.0));
+		//phsp(i,i)=sqrt(Egamma*pow(channels[i].getMomentum(s),2.0*J+1.0));
+		phsp(i,i)=Egamma*pow(getMomentum(i,s),J+0.5);
 	}
 	
-	return (phsp*getDenominator(s).inverse())*(getNumerator(s,3));
+	//return (phsp*getDenominator(s).inverse())*(getNumerator(s,3));
+	return ((getNumerator(s,3).transpose())*(getDenominator(s).inverse()))*phsp;
 }
 
 
@@ -113,7 +115,7 @@ comp amplitude::omega_s(comp s) {
 //calculates omega_ps
 comp amplitude::omega_ps(comp s) {
 
-	return 2. * (omega_p(s) - omega_p(smin))/(omega_p(smax) - omega_p(smin)) - 1.;
+	return 2. * (omega_p(s) - omega_p(smin))/(omega_p(smax) - omega_p(smin)) - 1.0;
 };
 
 
@@ -153,7 +155,10 @@ VectorXcd amplitude::getNumerator(comp s, int type){
 //calculates rhoN_ki(s') = delta_ki * (2p_i)^{2J+1}/(s'+sL)^{J+alpha}
 comp amplitude::getRhoN(comp sprime,int k)
 {
-		comp x = pow(2.0*channels[k].getMomentum(sprime),2.0*J+1.0)/pow(sprime + sL,J+alpha);
+	int dumbJ = J;
+	if(k==2) dumbJ = 0;
+
+	comp x = pow(2.0*channels[k].getMomentum(sprime),2.0*dumbJ+1.0)/pow(sprime + sL,dumbJ+alpha);
 
 	return x;
 }
@@ -204,9 +209,9 @@ comp amplitude::getIntegral(comp s,int k){
 
 void amplitude::calcIntegrals(vector<comp> slist,int k){
 
-	/*for(comp s : slist){
-	integralList.insert({make_pair(s,k),0});
-	}*/
+	for(comp s : slist){
+		integralList[intKey(s,k)]=getIntegral(s,k);
+	}
 	
 
 	return;

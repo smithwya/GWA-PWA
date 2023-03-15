@@ -90,21 +90,7 @@ channel c1 = channel("PiPi",{0.13498, 0.13498});
 
 //if you read AddWave("S","kmat","nominal", 0, 1.0)
 
-amplitude a1 = amplitude(0,0,1.0,{c1});
-
-//if you read ChebyCoeffs("S", "PiPi","p+s=1.0", {-2173.73, 3272.05, -1553.73, 361.79})
-
-a1.setChebyCoeffs(0,3,1.0,{-2173.73, 3272.05, -1553.73, 361.79});
-
-//if you read AddPole("S",0.00631603,{-6.05845,-7.24665,1.95572} )
-
-a1.addPole(0.00631603,{"PiPi","KK","RhoRho"},{-6.05845,-7.24665,1.95572});
-
-//if you read AddKmatBackground("S", 0, {{16.1903, 18.3081 ,0}, {19.2388, 0}, {-15.811}})
-
-a1.setKParams(0,{{16.1903, 18.3081 ,0}, {19.2388, 0}, {-15.811}});
-
-return {a1};
+return {};
 }
 
 
@@ -112,14 +98,14 @@ return {a1};
 int main()
 {
 
-	double smin = pow(0.9975,2);
+	double smin = pow(0.997,2);
 	double smax = pow(2.5,2);
 
 	channel c1 = channel("PiPi",{0.13498, 0.13498});
 	channel c2 = channel("KK", {0.49761, 0.49761});
 	channel c3 = channel("RhoRho", {0.762, 0.762});
 
-	amplitude S_wave = amplitude(0,smin,smax,{c1,c2,c3});
+	amplitude S_wave = amplitude(0,0.6,smin,smax,{c1,c2,c3});
 
 	S_wave.setChebyCoeffs("PiPi",3, 1.0, {-2173.73, 3272.05, -1553.73, 361.79});
 	S_wave.setChebyCoeffs("KK",3, 1.0, {1927.5, -2996.84, 1354.33 , -287.158});
@@ -132,47 +118,55 @@ int main()
 	S_wave.setKParams(0,{{16.1903, 18.3081 ,0}, {19.2388, 0}, {-15.811}});
 	S_wave.setKParams(1, {{-6.27393,-9.19686,0}, {-13.3706,0}, {6.03082}});
 	
-	amplitude D_wave = amplitude(2,smin,smax,{c1,c2,c3});
+	amplitude D_wave = amplitude(2,0.6,smin,smax,{c1,c2,c3});
 
 
-	D_wave.setChebyCoeffs("PiPi", 3, 1.0, {109.759,-2.84445, 71.0952});
-	D_wave.setChebyCoeffs("KK", 3, 1.0 , {-26.9639, -135.324, -14.8872});
+	D_wave.setChebyCoeffs("PiPi", 3, 1.0, {109.759,-2.8444, 71.095});
+	D_wave.setChebyCoeffs("KK", 3, 1.0 , {-26.964, -135.324, -14.887});
 	D_wave.setChebyCoeffs("RhoRho",3,1.0, {0});
 
-	D_wave.addPole( 2.32993, {"PiPi","KK","RhoRho"}, {0.154701, 0.908119, 0.852267});
-	D_wave.addPole( 1.66739, {"PiPi","KK","RhoRho"}, {1.02689, -0.249618, 0.697538});
-	D_wave.addPole( 2.89362, {"PiPi","KK","RhoRho"}, {-0.343538, 0, 1.13407});
+	D_wave.addPole( 2.332, {"PiPi","KK","RhoRho"}, {0.155, 1.027, -0.344});
+	D_wave.addPole( 1.667, {"PiPi","KK","RhoRho"}, {0.908, -0.250, 0});
+	D_wave.addPole( 2.894, {"PiPi","KK","RhoRho"}, {0.852, 0.698, 1.134});
 
-	D_wave.setKParams(0, {{-1.17046,-1.01166, 0 }, {0.394645, 0}, {-11.3652}});
-	D_wave.setKParams(1, {{0.211384, 0.168251, 0}, {4.86693780658242758 * pow(10, -3),0}, {3.92328}});
-
-	cout<<"S-wave: "<<S_wave<<endl;
-
-
-	cout<<"D-wave:"<<D_wave<<endl;
+	D_wave.setKParams(0, {{-1.170,-1.012, 0 }, {0.395, 0}, {-11.365}});
+	D_wave.setKParams(1, {{0.211, 0.168, 0}, {0.005,0}, {3.923}});
 		
 	
 	int ch = 0;
-	auto intensity = [&](double x){
+	auto intensityS = [&](double x){
 		comp value = S_wave.getValue(pow(x,2))(ch);
 		return (value*conj(value)).real();
-
 	};
 
+	auto intensityD = [&](double x){
+		comp value = D_wave.getValue(pow(x,2))(ch);
+		return (value*conj(value)).real();
+	};
+
+	for(ch = 0; ch <3; ch ++){
+	makePlot("S_intensity_"+std::to_string(ch), intensityS);
+	makePlot("D_intensity_"+std::to_string(ch), intensityD);
+	}
+
+/*
+	
+	
+
 	auto start = chrono::high_resolution_clock::now();
-	makePlot("S_intensity_"+std::to_string(ch), intensity);
+	makePlot("S_intensity_"+std::to_string(ch), intensityS);
 	auto stop = chrono::high_resolution_clock::now();
 
 	auto duration1 = chrono::duration_cast<chrono::microseconds>(stop-start);
 	cout<<"First plot generation time: "<< duration1.count()<<" microseconds"<<endl;
 
 	start = chrono::high_resolution_clock::now();
-	makePlot("S_intensity_"+std::to_string(ch), intensity);
+	makePlot("S_intensity_"+std::to_string(ch), intensityS);
 	stop = chrono::high_resolution_clock::now();
 
 	auto duration2 = chrono::duration_cast<chrono::microseconds>(stop-start);
 	cout<<"First plot generation time: "<< duration2.count()<<" microseconds"<<endl;
+*/
 
-	
 	return 0;
 }

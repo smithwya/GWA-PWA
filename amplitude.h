@@ -43,7 +43,7 @@ class amplitude {
 public:
 	amplitude();
 	amplitude(int j, double alpha, double sl, vector<channel> c, vector<MatrixXcd> kParams, vector<double> rmasses,double s0, double smin, double smax);
-	amplitude(int J, double smin, double smax, vector<channel> chans);
+	amplitude(int J, double sl, double smin, double smax, vector<channel> chans);
 
 	comp chebyshev(comp x, int n);
 	comp omega_s(comp s);
