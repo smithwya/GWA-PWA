@@ -154,12 +154,7 @@ int main()
 		return (value*conj(value)).real();
 	};
 
-	vector<double> paramsS = S_wave.getParamList();
-	vector<double> paramsD = D_wave.getParamList();
 
-
-	S_wave.setParamList(paramsD);
-	cout<<D_wave<<endl;
 	/*
 	for(ch = 0; ch <3; ch ++){
 	makePlot("S_intensity_"+std::to_string(ch), intensityS);

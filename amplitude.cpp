@@ -369,10 +369,11 @@ void amplitude::setParamList(vector<double> params){
 
 	int index = 3;
 
-	for(channel c: channels){
-		int Ncoupls = c.getCouplings().size();
-		int Nchebys = c.getChebyCoeffs().size();
-		int Nmasses = c.getMasses().size();
+	for(int i = 0; i < numChannels; i++){
+		
+		int Ncoupls = channels[i].getCouplings().size();
+		int Nchebys = channels[i].getChebyCoeffs().size();
+		int Nmasses = channels[i].getMasses().size();
 		vector<double> coupls = {};
 		vector<double> chebys = {};
 		vector<double> masses = {};
@@ -391,12 +392,12 @@ void amplitude::setParamList(vector<double> params){
 		ss0 = params[index];
 		index++;
 
-		setChebyCoeffs(c.getName(),c.getPoleType(),ss0,chebys);
-		c.setCouplings(coupls);
-		c.setMasses(masses);
+		setChebyCoeffs(channels[i].getName(),channels[i].getPoleType(),ss0,chebys);
+		channels[i].setCouplings(coupls);
+		channels[i].setMasses(masses);
 	}
 
-	for(MatrixXcd m : kParameters){
+	for(int k = 0; k < kParameters.size(); k++){
 
 		for(int i = 0; i < numChannels; i++){
 			for(int j = numChannels-1; j>=i; j--){
@@ -405,8 +406,8 @@ void amplitude::setParamList(vector<double> params){
 				double impart = params[index];
 				index++;
 				comp matEl = comp(repart,impart);
-				m(i,j) = matEl;
-				m(j,i) = matEl;
+				kParameters[k](i,j) = matEl;
+				kParameters[k](j,i) = matEl;
 			}
 
 		}
