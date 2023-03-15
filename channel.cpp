@@ -35,7 +35,6 @@ vector<double> channel::getCouplings()
 
 void channel::setCouplings(vector<double> c)
 {
-
 	couplings = c;
 }
 
@@ -105,7 +104,19 @@ void channel::addCoupling(double x){
 	return;
 }
 
+int channel::getPoleType(){
+
+	return poletype;
+}
+
+void channel::setMasses(vector<double> ms){
+
+	masses = ms;
+	return;
+}
+
 ostream& operator<<(ostream& os, channel const& m) {
+	os<<"channel "<<m.channel_name<<":"<<endl;
 	os << "masses =";
 	for(double mass : m.masses){
 		os<< mass<<" ";

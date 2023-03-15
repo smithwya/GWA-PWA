@@ -64,6 +64,9 @@ public:
 	void addPole(double mass,vector<string> chan_names, vector<double> couplings);
 	vector<string> getChanNames();
 	void calcIntegrals(vector<comp> slist,int k);
+	vector<double> getParamList();
+	void setParamList(vector<double> params);
+	void setResMasses(vector<double> rm);
 private:
 	vector<channel> channels;
 	vector<MatrixXcd> kParameters;

@@ -34,4 +34,6 @@ public:
     void setName(string cname);
     string getName();
     void addCoupling(double coup);
+    int getPoleType();
+    void setMasses(vector<double> masses);
 };

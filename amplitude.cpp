@@ -237,6 +237,11 @@ comp amplitude::getMomentum(int chan, comp s)
 	return channels[chan].getMomentum(s);
 }
 
+void amplitude::setResMasses(vector<double> rm){
+	resmasses = rm;
+	return;
+}
+
 MatrixXcd amplitude::getKMatrix(comp s) {
 	MatrixXcd kmat = MatrixXcd::Zero(numChannels, numChannels);
 
@@ -320,12 +325,110 @@ void amplitude::addPole(double mass, vector<string> chan_names, vector<double> c
 }
 
 
+vector<double> amplitude::getParamList(){
+	vector<double> params = {};
+
+	params.push_back(J);
+	params.push_back(alpha);
+	params.push_back(sL);
+
+
+	for(channel c: channels){
+		vector<double> coupls = c.getCouplings();
+		vector<double> chebys = c.getChebyCoeffs();
+		vector<double> masses = c.getMasses();
+
+		params.insert(params.end(),coupls.begin(),coupls.end());
+		params.insert(params.end(),chebys.begin(),chebys.end());
+		params.insert(params.end(),masses.begin(),masses.end());
+		params.push_back(c.getS0());
+	}
+
+	for(MatrixXcd m : kParameters){
+
+		for(int i = 0; i < numChannels; i++){
+			for(int j = numChannels-1; j>=i; j--){
+				params.push_back(m(i,j).real());
+				params.push_back(m(i,j).imag());
+			}
+
+		}
+	}
+
+
+	params.insert(params.end(),resmasses.begin(),resmasses.end());
+
+	return params;
+}
+
+
+void amplitude::setParamList(vector<double> params){
+	J = params[0];
+	alpha = params[1];
+	sL = params[2];
+
+	int index = 3;
+
+	for(channel c: channels){
+		int Ncoupls = c.getCouplings().size();
+		int Nchebys = c.getChebyCoeffs().size();
+		int Nmasses = c.getMasses().size();
+		vector<double> coupls = {};
+		vector<double> chebys = {};
+		vector<double> masses = {};
+		double ss0 = 0;
+
+		for(int start = index; index<start+Ncoupls; index++){
+			coupls.push_back(params[index]);
+		}
+		for(int start = index; index<start+Nchebys; index++){
+			chebys.push_back(params[index]);
+		}
+		for(int start = index; index<start+Nmasses; index++){
+			masses.push_back(params[index]);
+		}
+
+		ss0 = params[index];
+		index++;
+
+		setChebyCoeffs(c.getName(),c.getPoleType(),ss0,chebys);
+		c.setCouplings(coupls);
+		c.setMasses(masses);
+	}
+
+	for(MatrixXcd m : kParameters){
+
+		for(int i = 0; i < numChannels; i++){
+			for(int j = numChannels-1; j>=i; j--){
+				double repart = params[index];
+				index++;
+				double impart = params[index];
+				index++;
+				comp matEl = comp(repart,impart);
+				m(i,j) = matEl;
+				m(j,i) = matEl;
+			}
+
+		}
+	}
+
+	int nResMasses = resmasses.size();
+
+
+	vector<double> rm = {};
+	for(int start = index; index<start+nResMasses; index++){
+		rm.push_back(params[index]);
+	}
+	setResMasses(rm);
+}
+
+
 ostream& operator<<(ostream& os, amplitude const& m) {
 	os << "J = " << m.J << ", alpha = " << m.alpha << ", sL = " << m.sL <<" num_channels = "<<m.numChannels<<" kmat_mat_params = " <<m.kParameters.size() <<endl;
 	os<<"numPoles = "<<m.resmasses.size() <<" s0= "<<m.s0<<" smin = "<<m.smin<<" smax ="<<m.smax<<endl<<endl;
 
 	for (int i = 0; i < m.numChannels; i++) {
-		os << "channel " << i << ": " << endl << m.channels[i] << endl<<endl;
+		os << m.channels[i] << endl<<endl;
 	}
 	os<<"resmasses: ";
 	for (int i = 0; i < m.resmasses.size(); i++) {

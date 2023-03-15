@@ -1,17 +1,30 @@
 #include <iostream>
-#include<complex>
-#include<vector>
-#include "amplitude.h"
-#include "channel.h"
-#include "TCanvas.h"
+#include <complex>
+#include <vector>
 #include <Eigen/Dense>
-#include "TH1D.h"
-#include "TFile.h"
 #include <sstream>
 #include <fstream>
-#include "TString.h"
-#include <chrono>
 #include <map>
+#include <chrono>
+#include "amplitude.h"
+#include "channel.h"
+#include "GWAFunction.h"
+#include "TCanvas.h"
+#include "TH1D.h"
+#include "TFile.h"
+#include "TString.h"
+#include "GWAFcn.h"
+#include "GWAFunction.h"
+#include "Minuit2/FunctionMinimum.h"
+#include "Minuit2/MnUserParameterState.h"
+#include "Minuit2/MnMigrad.h"
+#include "Minuit2/MnMinos.h"
+#include "Minuit2/MnContours.h"
+#include "Minuit2/MnPlot.h"
+
+
+
+
 
 using namespace std;
 using Eigen::MatrixXcd;
@@ -85,10 +98,7 @@ void plotComp(string pdfname,function<comp(double)> func){
 
 vector<amplitude> readInput(string filename){
 
-//if you read AddChannel("pipi", 0.13498, 0.13498)
-channel c1 = channel("PiPi",{0.13498, 0.13498});
-
-//if you read AddWave("S","kmat","nominal", 0, 1.0)
+//do something
 
 return {};
 }
@@ -121,8 +131,8 @@ int main()
 	amplitude D_wave = amplitude(2,0.6,smin,smax,{c1,c2,c3});
 
 
-	D_wave.setChebyCoeffs("PiPi", 3, 1.0, {109.759,-2.8444, 71.095});
-	D_wave.setChebyCoeffs("KK", 3, 1.0 , {-26.964, -135.324, -14.887});
+	D_wave.setChebyCoeffs("PiPi", 3, 1.0, {109.759,-2.8444, 71.095,0 });
+	D_wave.setChebyCoeffs("KK", 3, 1.0 , {-26.964, -135.324, -14.887,0});
 	D_wave.setChebyCoeffs("RhoRho",3,1.0, {0});
 
 	D_wave.addPole( 2.332, {"PiPi","KK","RhoRho"}, {0.155, 1.027, -0.344});
@@ -144,29 +154,17 @@ int main()
 		return (value*conj(value)).real();
 	};
 
+	vector<double> paramsS = S_wave.getParamList();
+	vector<double> paramsD = D_wave.getParamList();
+
+
+	S_wave.setParamList(paramsD);
+	cout<<D_wave<<endl;
+	/*
 	for(ch = 0; ch <3; ch ++){
 	makePlot("S_intensity_"+std::to_string(ch), intensityS);
 	makePlot("D_intensity_"+std::to_string(ch), intensityD);
 	}
-
-/*
-	
-	
-
-	auto start = chrono::high_resolution_clock::now();
-	makePlot("S_intensity_"+std::to_string(ch), intensityS);
-	auto stop = chrono::high_resolution_clock::now();
-
-	auto duration1 = chrono::duration_cast<chrono::microseconds>(stop-start);
-	cout<<"First plot generation time: "<< duration1.count()<<" microseconds"<<endl;
-
-	start = chrono::high_resolution_clock::now();
-	makePlot("S_intensity_"+std::to_string(ch), intensityS);
-	stop = chrono::high_resolution_clock::now();
-
-	auto duration2 = chrono::duration_cast<chrono::microseconds>(stop-start);
-	cout<<"First plot generation time: "<< duration2.count()<<" microseconds"<<endl;
-*/
-
+	*/
 	return 0;
 }
