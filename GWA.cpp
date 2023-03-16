@@ -153,8 +153,35 @@ int main()
 		return (value*conj(value)).real();
 	};
 
+
+	//tested: readCh
 	filereader testReader("GWA_dataformat.txt");
-	testReader.printCommands();
+	
+	string testSeed = testReader.getCommand(0);
+	string testFitreg = testReader.getCommand(1);
+	string testCh = testReader.getCommand(2);
+	string testWav = testReader.getCommand(5);
+	string testCheb = testReader.getCommand(6);
+	string testPole = testReader.getCommand(9);
+	string testKmat = testReader.getCommand(10);
+
+	cout<<testSeed<<" -> "<<testReader.readSeed(testSeed)<<endl;
+
+	vector<double> fitreg = testReader.readFitReg(testFitreg);
+	cout<<testFitreg<<" -> "<<fitreg[0]<<", "<<fitreg[1]<<endl;
+
+	chanDat testChanDat = testReader.readCh(testCh);
+	cout<<testCh<<" -> "<<testChanDat.name<<" ";
+	for(double x : testChanDat.ch_masses){
+		cout<<x<<" ";
+	}
+	cout<<endl;
+
+	ampDat testS = testReader.readWave(testWav);
+
+	cout<<testWav<<" -> "<< testS.wname<<" "<< testS.kmatflag<< " "<<testS.rhoN<<" "<<testS.J<<" "<<testS.sL<<endl;
+
+
 	/*
 	for(ch = 0; ch <3; ch ++){
 	makePlot("S_intensity_"+std::to_string(ch), intensityS);

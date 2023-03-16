@@ -59,5 +59,6 @@
         "stdexcept": "cpp",
         "cinttypes": "cpp",
         "regex": "cpp"
-    }
+    },
+    "C_Cpp.errorSquiggles": "disabled"
 }

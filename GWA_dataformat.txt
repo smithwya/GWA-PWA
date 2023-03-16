@@ -1,6 +1,4 @@
-
-SetSeed(3, 4, 5, 6)
-SetSeed(3, 4, {5, 6})
+SetSeed(3)
 
 FitRegion(0.9975, 2.5)
 
@@ -11,45 +9,12 @@ AddChannel("RhoRho", {0.762, 0.762})
 
 AddWave("S","kmat","nominal", 0, 1.0)
 
-#AddWave(0, 1, 2.5, {c1, c2, c3});
-#amplitude S_wave = amplitude(0,smin,smax,{c1,c2,c3});
-
 ChebyCoeffs("S", "PiPi","p+s=1.0", {-2173.73 fixed, 3272.05 +- 100, -1553.73 fixed, 361.79 fixed}) 
 ChebyCoeffs("S", "KK", "p=1.0", {1927.5 +- 49, -2996.84 +- 45, 1354.33 fixed, -287.158 fixed})
 ChebyCoeffs("S", "RhoRho  ", "p+s=1.0  ", {0.89645696 fixed})
 
-AddPole("S", 0.00631603     fixed,{{"PiPi", -6.05845 fixed}, {"KK", -7.24665    +-    800}, {"RhoRho", 1.95572fixed}})
-AddPole("S", 3.18353, {{"PiPi", -0.235874}, {"KK", -1.09189}, {"RhoRho", -0.232508}})
-AddPole("S", 7.54762, {{"PiPi", 8.29518}, {"KK", 12.9082}, {"RhoRho", -1.04908}})
+AddPole("S", 0.00631603 \pm 50, {"PiPi","KK","RhoRho"}, {-6.05845 \pm 70, -7.24665 \pm 0,1.95572  \pm 0})
 
-#AddPole("S", 0.00631603 +- 50, {"PiPi","KK","RhoRho"}, {(-6.05845) +- (70), (-7.24665) +- (0),(1.95572)  +- (0)})
-#AddPole("S", 0.00631603 +- 50, {"PiPi","KK","RhoRho"}, {-6.05845 +- 70, -7.24665 +- 0,1.95572  +- 0})
-#AddPole("S", 0.00631603 \pm 50, {"PiPi","KK","RhoRho"}, {-6.05845 \pm 70, -7.24665 \pm 0,1.95572  \pm 0})
-#S_wave.addPole(0.00631603, {"PiPi","KK","RhoRho"},{-6.05845,-7.24665,1.95572});
 
 AddKmatBackground("S", 0, {{16.1903 \pm 0, 18.3081 \pm 908, 0\pm 8}, {19.2388\pm 8, 0 \pm      7000}, {-15.811    \pm  8 }})
 AddKmatBackground("S", 1, {{-6.27393, -9.19686, 0}, {-13.3706, 0}, {6.03082}})
-
-
-
-AddWave("D", "kmat", "nominal", 0, 1.0)
-
-ChebyCoeffs("D", "PiPi", "p+s=1.0", {109.759 fixed, -2.84445 +-  400, 71.0952 +-    8000}) 
-ChebyCoeffs("D", "KK", "p+s=1.0", {-26.9639fixed, -135.324+-5, -14.8872+-8})
-ChebyCoeffs("D", "RhoRho", "p+s=1.0", {0fixed, 5+-9})
-
-#ChebyCoeffs("D", "RhoRho", "p+s=1.0", {(0 )   +- ( 0), (-5 )+-(9)})
-#ChebyCoeffs("D", "RhoRho", "p+s=1.0", {0    +- 0, -5 +-9})
-#ChebyCoeffs("D", "RhoRho", "p+s=1.0", {0    \pm 0, -5 \pm9})
-
-AddPole("D", 2.32993, {0.154701, 0.908119, 0.852267})
-AddPole("D", 1.66739, {1.02689, -0.249618, 0.697538})
-AddPole("D", 2.89362, {-0.343538, 0, 1.13407})
-
-AddKmatBackground("D", 0, {{-1.17046, -1.01166, 0 }, {0.394645, 0}, {-11.3652}})
-AddKmatBackground("D", 1, {{0.211384, 0.168251, 0}, {-13.3706, 0}, {3.92328}})
-
-
-AddKmatBackground("D", 1, {{0.211384, 0.168251, 0}, {-13.3706, 0}, {3.92328}})
-
-

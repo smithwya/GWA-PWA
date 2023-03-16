@@ -21,7 +21,7 @@ GWA : GWA.o amplitude.o observable.o channel.o filereader.o
 	$(LD) $(CPPFLAGS) -o GWA  GWA.o amplitude.o observable.o channel.o filereader.o $(LDFLAGS)
 
 
-%.o : %.cpp %.h
+%.o : %.cpp %.h %.txt
 	$(CXX) $(CPPFLAGS) -o $@ -c $<
 
 clean :
