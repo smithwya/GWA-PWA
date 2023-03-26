@@ -1,28 +1,33 @@
+TARGET = GWA
+# compilers
 CXX = $(shell root-config --cxx)
 LD = $(shell root-config --ld)
 
-
+#compiling flags
 CPPFLAGS := $(shell root-config --cflags) $(STDINCDIR) -I/usr/include/eigen3
-LDFLAGS := -Xlinker -rpath . $(shell root-config --glibs) $(STDLIBDIR)
-READERFLAGS := -lgsl -lgslcblas
-#G_OPTS := -malign-double
-#G_OPTSPOLE := -ffinite-math-only -fforce-addr -funroll-loops -ffast-math -malign-double -fno-trapping-math -fcaller-saves -fstrength-reduce -funsafe-math-optimizations -ffinite-math-only
-
-#CPPFLAGS += -g
 CPPFLAGS += -O3
 
+#linking flags
+LDFLAGS := -Xlinker -rpath . $(shell root-config --glibs) $(STDLIBDIR)
 
+SRCDIR = src
+OBJDIR = obj
+BINDIR = bin
 
-OBJ = $(SRC:.C=.o)
+SOURCES := $(wildcard $(SRCDIR)/*.cpp)
+INCLUDES := $(wildcard $(SRCDIR)/*.h)
+OBJECTS := $(SOURCES:$(SRCDIR)/%.cpp=$(OBJDIR)/%.o)
+rm = rm -f
 
-all : GWA
+all: $(BINDIR)/$(TARGET)
 
-GWA : GWA.o amplitude.o observable.o channel.o filereader.o
-	$(LD) $(CPPFLAGS) -o GWA  GWA.o amplitude.o observable.o channel.o filereader.o $(LDFLAGS)
+$(BINDIR)/$(TARGET): $(OBJECTS)
+	$(LD) $(CPPFLAGS) -o $(BINDIR)/$(TARGET) $(OBJECTS) $(LDFLAGS)
+	@echo "Linking complete"
 
-
-%.o : %.cpp %.h %.txt
-	$(CXX) $(CPPFLAGS) -o $@ -c $<
-
-clean :
-	rm -f *.o 
+$(OBJECTS): $(OBJDIR)/%.o : $(SRCDIR)/%.cpp
+	@$(CXX) $(CPPFLAGS) -c $< -o $@
+	@echo "Compiled "$<" successfully"
+clean:
+	$(rm) $(OBJECTS)
+	@echo "Cleanup complete"

@@ -34,6 +34,7 @@ amplitude::amplitude() {
 	smin = 0;
 	smax = 0;
 	integralList = {};
+	epsilon = 1e-3;
 }
 
 amplitude::amplitude(int j, double alp, double ssl, vector<channel> chans, vector<MatrixXcd> kParams, vector<double> rmasses, double ss0, double ssmin, double ssmax) {
@@ -48,6 +49,7 @@ amplitude::amplitude(int j, double alp, double ssl, vector<channel> chans, vecto
 	smax = ssmax;
 	resmasses = rmasses;
 	integralList = {};
+	epsilon = 1e-3;
 }
 
 amplitude::amplitude(int Jj,double ssL, double ssmin, double ssmax, vector<channel> chans){
@@ -63,7 +65,7 @@ amplitude::amplitude(int Jj,double ssL, double ssmin, double ssmax, vector<chann
 	for(channel c: chans){
 		channel_names.push_back(c.getName());
 	}
-
+	epsilon = 1e-3;
 }
 
 
@@ -423,6 +425,28 @@ void amplitude::setParamList(vector<double> params){
 	setResMasses(rm);
 }
 
+vector<double> amplitude::getFittedParamList(){
+	vector<double> allParams = getParamList();
+	vector<double> fittedParams = {};
+	
+	for(int i = 0; i < allParams.size(); i ++){
+		fittedParams.push_back(fixedParamList[i]*allParams[i]);
+	}
+
+	return fittedParams;
+}
+
+
+void amplitude::setFittedParamList(vector<double> fittedParams){
+	vector<double> allParams = getParamList();
+	
+	for(int i = 0; i < allParams.size(); i++){
+
+		if(fixedParamList[i]) allParams[i] = fittedParams[i];
+	}
+
+	setParamList(allParams);
+}
 
 ostream& operator<<(ostream& os, amplitude const& m) {
 	os << "J = " << m.J << ", alpha = " << m.alpha << ", sL = " << m.sL <<" num_channels = "<<m.numChannels<<" kmat_mat_params = " <<m.kParameters.size() <<endl;

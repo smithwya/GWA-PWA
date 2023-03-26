@@ -67,12 +67,15 @@ public:
 	vector<double> getParamList();
 	void setParamList(vector<double> params);
 	void setResMasses(vector<double> rm);
+	vector<double> getFittedParamList();
+	void setFittedParamList(vector<double> fittedParams);
 private:
 	vector<channel> channels;
 	vector<MatrixXcd> kParameters;
 	vector<double> resmasses;
 	vector<string> channel_names;
 	map<intKey, comp> integralList;
+	vector<bool> fixedParamList;
 	int numChannels;
 	int J;
 	double alpha;
@@ -80,6 +83,6 @@ private:
 	double s0;
 	double smin;
 	double smax;
-	const double epsilon = 1e-3;
+	double epsilon;
 	
 };
