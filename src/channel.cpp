@@ -47,8 +47,17 @@ double channel::getCoupling(int i)
 void channel::setChebyCoeffs(int ptype, double ss0, vector<double> c)
 {
 	chebyCoefficients = c;
+
 	poletype = ptype;
 	s0 = ss0;
+}
+
+void channel::setChebyCoeffs(int ptype, double ss0, vector<double> c, vector<double> csteps)
+{
+	chebyCoefficients = c;
+	poletype = ptype;
+	s0 = ss0;
+	chebyCoeff_steps = csteps;
 }
 
 vector<double> channel::getChebyCoeffs()
@@ -104,6 +113,14 @@ void channel::addCoupling(double x){
 	return;
 }
 
+void channel::addCoupling(double x,double step){
+	
+	couplings.push_back(x);
+	couplings_steps.push_back(step);
+
+	return;
+}
+
 int channel::getPoleType(){
 
 	return poletype;
@@ -113,6 +130,14 @@ void channel::setMasses(vector<double> ms){
 
 	masses = ms;
 	return;
+}
+
+vector<double> channel::getChebySteps(){
+	return chebyCoeff_steps;
+}
+
+vector<double> channel::getCouplingSteps(){
+	return couplings_steps;
 }
 
 ostream& operator<<(ostream& os, channel const& m) {

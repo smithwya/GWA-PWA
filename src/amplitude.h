@@ -60,8 +60,11 @@ public:
 	comp getIntegral(comp s, int k);
 	comp getIntegrand(double sp, comp s, int k);
 	void setChebyCoeffs(string channel_name, int type, double s0, vector<double> coeffs);
+	void setChebyCoeffs(string channel_name, int type, double s0, vector<double> coeffs,vector<double> csteps);
 	void setKParams(int power, vector<vector<double>> kparamlist);
+	void setKParams(int power, vector<vector<double>> kparamlist,vector<double> ksteps);
 	void addPole(double mass,vector<string> chan_names, vector<double> couplings);
+	void addPole(double mass,double mass_step,vector<string> chan_names, vector<double> couplings, vector<double> steps);
 	vector<string> getChanNames();
 	void calcIntegrals(vector<comp> slist,int k);
 	vector<double> getParamList();
@@ -70,10 +73,15 @@ public:
 	vector<double> getFittedParamList();
 	void setFittedParamList(vector<double> fittedParams);
 	string getName();
+	vector<channel> getChannels();
+	vector<double> getKSteps(int i);
+	vector<double> getPoleSteps();
 private:
 	vector<channel> channels;
 	vector<MatrixXcd> kParameters;
+	vector<vector<double>> kParameters_steps;
 	vector<double> resmasses;
+	vector<double> resmasses_steps;
 	vector<string> channel_names;
 	map<intKey, comp> integralList;
 	vector<bool> fixedParamList;

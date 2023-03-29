@@ -133,7 +133,7 @@ public:
 	void setChebys();
 	void setKmats();
 	void setPoles();
-	void setAll();
+	vector<double> getSteps(int i);
 
 
 private:
@@ -142,4 +142,7 @@ private:
 	string Seed, FitRegion;
 	vector<string> AddChannel_list, AddWave_list, Cheby_list, AddPole_list, Kmat_list;
 	observable obsObject;
+	vector<vector<double>> chan_fitsteps;
+	vector<vector<double>> kmat_fitsteps;
+	vector<vector<double>> resmasses_fitsteps;
 };

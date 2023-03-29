@@ -34,6 +34,8 @@ amplitude::amplitude() {
 	smin = 0;
 	smax = 0;
 	integralList = {};
+	resmasses_steps = {};
+	kParameters_steps = {};
 	epsilon = 1e-3;
 }
 
@@ -49,6 +51,8 @@ amplitude::amplitude(int j, double alp, double ssl, vector<channel> chans, vecto
 	smax = ssmax;
 	resmasses = rmasses;
 	integralList = {};
+	resmasses_steps = {};
+	kParameters_steps = {};
 	epsilon = 1e-3;
 	name = "";
 }
@@ -64,12 +68,18 @@ amplitude::amplitude(string ampName, int Jj,double ssL, double ssmin, double ssm
 	sL = ssL;
 	s0 = 1.0;
 	integralList = {};
+	resmasses_steps = {};
+	kParameters_steps = {};
 	for(channel c: chans){
 		channel_names.push_back(c.getName());
 	}
 	epsilon = 1e-3;
 }
 
+vector<channel> amplitude::getChannels(){
+
+	return channels;
+}
 
 	// return E_gamma * p_i * numerator * denominator.inverse()
 VectorXcd amplitude::getValue(comp s) {
@@ -286,6 +296,21 @@ void amplitude::setChebyCoeffs(string cname, int poletype, double s0, vector<dou
 
 }
 
+void amplitude::setChebyCoeffs(string cname, int poletype, double s0, vector<double> coeffs,vector<double> csteps){
+
+	auto it = find(channel_names.begin(),channel_names.end(),cname);
+
+	if(it==channel_names.end()){
+		cout<<"channel not found"<<endl;
+		return;
+	} 
+
+	int index = it-channel_names.begin();
+
+	channels[index].setChebyCoeffs(poletype,s0,coeffs,csteps);
+
+}
+
 
 void amplitude::setKParams(int power, vector<vector<double>> kparamlist){
 	int nParams = kParameters.size();
@@ -303,6 +328,34 @@ void amplitude::setKParams(int power, vector<vector<double>> kparamlist){
 		}
 	}
 	kParameters[power]=newKParam;
+}
+
+void amplitude::setKParams(int power, vector<vector<double>> kparamlist, vector<double> ksteps){
+	int nParams = kParameters.size();
+
+	while(kParameters.size()<power+1){
+		kParameters.push_back(MatrixXcd::Zero(numChannels,numChannels));
+	}
+	while(kParameters_steps.size()<power+1){
+		kParameters_steps.push_back({});
+	}
+	MatrixXcd newKParam = MatrixXcd::Zero(numChannels,numChannels);
+
+	for(int i = 0; i < numChannels; i++){
+		for(int j = numChannels-1; j>=i; j--){
+			newKParam(i,j) = kparamlist[i][j-i];
+			newKParam(j,i) = newKParam(i,j);
+
+		}
+	}
+	kParameters[power] = newKParam;
+	kParameters_steps[power] = ksteps;
+}
+
+vector<double> amplitude::getKSteps(int i){
+	if(i<0 || i > kParameters_steps.size()) return {};
+
+	return kParameters_steps[i];
 }
 
 void amplitude::addPole(double mass, vector<string> chan_names, vector<double> couplings){
@@ -328,6 +381,29 @@ void amplitude::addPole(double mass, vector<string> chan_names, vector<double> c
 	return;
 }
 
+void amplitude::addPole(double mass,double mass_step, vector<string> chan_names, vector<double> couplings, vector<double> steps){
+
+	int nCouplings = chan_names.size();
+
+	if(nCouplings != couplings.size()) return;
+
+	resmasses.push_back(mass);
+	resmasses_steps.push_back(mass_step);
+
+	for(int i = 0; i < numChannels; i++){
+
+		auto it = find(chan_names.begin(),chan_names.end(),channels[i].getName());
+
+		if(it==chan_names.end()){
+			channels[i].addCoupling(0.0,0.0);
+			continue;
+		}
+
+		int index = it-chan_names.begin();
+		channels[i].addCoupling(couplings[index],steps[index]);
+	} 
+	return;
+}
 
 vector<double> amplitude::getParamList(){
 	vector<double> params = {};
@@ -452,6 +528,10 @@ void amplitude::setFittedParamList(vector<double> fittedParams){
 
 string amplitude::getName(){
 	return name;
+}
+
+vector<double> amplitude::getPoleSteps(){
+	return resmasses_steps;
 }
 
 vector<string> amplitude::getChanNames(){

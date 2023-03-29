@@ -19,7 +19,9 @@ filereader::filereader(string filename){
 	commands = {};
 	readFile(filename);
 	obsObject = observable();
-
+	chan_fitsteps = {};
+	kmat_fitsteps = {};
+	resmasses_fitsteps = {};
 }
 
 //read a file and save the list of commands in the file
@@ -59,6 +61,10 @@ void filereader::ConstructBareAmps(){
 		ampDat ampd = readWave(s);
 		amplitude amp = amplitude(ampd.wname,ampd.J,ampd.sL,smin,smax,chlist);
 		amps.push_back(amp);
+		chan_fitsteps.push_back({});
+		kmat_fitsteps.push_back({});
+		resmasses_fitsteps.push_back({});
+
 	}
 
 	obsObject = observable(amps);
@@ -71,6 +77,7 @@ void filereader::setChebys(){
 	vector<chebyDat> chebydat_list;
 	int numAmps = obsObject.getNumAmps();
 	//make list of chebyshev data objects
+	int counter = 0;
 	for(string s : getChebyList()){
 		chebyDat chd = readCheby(s);
 		for(int i = 0; i < obsObject.amplitudes.size(); i++){
@@ -81,9 +88,10 @@ void filereader::setChebys(){
 				if (my_str == "s") type = 1;
 				if (my_str == "p") type = 2;
 				if (my_str == "p+s") type = 3;
-				obsObject.amplitudes[i].setChebyCoeffs(chd.channame, type, chd.ss0, chd.coeffs);
+				obsObject.amplitudes[i].setChebyCoeffs(chd.channame, type, chd.ss0, chd.coeffs,chd.coeffs_inc);
 			}
 		}
+		
 	}
 
 }
@@ -92,10 +100,9 @@ void filereader::setPoles(){
 
 	for(string s : getAddPoleList()){
 		poleDat pd = readPole(s);
-
 		for(int i = 0; i < obsObject.amplitudes.size(); i++){
 			if(pd.wavename == obsObject.amplitudes[i].getName()){
-				obsObject.amplitudes[i].addPole(pd.mass, pd.channames, pd.couplings);
+				obsObject.amplitudes[i].addPole(pd.mass,pd.mass_inc, pd.channames, pd.couplings,pd.couplings_inc);
 			}
 		}
 	}
@@ -121,7 +128,7 @@ void filereader::setKmats(){
 					}
 					kmatelemList.push_back(temp);
 				}
-				obsObject.amplitudes[i].setKParams(kmd.power, kmatelemList);
+				obsObject.amplitudes[i].setKParams(kmd.power, kmatelemList,kmd.matelems_inc);
 
 			}
 
@@ -467,4 +474,23 @@ kmatDat filereader::readKmat(string cmd){
 observable filereader::getObs(){
 
 	return obsObject;
+}
+
+
+vector<double> filereader::getSteps(int i){
+	vector<double> steps = {};
+
+	if(i<0 || i > obsObject.getNumAmps()) return steps;
+
+	amplitude amp = obsObject.amplitudes[i];
+
+	steps.push_back(0);
+	steps.push_back(0);
+	steps.push_back(0);
+
+	steps.insert(steps.end(),chan_fitsteps[i].begin(),chan_fitsteps[i].end());
+	steps.insert(steps.end(),kmat_fitsteps[i].begin(),kmat_fitsteps[i].end());
+	steps.insert(steps.end(),resmasses_fitsteps[i].begin(),resmasses_fitsteps[i].end());
+
+	return steps;
 }

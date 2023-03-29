@@ -10,7 +10,10 @@ class channel {
 private:
     string channel_name;
     vector<double> couplings;
+    vector<double> couplings_steps;
     vector<double> chebyCoefficients;
+    vector<double> chebyCoeff_steps;
+
     vector<double> masses;
     int poletype;
     double s0;
@@ -24,7 +27,8 @@ public:
     void setCouplings(vector<double> c);
     double getCoupling(int i);
     
-    void setChebyCoeffs(int ptype, double s0,vector<double> c);
+    void setChebyCoeffs(int ptype, double s0, vector<double> c);
+    void setChebyCoeffs(int ptype, double s0, vector<double> c, vector<double> csteps);
     vector<double> getChebyCoeffs();
     double getChebyCoeff(int i);
     friend ostream& operator<<(std::ostream& os, channel const& m);
@@ -34,6 +38,9 @@ public:
     void setName(string cname);
     string getName();
     void addCoupling(double coup);
+    void addCoupling(double coup,double step);
     int getPoleType();
     void setMasses(vector<double> masses);
+    vector<double> getChebySteps();
+    vector<double> getCouplingSteps();
 };

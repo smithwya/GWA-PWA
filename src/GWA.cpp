@@ -38,7 +38,18 @@ int main()
 	testReader.setKmats();
 	observable testObs = testReader.getObs();
 
-	cout<<testObs.amplitudes[0]<<endl;
-	JPsi testJPsi = JPsi(testObs.getAmps());
-	testJPsi.plotIntensity(0,0);
+
+	amplitude S_wave = testObs.amplitudes[0];
+	vector<channel> chans = testObs.amplitudes[0].getChannels();
+	for(double x : S_wave.getPoleSteps()) cout<<x<<endl;
+
+
+
+
+	/*testJPsi.plotIntensity(0,0);
+	testJPsi.plotIntensity(0,1);
+	testJPsi.plotIntensity(0,2);
+	testJPsi.plotIntensity(1,0);
+	testJPsi.plotIntensity(1,1);
+	testJPsi.plotIntensity(1,2);*/
 }
