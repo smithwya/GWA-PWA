@@ -19,9 +19,6 @@ filereader::filereader(string filename){
 	commands = {};
 	readFile(filename);
 	obsObject = observable();
-	chan_fitsteps = {};
-	kmat_fitsteps = {};
-	resmasses_fitsteps = {};
 }
 
 //read a file and save the list of commands in the file
@@ -61,10 +58,6 @@ void filereader::ConstructBareAmps(){
 		ampDat ampd = readWave(s);
 		amplitude amp = amplitude(ampd.wname,ampd.J,ampd.sL,smin,smax,chlist);
 		amps.push_back(amp);
-		chan_fitsteps.push_back({});
-		kmat_fitsteps.push_back({});
-		resmasses_fitsteps.push_back({});
-
 	}
 
 	obsObject = observable(amps);
@@ -474,23 +467,4 @@ kmatDat filereader::readKmat(string cmd){
 observable filereader::getObs(){
 
 	return obsObject;
-}
-
-
-vector<double> filereader::getSteps(int i){
-	vector<double> steps = {};
-
-	if(i<0 || i > obsObject.getNumAmps()) return steps;
-
-	amplitude amp = obsObject.amplitudes[i];
-
-	steps.push_back(0);
-	steps.push_back(0);
-	steps.push_back(0);
-
-	steps.insert(steps.end(),chan_fitsteps[i].begin(),chan_fitsteps[i].end());
-	steps.insert(steps.end(),kmat_fitsteps[i].begin(),kmat_fitsteps[i].end());
-	steps.insert(steps.end(),resmasses_fitsteps[i].begin(),resmasses_fitsteps[i].end());
-
-	return steps;
 }

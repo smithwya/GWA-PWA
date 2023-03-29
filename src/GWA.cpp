@@ -41,15 +41,14 @@ int main()
 
 	amplitude S_wave = testObs.amplitudes[0];
 	vector<channel> chans = testObs.amplitudes[0].getChannels();
-	for(double x : S_wave.getPoleSteps()) cout<<x<<endl;
+
+	vector<double> polesteps = S_wave.getPoleSteps();
+	for(double x : polesteps) cout<<x<<endl;
 
 
 
 
 	/*testJPsi.plotIntensity(0,0);
 	testJPsi.plotIntensity(0,1);
-	testJPsi.plotIntensity(0,2);
-	testJPsi.plotIntensity(1,0);
-	testJPsi.plotIntensity(1,1);
-	testJPsi.plotIntensity(1,2);*/
+	testJPsi.plotIntensity(0,2);*/
 }
