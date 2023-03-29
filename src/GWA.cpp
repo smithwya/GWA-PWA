@@ -30,6 +30,7 @@ typedef std::complex<double> comp;
 
 int main()
 {
+	//reads the file and creates an observable object with the information from the file
 	filereader testReader("Data/GWA_dataformat.txt");
 	testReader.SetAllCommandLists();
 	testReader.ConstructBareAmps();
@@ -38,17 +39,11 @@ int main()
 	testReader.setKmats();
 	observable testObs = testReader.getObs();
 
-
-	amplitude S_wave = testObs.amplitudes[0];
-	vector<channel> chans = testObs.amplitudes[0].getChannels();
-
-	vector<double> polesteps = S_wave.getPoleSteps();
-	for(double x : polesteps) cout<<x<<endl;
-
-
-
-
-	/*testJPsi.plotIntensity(0,0);
+	//grabs the amplitudes from the observable object, and recasts as a JPsi object
+	//The JPsi object has information needed for doing the fit
+	JPsi testJPsi = JPsi(testObs.amplitudes);
+	//plots the S-wave and all channels using the JPsi object
+	testJPsi.plotIntensity(0,0);
 	testJPsi.plotIntensity(0,1);
-	testJPsi.plotIntensity(0,2);*/
+	testJPsi.plotIntensity(0,2);
 }
