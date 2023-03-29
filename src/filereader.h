@@ -4,6 +4,7 @@
 #include<string>
 #include "amplitude.h"
 #include "channel.h"
+#include "observable.h"
 #include <iostream>
 #include <fstream>
 #include <sstream>
@@ -47,13 +48,17 @@ struct chebyDat{
 	string wavename;
 	string channame;
 	string poletype;
+	double ss0;
 	vector<double> coeffs;
+	vector<double> coeffs_inc;
 
-	chebyDat(string wn,string cn,string p, vector<double> c){
+	chebyDat(string wn,string cn,string p, double S0, vector<double> c, vector<double> c_inc){
 		wavename = wn;
 		channame = cn;
 		poletype = p;
+		ss0 = S0;
 		coeffs = c;
+		coeffs_inc = c_inc;
 	}
 
 
@@ -61,16 +66,18 @@ struct chebyDat{
 
 struct poleDat{
 	string wavename;
-	double mass;
+	double mass, mass_inc;
 	vector<string> channames;
-	vector<double> couplings;
+	vector<double> couplings, couplings_inc;
 
-	poleDat(string wn, double m, vector<string> cn, vector<double> cs){
+	poleDat(string wn, double m, double m_inc, vector<string> cn, vector<double> cs, vector<double> cs_inc){
 
 		wavename = wn;
 		mass = m;
+		mass_inc = m_inc;
 		channames = cn;
 		couplings =cs;
+		couplings_inc = cs_inc;
 	}
 
 
@@ -79,12 +86,13 @@ struct poleDat{
 struct kmatDat{
 	string wavename;
 	int power;
-	vector<double> matelems;
+	vector<double> matelems, matelems_inc;
 
-	kmatDat(string wn, int p, vector<double> m){
+	kmatDat(string wn, int p, vector<double> m, vector<double> m_inc){
 		wavename = wn;
 		power = p;
 		matelems = m;
+		matelems_inc = m_inc;
 	}
 
 
@@ -95,9 +103,25 @@ class filereader {
 public:
 	filereader(string fname);
 	void readFile(string fname);
-	vector<amplitude> constructAmps();
+	void ConstructBareAmps();
+	//void CompleteBareAmps(vector<amplitude> amplist);
 	void printCommands();
 	string getCommand(int i);
+	void SetSeed();
+	void SetFitRegion();
+	void SetAddChannelList();
+	void SetAddWaveList();
+	void SetChebyList();
+	void SetAddPoleList();
+	void SetKmatList();
+	void SetAllCommandLists();
+	string getSeed();
+	string getFitRegion();
+	vector<string> getAddChannelList();
+	vector<string> getAddWaveList();
+	vector<string> getChebyList();
+	vector<string> getAddPoleList();
+	vector<string> getKmatList();
 	int readSeed(string cmd);
 	vector<double> readFitReg(string cmd);
 	chanDat readCh(string cmd);
@@ -105,11 +129,17 @@ public:
 	chebyDat readCheby(string cmd);
 	poleDat readPole(string cmd);
 	kmatDat readKmat(string cmd);
-
-
+	observable getObs();
+	void setChebys();
+	void setKmats();
+	void setPoles();
+	void setAll();
 
 
 private:
 	vector<std::string> commands;
-	smatch match;
+	smatch match, testmatch;
+	string Seed, FitRegion;
+	vector<string> AddChannel_list, AddWave_list, Cheby_list, AddPole_list, Kmat_list;
+	observable obsObject;
 };

@@ -19,29 +19,34 @@ class observable {
 
 
 private:
-	vector<channel> channels;
-	vector<amplitude> amplitudes;
+	
 	vector<pair<double,double>> data;
+	int numAmps;
+
 
 public:
+	vector<amplitude> amplitudes;
+	int numChans;
 	observable(){
-		channels = {};
 		amplitudes = {};
 		data = {};
+		numAmps = 0;
+		numChans =0;
 	};
 
-	observable(vector<channel> c, vector<amplitude> a){
-		channels = c;
+	observable(vector<amplitude> a){
 		amplitudes = a;
 		data = {};
-	};
-
-	vector<channel> getChannels(){
-		return channels;
+		numAmps = a.size();
+		numChans = a[0].getChanNames().size();
 	};
 
 	vector<amplitude> getAmps(){
 		return amplitudes;
+	};
+
+	int getNumAmps(){
+		return numAmps;
 	};
 
 	amplitude getAmp(int i){
@@ -50,12 +55,12 @@ public:
 
 	void setData(vector<pair<double,double>> dat){
 		data = dat;
-	}
+	};
 
 	void readData(string filename){
 
 		return;
-	}
+	};
 
 	void makePlot(string pdfname, function<double(double)> func, double lower_bound, double upper_bound, int num_bins){
 
@@ -81,7 +86,7 @@ public:
 		canv.SaveAs(("Plots/"+pdfname+".pdf").c_str());
 		file.Close();
 		return;
-	}
+	};
 
 	void plotComp(string pdfname,function<comp(double)> func, double lower_bound, double upper_bound, int num_bins){
 
@@ -95,6 +100,9 @@ public:
 		makePlot("Re "+pdfname, realFunc, lower_bound, upper_bound, num_bins);
 		makePlot("Im "+pdfname, imagFunc, lower_bound, upper_bound, num_bins);
 
-	}
-
+	};
+	friend ostream& operator<<(std::ostream& os, observable const& m){
+		for(amplitude a: m.amplitudes) cout<<a<<endl<<endl;
+		return os;
+	};
 };

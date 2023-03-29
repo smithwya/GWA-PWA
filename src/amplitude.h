@@ -43,7 +43,7 @@ class amplitude {
 public:
 	amplitude();
 	amplitude(int j, double alpha, double sl, vector<channel> c, vector<MatrixXcd> kParams, vector<double> rmasses,double s0, double smin, double smax);
-	amplitude(int J, double sl, double smin, double smax, vector<channel> chans);
+	amplitude(string ampName,int J, double sl, double smin, double smax, vector<channel> chans);
 
 	comp chebyshev(comp x, int n);
 	comp omega_s(comp s);
@@ -69,6 +69,7 @@ public:
 	void setResMasses(vector<double> rm);
 	vector<double> getFittedParamList();
 	void setFittedParamList(vector<double> fittedParams);
+	string getName();
 private:
 	vector<channel> channels;
 	vector<MatrixXcd> kParameters;
@@ -84,5 +85,6 @@ private:
 	double smin;
 	double smax;
 	double epsilon;
+	string name;
 	
 };

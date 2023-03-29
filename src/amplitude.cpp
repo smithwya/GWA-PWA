@@ -50,9 +50,11 @@ amplitude::amplitude(int j, double alp, double ssl, vector<channel> chans, vecto
 	resmasses = rmasses;
 	integralList = {};
 	epsilon = 1e-3;
+	name = "";
 }
 
-amplitude::amplitude(int Jj,double ssL, double ssmin, double ssmax, vector<channel> chans){
+amplitude::amplitude(string ampName, int Jj,double ssL, double ssmin, double ssmax, vector<channel> chans){
+	name = ampName;
 	numChannels = chans.size();
 	J = Jj;
 	channels = chans;
@@ -448,8 +450,18 @@ void amplitude::setFittedParamList(vector<double> fittedParams){
 	setParamList(allParams);
 }
 
+string amplitude::getName(){
+	return name;
+}
+
+vector<string> amplitude::getChanNames(){
+	vector<string> chlist = {};
+	for(channel c : channels) chlist.push_back(c.getName());
+	return chlist;
+}
+
 ostream& operator<<(ostream& os, amplitude const& m) {
-	os << "J = " << m.J << ", alpha = " << m.alpha << ", sL = " << m.sL <<" num_channels = "<<m.numChannels<<" kmat_mat_params = " <<m.kParameters.size() <<endl;
+	os << m.name<<"-wave: J = " << m.J << ", alpha = " << m.alpha << ", sL = " << m.sL <<" num_channels = "<<m.numChannels<<" kmat_mat_params = " <<m.kParameters.size() <<endl;
 	os<<"numPoles = "<<m.resmasses.size() <<" s0= "<<m.s0<<" smin = "<<m.smin<<" smax ="<<m.smax<<endl<<endl;
 
 	for (int i = 0; i < m.numChannels; i++) {
