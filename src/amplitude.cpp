@@ -36,6 +36,7 @@ amplitude::amplitude() {
 	integralList = {};
 	resmasses_steps = {};
 	kParameters_steps = {};
+
 	epsilon = 1e-3;
 }
 
@@ -53,6 +54,7 @@ amplitude::amplitude(int j, double alp, double ssl, vector<channel> chans, vecto
 	integralList = {};
 	resmasses_steps = {};
 	kParameters_steps = {};
+
 	epsilon = 1e-3;
 	name = "";
 }
@@ -70,6 +72,7 @@ amplitude::amplitude(string ampName, int Jj,double ssL, double ssmin, double ssm
 	integralList = {};
 	resmasses_steps = {};
 	kParameters_steps = {};
+
 	for(channel c: chans){
 		channel_names.push_back(c.getName());
 	}
@@ -405,6 +408,42 @@ void amplitude::addPole(double mass,double mass_step, vector<string> chan_names,
 	return;
 }
 
+vector<double> amplitude::getStepSizes(){
+	vector<double> stepsizes = {};
+	//J
+	stepsizes.push_back(0);
+	//alpha
+	stepsizes.push_back(0);
+	//sL
+	stepsizes.push_back(0);
+
+	//channels
+	for(channel c : channels){
+
+		vector<double> templist = c.getCouplingSteps();
+		stepsizes.insert(stepsizes.end(),templist.begin(),templist.end());
+
+		templist = c.getChebySteps();
+		stepsizes.insert(stepsizes.end(),templist.begin(),templist.end());
+
+		//assuming masses are fixed
+		for(double m : c.getMasses()){
+			stepsizes.push_back(0);
+		}
+		//s0
+		stepsizes.push_back(0);
+	}
+
+	//KMatrix steps
+	for(vector<double> kp : kParameters_steps){
+	stepsizes.insert(stepsizes.end(),kp.begin(),kp.end());
+	}
+
+	stepsizes.insert(stepsizes.end(),resmasses_steps.begin(),resmasses_steps.end());
+
+	return stepsizes;
+}
+
 vector<double> amplitude::getParamList(){
 	vector<double> params = {};
 
@@ -427,14 +466,13 @@ vector<double> amplitude::getParamList(){
 	for(MatrixXcd m : kParameters){
 
 		for(int i = 0; i < numChannels; i++){
-			for(int j = numChannels-1; j>=i; j--){
+			for(int j = i; j < numChannels; j++){
 				params.push_back(m(i,j).real());
-				params.push_back(m(i,j).imag());
+				//params.push_back(m(i,j).imag());
 			}
-
+			
 		}
 	}
-
 
 	params.insert(params.end(),resmasses.begin(),resmasses.end());
 
@@ -480,11 +518,11 @@ void amplitude::setParamList(vector<double> params){
 	for(int k = 0; k < kParameters.size(); k++){
 
 		for(int i = 0; i < numChannels; i++){
-			for(int j = numChannels-1; j>=i; j--){
+			for(int j = i; j < numChannels; j++){
 				double repart = params[index];
 				index++;
-				double impart = params[index];
-				index++;
+				double impart = 0;
+				//index++;
 				comp matEl = comp(repart,impart);
 				kParameters[k](i,j) = matEl;
 				kParameters[k](j,i) = matEl;
@@ -505,22 +543,37 @@ void amplitude::setParamList(vector<double> params){
 
 vector<double> amplitude::getFittedParamList(){
 	vector<double> allParams = getParamList();
+	vector<double> stepsizes = getStepSizes();
 	vector<double> fittedParams = {};
 	
-	for(int i = 0; i < allParams.size(); i ++){
-		fittedParams.push_back(fixedParamList[i]*allParams[i]);
+	for(int i = 0; i < allParams.size(); i++){
+		if(stepsizes[i]!=0) fittedParams.push_back(allParams[i]);
 	}
 
 	return fittedParams;
 }
 
+vector<double> amplitude::getFittedSteps(){
+	vector<double> fsteps = {};
+
+	for(double x : getStepSizes()){
+		if(x!=0) fsteps.push_back(x);
+	}
+	return fsteps;
+}
+
 
 void amplitude::setFittedParamList(vector<double> fittedParams){
 	vector<double> allParams = getParamList();
-	
+	vector<double> stepsizes = getStepSizes();
+
+	int index = 0;
 	for(int i = 0; i < allParams.size(); i++){
 
-		if(fixedParamList[i]) allParams[i] = fittedParams[i];
+		if(stepsizes[i] != 0){ 
+			allParams[i] = fittedParams[index];
+			index++;
+		}
 	}
 
 	setParamList(allParams);

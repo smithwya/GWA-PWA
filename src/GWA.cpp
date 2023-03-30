@@ -12,18 +12,19 @@
 #include "observable.h"
 #include "JPsi.h"
 
-#include "Minuit2/FunctionMinimum.h"
-#include "Minuit2/MnUserParameterState.h"
-#include "Minuit2/MnMigrad.h"
-#include "Minuit2/MnMinos.h"
-#include "Minuit2/MnContours.h"
-#include "Minuit2/MnPlot.h"
+#include "Math/Minimizer.h"
+#include "Math/Factory.h"
+#include "Math/Functor.h"
+#include "TRandom2.h"
+#include "TError.h"
 
 
 using namespace std;
 using Eigen::MatrixXcd;
 using Eigen::VectorXcd;
 typedef std::complex<double> comp;
+
+
 
 
 
@@ -43,7 +44,25 @@ int main()
 	//The JPsi object has information needed for doing the fit
 	JPsi testJPsi = JPsi(testObs.amplitudes);
 	//plots the S-wave and all channels using the JPsi object
-	testJPsi.plotIntensity(0,0);
+	/*testJPsi.plotIntensity(0,0);
 	testJPsi.plotIntensity(0,1);
-	testJPsi.plotIntensity(0,2);
+	testJPsi.plotIntensity(0,2);*/
+
+	//make the minimzer
+	ROOT::Math::Minimizer* min = ROOT::Math::Factory::CreateMinimizer("Minuit2","");
+	min->SetMaxFunctionCalls(1000000);
+	min->SetMaxIterations(10000);
+	min->SetTolerance(0.001);
+	min->SetPrintLevel(1);
+
+	amplitude S_wave = testObs.amplitudes[0];
+	
+	vector<double> steps = S_wave.getStepSizes();
+	vector<double> params =S_wave.getParamList();
+	vector<double> fittedParams = S_wave.getFittedParamList();
+	
+	cout<<S_wave<<endl;
+	S_wave.setFittedParamList(fittedParams);
+	cout<<S_wave<<endl;
+	
 }

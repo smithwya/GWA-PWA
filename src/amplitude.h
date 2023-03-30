@@ -76,12 +76,14 @@ public:
 	vector<channel> getChannels();
 	vector<double> getKSteps(int i);
 	vector<double> getPoleSteps();
+	vector<double> getStepSizes();
+	vector<double> getFittedSteps();
 private:
 	vector<channel> channels;
 	vector<MatrixXcd> kParameters;
 	vector<vector<double>> kParameters_steps;
 	vector<double> resmasses;
-	vector<double> resmasses_steps;
+	vector<double> resmasses_steps; 
 	vector<string> channel_names;
 	map<intKey, comp> integralList;
 	vector<bool> fixedParamList;
