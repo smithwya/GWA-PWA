@@ -101,8 +101,31 @@ public:
 		makePlot("Im "+pdfname, imagFunc, lower_bound, upper_bound, num_bins);
 
 	};
+
+
+	vector<double> getFitParams(){
+		vector<double> params = {};
+		for(amplitude a : amplitudes){
+			vector<double> temp = a.getFittedParamList();
+			params.insert(params.end(),temp.begin(),temp.end());
+		}
+		return params;
+	};
+
+	vector<double> getStepSizes(){
+		vector<double> steps = {};
+		for(amplitude a : amplitudes){
+			vector<double> temp = a.getFittedSteps();
+			steps.insert(steps.end(),temp.begin(),temp.end());
+		}
+		return steps;
+	};
+
+
 	friend ostream& operator<<(std::ostream& os, observable const& m){
 		for(amplitude a: m.amplitudes) cout<<a<<endl<<endl;
 		return os;
 	};
+
+
 };
