@@ -98,6 +98,21 @@ struct kmatDat{
 
 };
 
+struct expdataDat{
+
+	string wavename;
+	string channame;
+	string filename;
+
+	expdataDat(string wn, string cn, string fn){
+		wavename = wn;
+		channame = cn;
+		filename = fn;
+	}
+
+
+};
+
 class filereader {
 
 public:
@@ -133,12 +148,16 @@ public:
 	void setChebys();
 	void setKmats();
 	void setPoles();
+	void loadExpData();
+	expdataDat readExpData(string cmd);
+	void SetExpDataList();
+	vector<string> getExpDataList();
 
 
 private:
 	vector<std::string> commands;
 	smatch match, testmatch;
 	string Seed, FitRegion;
-	vector<string> AddChannel_list, AddWave_list, Cheby_list, AddPole_list, Kmat_list;
+	vector<string> AddChannel_list, AddWave_list, Cheby_list, AddPole_list, Kmat_list,ExpData_list;
 	observable obsObject;
 };

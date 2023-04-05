@@ -221,6 +221,7 @@ void filereader::SetAllCommandLists(){
 	SetChebyList();
 	SetAddPoleList();
 	SetKmatList();
+	SetExpDataList();
 }
 
 string filereader::getSeed(){
@@ -249,6 +250,10 @@ vector<string> filereader::getAddPoleList(){
 
 vector<string> filereader::getKmatList(){
 	return Kmat_list;
+}
+
+vector<string> filereader::getExpDataList(){
+	return ExpData_list;
 }
 
 int filereader::readSeed(string cmd){
@@ -467,4 +472,86 @@ kmatDat filereader::readKmat(string cmd){
 observable filereader::getObs(){
 
 	return obsObject;
+}
+
+
+void filereader::loadExpData(){
+	
+	//make list of experimental data objects
+	for(string s : getExpDataList()){
+		expdataDat expd = readExpData(s);
+		ifstream letsread;
+		vector<expchan> exp_xy;
+		vector<double> x, y = {};
+		cout<<expd.filename<<endl;
+		for(int i = 0; i < obsObject.getNumAmps(); i++){
+
+			if(expd.wavename == obsObject.amplitudes[i].getName()){
+				
+				for(int j = 0; j < obsObject.numChans; j++){
+
+					if(expd.channame == obsObject.amplitudes[i].getChanNames()[j]){
+
+						double a[17];
+
+						for(int k = 0; k < 17; k++){
+							a[k] = 0;
+						}
+
+						letsread.open(expd.filename);
+
+						while(letsread>>a[1]>>a[2]>>a[3]>>a[4]>>a[5]>>a[6]>>a[7]>>a[8]>>a[9]>>a[10]>>a[11]>>a[12]>>a[13]>>a[14]>>a[15]>>a[16]>>a[17]){
+							x.push_back(a[1]);
+							y.push_back(a[2]);
+						}
+
+						exp_xy.push_back(expchan(expd.wavename, expd.channame, x, y));
+						
+						x.clear();
+						y.clear();
+						letsread.close();
+
+					}
+					else{
+						exp_xy.push_back(expchan(expd.wavename, obsObject.amplitudes[i].getChanNames()[j], {}, {})); //in order to consider also possible dummy channels
+					}
+
+				}
+				
+			}
+
+		}
+		obsObject.addData(exp_xy);
+	}
+
+}
+
+void filereader::SetExpDataList(){
+	regex reg_ExpData("LoadExpData\\(\\s*\"(.*?)\"\\s*,\\s*\"(.*?)\"\\s*,\\s*\"(.*?)\"\\s*\\)");
+	smatch cmdmatch;
+	for(int i = 0; i < commands.size(); i++){
+		if(regex_search(commands.at(i), cmdmatch, reg_ExpData)){
+            ExpData_list.push_back(commands[i]);
+		}
+    }
+}
+
+expdataDat filereader::readExpData(string cmd){
+	regex reg_ExpData("LoadExpData\\(\\s*\"(.*?)\"\\s*,\\s*\"(.*?)\"\\s*,\\s*\"(.*?)\"\\s*\\)");
+	regex testreg_name("[A-Za-z0-9\\.\\-\\_]+");
+	string wavename = "";
+	string chname = "";
+	string fname = "";
+	
+	if(regex_search(cmd, match, reg_ExpData)){
+		wavename = match[1];
+		remove(wavename.begin(), wavename.end(), ' ');
+		chname = match[2];
+		remove(chname.begin(), chname.end(), ' ');
+		fname = match[3];
+		remove(fname.begin(), fname.end(), ' ');
+
+    }
+
+	return expdataDat(wavename, chname, fname);
 }

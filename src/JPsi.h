@@ -24,4 +24,7 @@ class JPsi : public observable{
 	    makePlot("wave"+to_string(wav)+"-"+to_string(ch),s_intens,1.0,2.5,300);
     };
     
+    double JPsiminfunc(vector<double> x){
+	return x[0]*x[0];
+    }
 };

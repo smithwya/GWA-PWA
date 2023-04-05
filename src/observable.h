@@ -14,13 +14,29 @@ using Eigen::MatrixXcd;
 using Eigen::VectorXcd;
 typedef std::complex<double> comp;
 
+struct expchan{
+
+		string wavename;
+		string channame;
+		vector<double> sqrts;
+		vector<double> amp_expval;
+
+		expchan(string wn, string cn, vector<double> x, vector<double> y){
+			wavename = wn;
+			channame = cn;
+			sqrts = x;
+			amp_expval = y;
+		}
+
+
+};
 
 class observable {
 
 
 private:
 	
-	vector<pair<double,double>> data;
+	vector<vector<expchan>> data;
 	int numAmps;
 
 
@@ -53,9 +69,13 @@ public:
 		return amplitudes[i];
 	};
 
-	void setData(vector<pair<double,double>> dat){
-		data = dat;
+	void addData(vector<expchan> dat){
+		data.push_back(dat);
 	};
+
+	vector<vector<expchan>> getData(){
+		return data;
+	}
 
 	void readData(string filename){
 
@@ -111,6 +131,18 @@ public:
 		}
 		return params;
 	};
+
+	void setFitParams(vector<double> newparams){
+		int index = 0;
+		for(int i = 0; i < amplitudes.size(); i++){
+			int nparams = amplitudes[i].getFittedParamList().size();
+
+			vector<double> ampparams(newparams.begin()+index,newparams.begin()+index+nparams);
+			amplitudes[i].setFittedParamList(ampparams);
+			index+=nparams;
+		}
+
+	}
 
 	vector<double> getStepSizes(){
 		vector<double> steps = {};

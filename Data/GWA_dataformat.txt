@@ -21,3 +21,6 @@ AddPole("S",7.54762 \pm 10, {"PiPi","KK","RhoRho"}, {8.29518 \pm 0, 12.9082 \pm 
 
 AddKmatBackground("S", 0, {{16.1903 \pm 0, 18.3081 \pm 908, 0 \pm 8}, {19.2388 \pm 8, 0 \pm 7000}, {-15.811 \pm  8 }})
 AddKmatBackground("S", 1, {{-6.27393 \pm 0, -9.19686 \pm 0, 0 \pm 0}, {-13.3706\pm9, 0 \pm 9}, {6.03082 \pm 9}})
+
+LoadExpData("S", "PiPi", "Data/pipi_nominal.dat")
+LoadExpData("S", "KK", "Data/kk_nominal.dat")

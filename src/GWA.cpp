@@ -23,9 +23,18 @@ using namespace std;
 using Eigen::MatrixXcd;
 using Eigen::VectorXcd;
 typedef std::complex<double> comp;
-
+observable testObs = observable();
+int nParams = 0;
 
 double minfunc(const double *xx){
+	return 1.0+xx[0]*xx[0]+pow(xx[1]-1.5,2)+pow(xx[2]+4,2);
+
+	vector<double> params = {};
+	for(int i = 0; i < nParams; i++){
+		params.push_back(xx[i]);
+	}
+
+	testObs.setFitParams(params);
 
 	return 0;
 }
@@ -43,9 +52,23 @@ int main()
 	testReader.setChebys();
 	testReader.setPoles();
 	testReader.setKmats();
+	testReader.loadExpData();
+
 
 	//saves the observable object outside of filereader object
-	observable testObs = testReader.getObs();
+	testObs = testReader.getObs();
+
+	/*
+	JPsi testJ = JPsi();
+	
+	function<double(double*)> jminf = [&](double *x){
+		return x[0]*x[0];
+		//return testJ.JPsiminfunc({x[0]});
+	};
+	*/
+	vector<double> sols = {0,1.5,-4.0};
+	ROOT::Math::Functor f(&minfunc,sols.size());
+	
 
 	//make the minimzer
 	ROOT::Math::Minimizer* min = ROOT::Math::Factory::CreateMinimizer("Minuit2","");
@@ -57,8 +80,10 @@ int main()
 	//get the initial parameters and steps from the constructed observable object
 	vector<double> fitparams = testObs.getFitParams();
 	vector<double> steps = testObs.getStepSizes();
-	int nParams = fitparams.size();
+	nParams = fitparams.size();
 
+	min->SetFunction(f);
+	/*
 	//make a function wrapper to minimize the function minfunc (=chisquared)
 	ROOT::Math::Functor f(&minfunc,nParams);
 	min->SetFunction(f);
@@ -66,7 +91,10 @@ int main()
 	for(int i = 0; i < nParams; i++){
 		min->SetVariable(i,to_string(i),fitparams[i],steps[i]);
 	}
-
+	*/
+	min->SetVariable(0,"x",5,0.2);
+	min->SetVariable(1,"y",32,0.2);
+	min->SetVariable(2,"z",20,0.2);
 	min->Minimize();
 
 	//store the parameters for the minimum that the minimizer found in xs
