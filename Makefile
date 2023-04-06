@@ -22,11 +22,13 @@ rm = rm -f
 all: $(BINDIR)/$(TARGET)
 
 $(BINDIR)/$(TARGET): $(OBJECTS)
+	@if [ ! -d $(BINDIR) ]; then mkdir $(BINDIR); fi
 	$(LD) $(CPPFLAGS) -o $(BINDIR)/$(TARGET) $(OBJECTS) $(LDFLAGS)
 	@echo "Linking complete"
 
 $(OBJECTS): $(OBJDIR)/%.o : $(SRCDIR)/%.cpp
-	@$(CXX) $(CPPFLAGS) -c $< -o $@
+	@if [ ! -d $(OBJDIR) ]; then mkdir $(OBJDIR); fi
+	$(CXX) $(CPPFLAGS) -c $< -o $@
 	@echo "Compiled "$<" successfully"
 clean:
 	$(rm) $(OBJECTS)
