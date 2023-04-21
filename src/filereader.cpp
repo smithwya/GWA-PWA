@@ -24,6 +24,8 @@ filereader::filereader(string filename){
 //read a file and save the list of commands in the file
 void filereader::readFile(string filename){
 	ifstream infile(filename);
+	if (!infile) { cout << "Error: file " << filename << " not found!!!" << endl; exit(0); }
+
     string line;
         
     for(std::string line; getline(infile, line); )
@@ -148,7 +150,7 @@ void filereader::SetSeed(){
 	smatch cmdmatch;
 	for(int i = 0; i < commands.size(); i++){
 		if(regex_search(commands.at(i), cmdmatch, reg_Seed)){
-            Seed = commands[i];
+            SeedCmd = commands[i];
 		}
     }		
 }
@@ -224,8 +226,8 @@ void filereader::SetAllCommandLists(){
 	SetExpDataList();
 }
 
-string filereader::getSeed(){
-	return Seed;
+int filereader::getSeed(){
+	return readSeed(SeedCmd);
 }
 
 string filereader::getFitRegion(){
@@ -482,7 +484,7 @@ void filereader::loadExpData(){
 		expdataDat expd = readExpData(s);
 		ifstream letsread;
 		vector<expchan> exp_xy;
-		vector<double> x, y = {};
+		vector<double> x, y, y_stat_err = {};
 		cout<<expd.filename<<endl;
 		for(int i = 0; i < obsObject.getNumAmps(); i++){
 
@@ -500,12 +502,13 @@ void filereader::loadExpData(){
 
 						letsread.open(expd.filename);
 
-						while(letsread>>a[1]>>a[2]>>a[3]>>a[4]>>a[5]>>a[6]>>a[7]>>a[8]>>a[9]>>a[10]>>a[11]>>a[12]>>a[13]>>a[14]>>a[15]>>a[16]>>a[17]){
-							x.push_back(a[1]);
-							y.push_back(a[2]);
+						while(letsread>>a[0]>>a[1]>>a[2]>>a[3]>>a[4]>>a[5]>>a[6]>>a[7]>>a[8]>>a[9]>>a[10]>>a[11]>>a[12]>>a[13]>>a[14]>>a[15]>>a[16]){
+							x.push_back(a[0]);
+							y.push_back(a[1]);
+							y_stat_err.push_back(a[2]);
 						}
 
-						exp_xy.push_back(expchan(expd.wavename, expd.channame, x, y));
+						exp_xy.push_back(expchan(expd.wavename, expd.channame, x, y, y_stat_err));
 						
 						x.clear();
 						y.clear();
@@ -513,7 +516,7 @@ void filereader::loadExpData(){
 
 					}
 					else{
-						exp_xy.push_back(expchan(expd.wavename, obsObject.amplitudes[i].getChanNames()[j], {}, {})); //in order to consider also possible dummy channels
+						exp_xy.push_back(expchan(expd.wavename, obsObject.amplitudes[i].getChanNames()[j], {}, {}, {})); //in order to consider also possible dummy channels
 					}
 
 				}

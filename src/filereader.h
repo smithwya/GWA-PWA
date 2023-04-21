@@ -130,7 +130,7 @@ public:
 	void SetAddPoleList();
 	void SetKmatList();
 	void SetAllCommandLists();
-	string getSeed();
+	int getSeed();
 	string getFitRegion();
 	vector<string> getAddChannelList();
 	vector<string> getAddWaveList();
@@ -157,7 +157,7 @@ public:
 private:
 	vector<std::string> commands;
 	smatch match, testmatch;
-	string Seed, FitRegion;
+	string SeedCmd, FitRegion;
 	vector<string> AddChannel_list, AddWave_list, Cheby_list, AddPole_list, Kmat_list,ExpData_list;
 	observable obsObject;
 };
