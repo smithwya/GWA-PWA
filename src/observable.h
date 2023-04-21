@@ -7,6 +7,7 @@
 #include "channel.h"
 #include "TCanvas.h"
 #include "TH1D.h"
+#include "TGraphErrors.h"
 #include "TFile.h"
 #include "TString.h"
 using namespace std;
@@ -111,6 +112,52 @@ public:
 		file.Close();
 		return;
 	};
+
+		void makePlotGraph(string pdfname, function<double(double)> func, double lower_bound, double upper_bound){	
+
+			int J = 0;
+
+			int numchan = 0;
+
+			int num_exp_pts = data[J][numchan].amp_expval.size();
+
+			double delta = (upper_bound - lower_bound)/ num_exp_pts;
+
+			double x[num_exp_pts], y[num_exp_pts], ex[num_exp_pts], ey[num_exp_pts];
+
+			double val = 0;
+
+			for(int i = 0; i < num_exp_pts; i++){
+				val = data[J][numchan].sqrts[i];
+				if(isnan(val)) x[i] = 0;
+				else x[i] = data[J][numchan].sqrts[i];
+
+				val = func(x[i]);
+				if(isnan(val)) y[i] = 0;
+				else y[i] = val;
+
+				ex[i] = 0;
+
+				ey[i] = 0;
+
+			}
+
+			auto gr = new TGraphErrors(num_exp_pts,x,y,ex,ey);
+   			//gr->SetTitle("TGraphErrors Example");
+   			gr->SetMarkerColor(4);
+   			gr->SetMarkerStyle(21);
+			gr->GetXaxis()->SetRangeUser(lower_bound, upper_bound);
+			gr->GetYaxis()->SetRangeUser(0, 15000);
+			gr->SetLineWidth(0);
+
+			TFile file("pdf_folder.root", "recreate");
+			TCanvas canv;
+			gr->Write();
+			gr->Draw("ALP");
+			canv.SaveAs(("Plots/"+pdfname+".pdf").c_str());
+			file.Close();
+			return;
+		};
 
 	void makePlotWithExp(int J, int numchan, string pdfname, function<double(double)> func, double lower_bound, double upper_bound, int num_bins){
 

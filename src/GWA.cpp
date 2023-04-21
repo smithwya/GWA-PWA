@@ -99,6 +99,8 @@ int main()
 
 	testObs.makePlot("JPsiS_PiPi",intensityS,0.9975,2.5,300);
 
+	testObs.makePlotGraph("JPsiS_PiPi_Graph",intensityS,0.9975,2.5);
+
 	testObs.makePlotWithExp(0, 0, "JPsiS_PiPiWithExp", intensityS, 0.9975,2.5,300);
 
 	/*
