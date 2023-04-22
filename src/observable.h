@@ -6,10 +6,12 @@
 #include "amplitude.h"
 #include "channel.h"
 #include "TCanvas.h"
+#include "TF1.h"
 #include "TH1D.h"
 #include "TGraphErrors.h"
 #include "TFile.h"
 #include "TString.h"
+#include <Math/ParamFunctor.h>
 using namespace std;
 using Eigen::MatrixXcd;
 using Eigen::VectorXcd;
@@ -113,51 +115,71 @@ public:
 		return;
 	};
 
-		void makePlotGraph(string pdfname, function<double(double)> func, double lower_bound, double upper_bound){	
+	/*
+	void makePlotGraph(string pdfname, function<double(double)> func, double lower_bound, double upper_bound){	
 
-			int J = 0;
+		auto myFunc = [&](double x){return func(x);};
 
-			int numchan = 0;
+		TF1 *f = new TF1("f", "myFunc(x)", lower_bound, upper_bound, 0);
 
-			int num_exp_pts = data[J][numchan].amp_expval.size();
+		auto gr = new TGraph(f);
 
-			double delta = (upper_bound - lower_bound)/ num_exp_pts;
+		TFile file("pdf_folder.root", "recreate");
+		TCanvas canv;
+		//gr->Write();
+		//gr->Draw();
+		f->Draw();
+		canv.SaveAs(("Plots/"+pdfname+".pdf").c_str());
+		file.Close();
+		return;
 
-			double x[num_exp_pts], y[num_exp_pts], ex[num_exp_pts], ey[num_exp_pts];
+	}; //not working!
+	*/
 
-			double val = 0;
+	void makePlotGraph(int J, int numchan, string pdfname, function<double(double)> func, double lower_bound, double upper_bound){	
 
-			for(int i = 0; i < num_exp_pts; i++){
-				val = data[J][numchan].sqrts[i];
-				if(isnan(val)) x[i] = 0;
-				else x[i] = data[J][numchan].sqrts[i];
+		int numpts = data[J][numchan].amp_expval.size();
 
-				val = func(x[i]);
-				if(isnan(val)) y[i] = 0;
-				else y[i] = val;
+		double delta = (upper_bound - lower_bound)/ numpts;
 
-				ex[i] = 0;
+		double x[numpts], y[numpts], ex[numpts], ey[numpts];
 
-				ey[i] = 0;
+		double val = 0;
 
-			}
+		for(int i = 0; i < numpts; i++){
 
-			auto gr = new TGraphErrors(num_exp_pts,x,y,ex,ey);
-   			//gr->SetTitle("TGraphErrors Example");
-   			gr->SetMarkerColor(4);
-   			gr->SetMarkerStyle(21);
-			gr->GetXaxis()->SetRangeUser(lower_bound, upper_bound);
-			gr->GetYaxis()->SetRangeUser(0, 15000);
-			gr->SetLineWidth(0);
+			val = data[J][numchan].sqrts[i];
+			if(isnan(val)) x[i] = 0;
+			else x[i] = val;
 
-			TFile file("pdf_folder.root", "recreate");
-			TCanvas canv;
-			gr->Write();
-			gr->Draw("ALP");
-			canv.SaveAs(("Plots/"+pdfname+".pdf").c_str());
-			file.Close();
-			return;
-		};
+			val = func(x[i]);
+			if(isnan(val)) y[i] = 0;
+			else y[i] = val;
+
+			ex[i] = 0;
+
+			ey[i] = 0;
+
+		}
+
+		auto gr = new TGraphErrors(numpts,x,y,ex,ey);
+
+   		//gr->SetTitle("TGraphErrors Example");
+   		gr->SetMarkerColor(4);
+   		gr->SetMarkerStyle(21);
+		gr->GetXaxis()->SetRangeUser(lower_bound, upper_bound);
+		gr->GetYaxis()->SetRangeUser(0, 15500);
+		gr->SetLineWidth(1);
+
+		TFile file("pdf_folder.root", "recreate");
+		TCanvas canv;
+		gr->Write();
+		gr->Draw("ALP");
+		canv.SaveAs(("Plots/"+pdfname+".pdf").c_str());
+		file.Close();
+		return;
+
+	}; 
 
 	void makePlotWithExp(int J, int numchan, string pdfname, function<double(double)> func, double lower_bound, double upper_bound, int num_bins){
 
@@ -197,7 +219,76 @@ public:
 		return;
 	};
 
-	void makePlotOnlyExp(int J, int numchan, string pdfname, double lower_bound, double upper_bound){
+	void makePlotGraphWithExp(int J, int numchan, string pdfname, function<double(double)> func, double lower_bound, double upper_bound){
+
+		int num_exp_pts = data[J][numchan].amp_expval.size();
+
+		double x1[num_exp_pts], y1[num_exp_pts], ex1[num_exp_pts], ey1[num_exp_pts];
+
+		double x2[num_exp_pts], y2[num_exp_pts], ex2[num_exp_pts], ey2[num_exp_pts];
+
+		double val = 0;
+
+		for(int i = 0; i < num_exp_pts; i++){
+
+			val = data[J][numchan].sqrts[i];
+			if(isnan(val)) x1[i] = 0;
+			else x1[i] = data[J][numchan].sqrts[i];
+
+			val = data[J][numchan].sqrts[i];
+			if(isnan(val)) x2[i] = 0;
+			else x2[i] = data[J][numchan].sqrts[i];
+
+			val = data[J][numchan].amp_expval[i];
+			if(isnan(val)) y1[i] = 0;
+			else y1[i] = val;
+
+			val = func(x2[i]);
+			if(isnan(val)) y2[i] = 0;
+			else y2[i] = val;
+
+			ex1[i] = 0;
+
+			ex2[i] = 0;
+
+			val = data[J][numchan].amp_expval_stat_err[i];
+			if(isnan(val)) ey1[i] = 0;
+			else ey1[i] = val;
+
+	   		ey2[i] = 0;
+
+		}
+
+		auto gr1 = new TGraphErrors(num_exp_pts,x1,y1,ex1,ey1);
+		auto gr2 = new TGraphErrors(num_exp_pts,x2,y2,ex2,ey2);
+
+   		//gr1->SetTitle("TGraphErrors Example");
+   		gr1->SetMarkerColor(4);
+   		gr1->SetMarkerStyle(21);
+		gr1->GetXaxis()->SetRangeUser(lower_bound, upper_bound);
+		gr1->GetYaxis()->SetRangeUser(0, 15500);
+		gr1->SetLineWidth(1);
+
+		//gr2->SetTitle("TGraphErrors Example");
+   		gr2->SetMarkerSize(0);
+		gr2->GetXaxis()->SetRangeUser(lower_bound, upper_bound);
+		gr2->GetYaxis()->SetRangeUser(0, 15500);
+		gr2->SetLineWidth(1);
+		gr2->SetLineColor(kRed);
+
+		TFile file("pdf_folder.root", "recreate");
+		TCanvas canv;
+		gr1->Write();
+		gr2->Write();
+		gr1->Draw("AP");
+		gr2->Draw("same");
+		canv.SaveAs(("Plots/"+pdfname+".pdf").c_str());
+		file.Close();
+		return;
+		
+	};
+
+	void makePlotExpOnly(int J, int numchan, string pdfname, double lower_bound, double upper_bound){
 
 				int num_data_points = data[J][numchan].amp_expval.size();
 
@@ -220,6 +311,53 @@ public:
 		return;
 	};
 
+	void makePlotGraph_ExpOnly(int J, int numchan, string pdfname, double lower_bound, double upper_bound){	
+
+		int num_exp_pts = data[J][numchan].amp_expval.size();
+
+		double delta = (upper_bound - lower_bound)/ num_exp_pts;
+
+		double x[num_exp_pts], y[num_exp_pts], ex[num_exp_pts], ey[num_exp_pts];
+
+		double val = 0;
+
+		for(int i = 0; i < num_exp_pts; i++){
+
+			val = data[J][numchan].sqrts[i];
+			if(isnan(val)) x[i] = 0;
+			else x[i] = val;
+
+			val = data[J][numchan].amp_expval[i];
+			if(isnan(val)) y[i] = 0;
+			else y[i] = val;
+
+			ex[i] = 0;
+
+			val = data[J][numchan].amp_expval_stat_err[i];
+			if(isnan(val)) ey[i] = 0;
+			else ey[i] = val;
+
+		}
+
+		auto gr = new TGraphErrors(num_exp_pts,x,y,ex,ey);
+
+   		//gr->SetTitle("TGraphErrors Example");
+   		gr->SetMarkerColor(4);
+   		gr->SetMarkerStyle(21);
+		gr->GetXaxis()->SetRangeUser(lower_bound, upper_bound);
+		gr->GetYaxis()->SetRangeUser(0, 15500);
+		gr->SetLineWidth(1);
+
+		TFile file("pdf_folder.root", "recreate");
+		TCanvas canv;
+		gr->Write();
+		gr->Draw("ALP");
+		canv.SaveAs(("Plots/"+pdfname+".pdf").c_str());
+		file.Close();
+		return;
+
+	};
+
 	void plotComp(string pdfname,function<comp(double)> func, double lower_bound, double upper_bound, int num_bins){
 
 		auto realFunc = [&](double x){
@@ -234,6 +372,20 @@ public:
 
 	};
 
+	void plotCompGraph(int J, int numchan, string pdfname,function<comp(double)> func, double lower_bound, double upper_bound){
+
+		auto realFunc = [&](double x){
+			return func(x).real();
+		};
+		auto imagFunc = [&](double x){
+			return func(x).imag();
+		};
+
+		makePlotGraph(0, 0, "Re "+pdfname, realFunc, lower_bound, upper_bound);
+		makePlotGraph(0, 0, "Im "+pdfname, imagFunc, lower_bound, upper_bound);
+
+	};
+
 	void plotCompWithExp(int J, int numchan, string pdfname,function<comp(double)> func, double lower_bound, double upper_bound, int num_bins){
 
 		auto realFunc = [&](double x){
@@ -245,6 +397,20 @@ public:
 
 		makePlotWithExp(J, numchan, "Exp_plus_Re "+pdfname, realFunc, lower_bound, upper_bound, num_bins);
 		makePlotWithExp(J, numchan, "Exp_plus_Im "+pdfname, imagFunc, lower_bound, upper_bound, num_bins);
+
+	};
+
+	void plotCompGraphWithExp(int J, int numchan, string pdfname,function<comp(double)> func, double lower_bound, double upper_bound, int num_bins){
+
+		auto realFunc = [&](double x){
+			return func(x).real();
+		};
+		auto imagFunc = [&](double x){
+			return func(x).imag();
+		};
+
+		makePlotGraphWithExp(J, numchan, "Exp_plus_Re "+pdfname, realFunc, lower_bound, upper_bound);
+		makePlotGraphWithExp(J, numchan, "Exp_plus_Im "+pdfname, imagFunc, lower_bound, upper_bound);
 
 	};
 
