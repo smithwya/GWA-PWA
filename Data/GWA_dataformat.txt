@@ -10,17 +10,17 @@ AddChannel("RhoRho", {0.762, 0.762})
 AddWave("S","kmat","nominal", 0, 0.6)
 
 ChebyCoeffs("S", "PiPi","p+s = 1", {-2173.73 \pm 8, 3272.05 \pm 10, -1553.73 \pm 9, 361.79 \pm 8}) 
-ChebyCoeffs("S", "KK", "p = 1", {1927.5 \pm 49, -2996.84 \pm 45, 1354.33 \pm8, -287.158 \pm 0})
+ChebyCoeffs("S", "KK", "p = 1", {1927.5 \pm 49, -2996.84 \pm 45, 1354.33 \pm8, -287.158 \pm 8})
 ChebyCoeffs("S", "RhoRho", "p+s = 1", {0 \pm 0})
 
 
 
-AddPole("S", 0.00631603 \pm 10, {"PiPi","KK","RhoRho"}, {-6.05845 \pm 70, -7.24665 \pm 0,1.95572  \pm 0})
-AddPole("S", 3.18353 \pm 10, {"PiPi","KK","RhoRho"}, {-0.235974 \pm 70, -1.09189 \pm 0, -0.232508  \pm 0})
-AddPole("S",7.54762 \pm 10, {"PiPi","KK","RhoRho"}, {8.29518 \pm 0, 12.9082 \pm 0, -1.04908 \pm 0})
+AddPole("S", 0.00631603 \pm 10, {"PiPi","KK","RhoRho"}, {-6.05845 \pm 70, -7.24665 \pm 0,1.95572  \pm 8})
+AddPole("S", 3.18353 \pm 10, {"PiPi","KK","RhoRho"}, {-0.235974 \pm 70, -1.09189 \pm 8, -0.232508  \pm 8})
+AddPole("S",7.54762 \pm 10, {"PiPi","KK","RhoRho"}, {8.29518 \pm 8, 12.9082 \pm 8, -1.04908 \pm 1})
 
-AddKmatBackground("S", 0, {{16.1903 \pm 0, 18.3081 \pm 908, 0 \pm 8}, {19.2388 \pm 8, 0 \pm 7000}, {-15.811 \pm  8 }})
-AddKmatBackground("S", 1, {{-6.27393 \pm 0, -9.19686 \pm 0, 0 \pm 0}, {-13.3706\pm9, 0 \pm 9}, {6.03082 \pm 9}})
+AddKmatBackground("S", 0, {{16.1903 \pm 8, 18.3081 \pm 908, 0 \pm 0}, {19.2388 \pm 8, 0 \pm 0}, {-15.811 \pm  8 }})
+AddKmatBackground("S", 1, {{-6.27393 \pm 8, -9.19686 \pm 8, 0 \pm 0}, {-13.3706\pm9, 0 \pm 0}, {6.03082 \pm 9}})
 
 LoadExpData("S", "PiPi", "Data/pipi_nominal.dat")
 LoadExpData("S", "KK", "Data/kk_nominal.dat")

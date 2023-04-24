@@ -52,12 +52,37 @@ double minfunc(const double *xx){
 			y = (temp*conj(temp)).real();
 			std = testObs.getData()[J][numchan].amp_expval_stat_err[i];
 			sum += pow(((y - testObs.getData()[J][numchan].amp_expval[i])/std), 2);
-			if(i == 56) cout << x << "	" << y << "	" << testObs.getData()[J][numchan].amp_expval[i] << "	" << std << endl;
+			//if(i == 56) cout << x << "	" << y << "	" << testObs.getData()[J][numchan].amp_expval[i] << "	" << std << endl;
+			cout << xx[2] << endl;
+			cout << endl;
 		}
 	}
 
-	cout << endl;
-	return sum;
+	double tot = sum;
+
+	/*sum, std = 0;
+	
+	numchan = 1;
+	
+	x, y = 0;
+	temp = 0;
+	npts = testObs.getData()[J][numchan].amp_expval.size();
+
+	for(int i = 0; i < npts; i++){
+		x = testObs.getData()[J][numchan].sqrts[i];
+		if(x >= lower_bound && x <= upper_bound){	
+			temp = testObs.amplitudes[J].getValue(pow(x,2))(numchan);
+			y = (temp*conj(temp)).real();
+			std = testObs.getData()[J][numchan].amp_expval_stat_err[i];
+			sum += pow(((y - testObs.getData()[J][numchan].amp_expval[i])/std), 2);
+			cout << x << "	" << y << "	" << testObs.getData()[J][numchan].amp_expval[i] << "	" << std << endl;
+		}
+	}
+
+	tot += sum;*/
+
+	return tot;
+
 }
 
 
@@ -88,8 +113,13 @@ double minfuncforpoles(const double *xx){
 int main()
 {
 
-	auto intensityS = [&](double x){
+	auto intensityS_PiPi = [&](double x){
 		comp value = testObs.amplitudes[0].getValue(pow(x,2))(0);
+		return (value*conj(value)).real();
+	};
+
+	auto intensityS_KK = [&](double x){
+		comp value = testObs.amplitudes[0].getValue(pow(x,2))(1);
 		return (value*conj(value)).real();
 	};
 
@@ -107,9 +137,9 @@ int main()
 	//saves the observable object outside of filereader object
 	testObs = testReader.getObs();
 
-	//testObs.makePlotExpOnly(0, 0, "JPsiS_PiPi_Exp", 0.9975,2.5);
+	//testObs.makePlotExpOnly(0, 1, "JPsiS_KK_Exp", 0.9975,2.5);
 
-	//testObs.makePlotGraph_ExpOnly(0, 0, "JPsiS_PiPi_Exp_Graph", 0.9975,2.5);
+	testObs.makePlotGraph_ExpOnly(0, 1, "JPsiS_KK_Exp_Graph", 0.9975,2.5);
 	
 	//testObs.makePlot("JPsiS_PiPi",intensityS,0.9975,2.5,300);
 
@@ -117,7 +147,9 @@ int main()
 
 	//testObs.makePlotWithExp(0, 0, "JPsiS_PiPiWithExp", intensityS, 0.9975,2.5,300);
 
-	testObs.makePlotGraphWithExp(0, 0, "JPsiS_PiPi_Graph_WithExp", intensityS, 0.9975,2.5);
+	testObs.makePlotGraphWithExp(0, 0, "JPsiS_PiPi_Graph_WithExp", intensityS_PiPi, 0.9975,2.5);
+
+	testObs.makePlotGraphWithExp(0, 1, "JPsiS_KK_Graph_WithExp", intensityS_KK, 0.9975,2.5);
 
 	/*
 	TRandom3 gen(testReader.getSeed());
@@ -142,7 +174,7 @@ int main()
 	//Set some criteria for the minimzer to stop
 	min->SetMaxFunctionCalls(1000000);
 	min->SetMaxIterations(10000);
-	min->SetTolerance(0.001);
+	min->SetTolerance(0.01);
 	min->SetPrintLevel(1);
 	//get the initial parameters and steps from the constructed observable object
 	vector<double> fitparams = testObs.getFitParams();
@@ -157,7 +189,7 @@ int main()
 		
 		min->SetVariable(i,to_string(i),fitparams[i],steps[i]);
 		//min->VariableLimits(i, fitparams[i] - 100, fitparams[i] + 100); // to do with the uncertanties of input file
-		//if(i != 2) min->FixVariable(i); 
+		if(i != 2) min->FixVariable(i); 
 	}
 
 	double test[nParams];
@@ -166,7 +198,8 @@ int main()
 		test[i] = testObs.getFitParams()[i];
 	}
 
-	int numpts = testObs.getData()[0][0].amp_expval.size();
+	
+	int numpts = testObs.getData()[0][0].amp_expval.size();// + testObs.getData()[0][1].amp_expval.size();
 
 	double before = minfunc(test) / numpts;
 
@@ -182,10 +215,14 @@ int main()
 
 	cout << "chi2 after: " << after << endl;
 
+	cout << testObs.amplitudes[0] << endl;
+
 	//store the parameters for the minimum that the minimizer found in xs
 	const double *xs = min->X();
 
-	testObs.makePlotGraphWithExp(0, 0, "testJPsi", intensityS, 0.9975, 2.5);
+	testObs.makePlotGraphWithExp(0, 0, "testJPsi_PiPi", intensityS_PiPi, 0.9975, 2.5);
+
+	testObs.makePlotGraphWithExp(0, 1, "testJPsi_KK", intensityS_KK, 0.9975, 2.5);
 
 	//note to self: need to get rid of 'dumbJ' in amplitude.cpp later when doing non-radJPsi fits
 
