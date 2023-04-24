@@ -43,7 +43,7 @@ class observable {
 
 private:
 	
-	vector<vector<expchan>> data;
+	vector<expchan> data;
 	int numAmps;
 
 
@@ -76,11 +76,11 @@ public:
 		return amplitudes[i];
 	};
 
-	void addData(vector<expchan> dat){
-		data.push_back(dat);
+	void setData(vector<expchan> dat){
+		data=dat;
 	};
 
-	vector<vector<expchan>> getData(){
+	vector<expchan> getData(){
 		return data;
 	}
 
@@ -136,9 +136,24 @@ public:
 	}; //not working!
 	*/
 
-	void makePlotGraph(int J, int numchan, string pdfname, function<double(double)> func, double lower_bound, double upper_bound){	
+	int getchanindex (int J, string channame){
 
-		int numpts = data[J][numchan].amp_expval.size();
+		vector<string> chan_names = amplitudes[J].getChanNames();
+		auto it = find(chan_names.begin(),chan_names.end(),channame);
+
+		if(it==chan_names.end()){
+			cout<<"channel doesn't exist"<<endl;
+			return -1;
+		}
+		return it-chan_names.begin();
+
+
+	}
+	void makePlotGraph(int J, string channame, string pdfname, function<double(double)> func, double lower_bound, double upper_bound){	
+
+		int numchan = getchanindex(J,channame);
+
+		int numpts = data[numchan].amp_expval.size();
 
 		double delta = (upper_bound - lower_bound)/ numpts;
 

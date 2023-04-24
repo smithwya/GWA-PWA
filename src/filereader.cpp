@@ -478,55 +478,33 @@ observable filereader::getObs(){
 
 
 void filereader::loadExpData(){
-	
-	//make list of experimental data objects
+
+	ifstream letsread;
+	int nWaves = obsObject.getNumAmps();
+	vector<expchan> allDat = {};
+
 	for(string s : getExpDataList()){
+		//for each command in the input file
+
+		//getting info from the file, chan name, wave name, data name
 		expdataDat expd = readExpData(s);
-		ifstream letsread;
-		vector<expchan> exp_xy;
-		vector<double> x, y, y_stat_err = {};
-		cout<<expd.filename<<endl;
-		for(int i = 0; i < obsObject.getNumAmps(); i++){
-
-			if(expd.wavename == obsObject.amplitudes[i].getName()){
-				
-				for(int j = 0; j < obsObject.numChans; j++){
-
-					if(expd.channame == obsObject.amplitudes[i].getChanNames()[j]){
-
-						double a[17];
-
-						for(int k = 0; k < 17; k++){
-							a[k] = 0;
-						}
-
-						letsread.open(expd.filename);
-
-						while(letsread>>a[0]>>a[1]>>a[2]>>a[3]>>a[4]>>a[5]>>a[6]>>a[7]>>a[8]>>a[9]>>a[10]>>a[11]>>a[12]>>a[13]>>a[14]>>a[15]>>a[16]){
-							x.push_back(a[0]);
-							y.push_back(a[1]);
-							y_stat_err.push_back(a[2]);
-						}
-
-						exp_xy.push_back(expchan(expd.wavename, expd.channame, x, y, y_stat_err));
-						
-						x.clear();
-						y.clear();
-						letsread.close();
-
-					}
-					else{
-						exp_xy.push_back(expchan(expd.wavename, obsObject.amplitudes[i].getChanNames()[j], {}, {}, {})); //in order to consider also possible dummy channels
-					}
-
-				}
-				
-			}
+		//read the file
+		letsread.open(expd.filename);
+		vector<double> a(17,0);
+		vector<double> x = {};
+		vector<double> y = {};
+		vector<double> y_stat_err = {};
+		while(letsread>>a[0]>>a[1]>>a[2]>>a[3]>>a[4]>>a[5]>>a[6]>>a[7]>>a[8]>>a[9]>>a[10]>>a[11]>>a[12]>>a[13]>>a[14]>>a[15]>>a[16]){
+			x.push_back(a[0]);
+			y.push_back(a[1]);
+			y_stat_err.push_back(a[2]);
 
 		}
-		obsObject.addData(exp_xy);
+		//make a data object from that file.			
+		expchan tempData = expchan(expd.wavename, expd.channame, x, y, y_stat_err);
+		allDat.push_back(tempData);
 	}
-
+	obsObject.setData(allDat);
 }
 
 void filereader::SetExpDataList(){

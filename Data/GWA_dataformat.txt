@@ -9,7 +9,7 @@ AddChannel("RhoRho", {0.762, 0.762})
 
 AddWave("S","kmat","nominal", 0, 0.6)
 
-ChebyCoeffs("S", "PiPi","p+s = 1", {-2173.73 \pm 8, 3272.05 \pm 10, -1553.73 \pm 9, 361.79 \pm 8}) 
+ChebyCoeffs("S", "PiPi","p+s = 1", {-2160.73 \pm 10, 3272.05 \pm 10, -1543.73 \pm 9, 371.79 \pm 8}) 
 ChebyCoeffs("S", "KK", "p = 1", {1927.5 \pm 49, -2996.84 \pm 45, 1354.33 \pm8, -287.158 \pm 8})
 ChebyCoeffs("S", "RhoRho", "p+s = 1", {0 \pm 0})
 
