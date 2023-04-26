@@ -39,22 +39,24 @@ double minfunc(const double *xx){
 	double sum = 0;
 	double std = 0;
 	int J = 0;
-	int numchan = 0;
+	string channame = "PiPi";
 	double lower_bound = 0.9975;
 	double upper_bound = 2.5;
 	double x = 0;
 	double y = 0;
 	comp temp = 0;
-	int npts = testObs.getData()[J][numchan].amp_expval.size();
+
+	int numchan = testObs.getchanindex(J, channame);
+	int npts = testObs.getData()[numchan].amp_expval.size();
 
 	for(int i = 0; i < npts; i++){
-		x = testObs.getData()[J][numchan].sqrts[i];
+		x = testObs.getData()[numchan].sqrts[i];
 		if(x >= lower_bound && x <= upper_bound){	
 
-			temp = testObs.amplitudes[J].getValue(pow(x,2))(numchan);
+			temp = testObs.amplitudes[J].getValue(pow(x,2))(numchan);//this numchan should be wrong because it is no more 0; take the position of "PiPi" in vector<string> ChanName
 			y = (temp*conj(temp)).real();
-			std = testObs.getData()[J][numchan].amp_expval_stat_err[i];
-			sum += pow(((y - testObs.getData()[J][numchan].amp_expval[i])/std), 2);
+			std = testObs.getData()[numchan].amp_expval_stat_err[i];
+			sum += pow(((y - testObs.getData()[numchan].amp_expval[i])/std), 2);
 			//if(i == 56) cout << x << "	" << y << "	" << testObs.getData()[J][numchan].amp_expval[i] << "	" << std << endl;
 		
 		}
@@ -62,26 +64,33 @@ double minfunc(const double *xx){
 
 	double tot = sum;
 
-	/*sum, std = 0;
+	/*
+	sum = 0;
+	std = 0;
 	
-	numchan = 1;
+	channame = "KK";
+	numchan = testObs.getchanindex(J, channame);
 	
-	x, y = 0;
+	x = 0; 
+	y = 0;
+
 	temp = 0;
-	npts = testObs.getData()[J][numchan].amp_expval.size();
+	npts = testObs.getData()[numchan].amp_expval.size();
 
 	for(int i = 0; i < npts; i++){
-		x = testObs.getData()[J][numchan].sqrts[i];
+		x = testObs.getData()[numchan].sqrts[i];
 		if(x >= lower_bound && x <= upper_bound){	
-			temp = testObs.amplitudes[J].getValue(pow(x,2))(numchan);
+			temp = testObs.amplitudes[J].getValue(pow(x,2))(numchan);//this numchan should be wrong because it is no more 0
 			y = (temp*conj(temp)).real();
-			std = testObs.getData()[J][numchan].amp_expval_stat_err[i];
-			sum += pow(((y - testObs.getData()[J][numchan].amp_expval[i])/std), 2);
-			cout << x << "	" << y << "	" << testObs.getData()[J][numchan].amp_expval[i] << "	" << std << endl;
+			std = testObs.getData()[numchan].amp_expval_stat_err[i];
+			sum += pow(((y - testObs.getData()[numchan].amp_expval[i])/std), 2);
+			cout << x << "	" << y << "	" << testObs.getData()[numchan].amp_expval[i] << "	" << std << endl;
 		}
 	}
 
-	tot += sum;*/
+	tot += sum;
+	*/
+
 	//cout<<"param: "<<params[3]<<" chisq "<<tot<<endl;
 	return tot;
 
@@ -147,9 +156,9 @@ int main()
 
 	//testObs.makePlotGraph(0, 0, "JPsiS_PiPi_Graph",intensityS,0.9975,2.5);
 
-	//testObs.makePlotWithExp(0, 0, "JPsiS_PiPiWithExp", intensityS, 0.9975,2.5,300);
+	//testObs.makePlotWithExp(0, "PiPi", "JPsiS_PiPiWithExp", intensityS_PiPi, 0.9975,2.5,300);
 
-	//testObs.makePlotGraphWithExp(0, 0, "JPsiS_PiPi_Graph_WithExp", intensityS_PiPi, 0.9975,2.5);
+	testObs.makePlotGraphWithExp(0, 0, "JPsiS_PiPi_Graph_WithExp", intensityS_PiPi, 0.9975,2.5);
 
 	//testObs.makePlotGraphWithExp(0, 1, "JPsiS_KK_Graph_WithExp", intensityS_KK, 0.9975,2.5);
 
@@ -191,9 +200,9 @@ int main()
 		
 		min->SetVariable(i,to_string(i),fitparams[i],steps[i]);
 		//min->VariableLimits(i, fitparams[i] - 100, fitparams[i] + 100); // to do with the uncertanties of input file
-		if(i != 3) min->FixVariable(i); 
+		//if(i != 3) min->FixVariable(i); 
 	}
-	/*
+	
 	min->Minimize();
 	min->X();
 
@@ -209,8 +218,8 @@ int main()
 
 	//store the parameters for the minimum that the minimizer found in xs
 	const double *xs = min->X();
-	*/
-	//testObs.makePlotGraphWithExp(0, 0, "testJPsi_PiPi", intensityS_PiPi, 0.9975, 2.5);
+	
+	testObs.makePlotGraphWithExp(0, 0, "testJPsi_PiPi", intensityS_PiPi, 0.9975, 2.5);
 
 	//testObs.makePlotGraphWithExp(0, 1, "testJPsi_KK", intensityS_KK, 0.9975, 2.5);
 
