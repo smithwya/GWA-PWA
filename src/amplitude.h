@@ -66,6 +66,7 @@ public:
 	void addPole(double mass,vector<string> chan_names, vector<double> couplings);
 	void addPole(double mass,double mass_step,vector<string> chan_names, vector<double> couplings, vector<double> steps);
 	vector<string> getChanNames();
+	int getNumOfChans();
 	void calcIntegrals(vector<comp> slist,int k);
 	vector<double> getParamList();
 	void setParamList(vector<double> params);

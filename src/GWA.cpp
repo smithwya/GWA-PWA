@@ -38,7 +38,7 @@ double minfunc(const double *xx){
 	
 	double sum = 0;
 	double std = 0;
-	int J = 0;
+	string ampname = "S";
 	string channame = "PiPi";
 	double lower_bound = 0.9975;
 	double upper_bound = 2.5;
@@ -46,50 +46,52 @@ double minfunc(const double *xx){
 	double y = 0;
 	comp temp = 0;
 
-	int numchan = testObs.getchanindex(J, channame);
-	int npts = testObs.getData()[numchan].amp_expval.size();
+	int numamp = testObs.getampindex(ampname);
+	int numchan = testObs.getchanindex(ampname, channame);
+	int totnumofchans = testObs.amplitudes[numamp].getNumOfChans();
+	int npts = testObs.getData()[totnumofchans * numamp + numchan].amp_expval.size();
 
 	for(int i = 0; i < npts; i++){
-		x = testObs.getData()[numchan].sqrts[i];
+		x = testObs.getData()[totnumofchans * numamp + numchan].sqrts[i];
 		if(x >= lower_bound && x <= upper_bound){	
 
-			temp = testObs.amplitudes[J].getValue(pow(x,2))(numchan);//this numchan should be wrong because it is no more 0; take the position of "PiPi" in vector<string> ChanName
+			temp = testObs.amplitudes[numamp].getValue(pow(x,2))(numchan);
 			y = (temp*conj(temp)).real();
-			std = testObs.getData()[numchan].amp_expval_stat_err[i];
-			sum += pow(((y - testObs.getData()[numchan].amp_expval[i])/std), 2);
-			//if(i == 56) cout << x << "	" << y << "	" << testObs.getData()[J][numchan].amp_expval[i] << "	" << std << endl;
+			std = testObs.getData()[totnumofchans * numamp + numchan].amp_expval_stat_err[i];
+			sum += pow(((y - testObs.getData()[totnumofchans * numamp + numchan].amp_expval[i])/std), 2);
+			//if(i == 56) cout << x << "	" << y << "	" << testObs.getData()[totnumofchans * numamp + numchan].amp_expval[i] << "	" << std << endl;
 		
 		}
 	}
 
 	double tot = sum;
 
-	/*
+	
 	sum = 0;
 	std = 0;
 	
 	channame = "KK";
-	numchan = testObs.getchanindex(J, channame);
+	numchan = testObs.getchanindex(ampname, channame);
 	
 	x = 0; 
 	y = 0;
 
 	temp = 0;
-	npts = testObs.getData()[numchan].amp_expval.size();
+	npts = testObs.getData()[totnumofchans * numamp + numchan].amp_expval.size();
 
 	for(int i = 0; i < npts; i++){
-		x = testObs.getData()[numchan].sqrts[i];
+		x = testObs.getData()[totnumofchans * numamp + numchan].sqrts[i];
 		if(x >= lower_bound && x <= upper_bound){	
-			temp = testObs.amplitudes[J].getValue(pow(x,2))(numchan);//this numchan should be wrong because it is no more 0
+			temp = testObs.amplitudes[numamp].getValue(pow(x,2))(numchan);//this numchan should be wrong because it is no more 0
 			y = (temp*conj(temp)).real();
-			std = testObs.getData()[numchan].amp_expval_stat_err[i];
-			sum += pow(((y - testObs.getData()[numchan].amp_expval[i])/std), 2);
-			cout << x << "	" << y << "	" << testObs.getData()[numchan].amp_expval[i] << "	" << std << endl;
+			std = testObs.getData()[totnumofchans * numamp + numchan].amp_expval_stat_err[i];
+			sum += pow(((y - testObs.getData()[totnumofchans * numamp + numchan].amp_expval[i])/std), 2);
+			//if(i == 56) cout << x << "	" << y << "	" << testObs.getData()[totnumofchans * numamp + numchan].amp_expval[i] << "	" << std << endl;
 		}
 	}
 
 	tot += sum;
-	*/
+	
 
 	//cout<<"param: "<<params[3]<<" chisq "<<tot<<endl;
 	return tot;
@@ -148,19 +150,9 @@ int main()
 	//saves the observable object outside of filereader object
 	testObs = testReader.getObs();
 
-	//testObs.makePlotExpOnly(0, 1, "JPsiS_KK_Exp", 0.9975,2.5);
+	testObs.makePlotGraphWithExp("S", "PiPi", "JPsiS_PiPi_Graph_WithExp", intensityS_PiPi, 0.9975,2.5);
 
-	//testObs.makePlotGraph_ExpOnly(0, 1, "JPsiS_KK_Exp_Graph", 0.9975,2.5);
-	
-	//testObs.makePlot("JPsiS_PiPi",intensityS,0.9975,2.5,300);
-
-	//testObs.makePlotGraph(0, 0, "JPsiS_PiPi_Graph",intensityS,0.9975,2.5);
-
-	//testObs.makePlotWithExp(0, "PiPi", "JPsiS_PiPiWithExp", intensityS_PiPi, 0.9975,2.5,300);
-
-	testObs.makePlotGraphWithExp(0, 0, "JPsiS_PiPi_Graph_WithExp", intensityS_PiPi, 0.9975,2.5);
-
-	//testObs.makePlotGraphWithExp(0, 1, "JPsiS_KK_Graph_WithExp", intensityS_KK, 0.9975,2.5);
+	testObs.makePlotGraphWithExp("S", "KK", "JPsiS_KK_Graph_WithExp", intensityS_KK, 0.9975,2.5);
 
 	/*
 	TRandom3 gen(testReader.getSeed());
@@ -178,6 +170,17 @@ int main()
 		//return testJ.JPsiminfunc({x[0]});
 	};
 	*/
+
+
+
+for(double x: testObs.getData()[0].sqrts) cout << x << endl; //the first 4 num are broken
+cout << testObs.getData().size() << endl;
+for(expchan k: testObs.getData()) cout << k.wavename << " " << k.channame << endl;
+expchan k = testObs.getData()[0];
+for(int i = 0; i < k.amp_expval.size(); i++){
+	cout << k.sqrts[i] << " " << k.amp_expval[i] << " " << k.amp_expval_stat_err[i] << endl;
+} 
+return 0;
 
 
 	//make the minimzer
@@ -219,9 +222,9 @@ int main()
 	//store the parameters for the minimum that the minimizer found in xs
 	const double *xs = min->X();
 	
-	testObs.makePlotGraphWithExp(0, 0, "testJPsi_PiPi", intensityS_PiPi, 0.9975, 2.5);
+	testObs.makePlotGraphWithExp("S", "PiPi", "testJPsi_PiPi", intensityS_PiPi, 0.9975, 2.5);
 
-	//testObs.makePlotGraphWithExp(0, 1, "testJPsi_KK", intensityS_KK, 0.9975, 2.5);
+	testObs.makePlotGraphWithExp("S", "KK", "testJPsi_KK", intensityS_KK, 0.9975, 2.5);
 
 	//note to self: need to get rid of 'dumbJ' in amplitude.cpp later when doing non-radJPsi fits
 
@@ -255,10 +258,12 @@ int main()
 	for(comp x : temppoles) cout<<x<<endl;
 	*/
 /*
-	expchan tchan = testObs.getData()[0][1];
+	expchan tchan = testObs.getData()[totnumofchans * numamp + numchan];
 	cout<<tchan.wavename<<" "<<tchan.channame<<endl;
 	for(int i = 0; i < tchan.sqrts.size(); i++){
 		cout<<tchan.sqrts[i]<<" "<<tchan.amp_expval[i]<<endl;
 	}
 	*/
+
+	return 0;
 }

@@ -68,6 +68,14 @@ public:
 		return amplitudes;
 	};
 
+	vector<string> getAmpNames(){
+		vector<string> temp;
+		for(amplitude amp: getAmps()){
+			temp.push_back(amp.getName());
+		}
+		return temp;
+	}
+
 	int getNumAmps(){
 		return numAmps;
 	};
@@ -136,9 +144,24 @@ public:
 	}; //not working!
 	*/
 
-	int getchanindex (int J, string channame){
+	int getampindex(string ampname){
 
-		vector<string> chan_names = amplitudes[J].getChanNames();
+		vector<string> amp_names = getAmpNames();
+		auto it = find(amp_names.begin(),amp_names.end(),ampname);
+
+		if(it==amp_names.end()){
+			cout<<"amplitude doesn't exist"<<endl;
+			return -1;
+		}
+		return it-amp_names.begin();
+
+	}
+
+	int getchanindex (string ampname, string channame){
+
+		int amp_index = getampindex(ampname);
+
+		vector<string> chan_names = amplitudes[amp_index].getChanNames();
 		auto it = find(chan_names.begin(),chan_names.end(),channame);
 
 		if(it==chan_names.end()){
@@ -149,11 +172,13 @@ public:
 
 
 	}
-	void makePlotGraph(int J, string channame, string pdfname, function<double(double)> func, double lower_bound, double upper_bound){	
+	void makePlotGraph(string ampname, string channame, string pdfname, function<double(double)> func, double lower_bound, double upper_bound){	
+		
+		int numamp = getampindex(ampname);
+		int totnumofchans = amplitudes[numamp].getNumOfChans();
+		int numchan = getchanindex(ampname,channame);
 
-		int numchan = getchanindex(J,channame);
-
-		int numpts = data[numchan].amp_expval.size();
+		int numpts = data[totnumofchans * numamp + numchan].amp_expval.size();
 
 		double delta = (upper_bound - lower_bound)/ numpts;
 
@@ -172,7 +197,7 @@ public:
 
 		for(int i = 0; i < numpts; i++){
 
-			val = data[numchan].sqrts[i];
+			val = data[totnumofchans * numamp + numchan].sqrts[i];
 			if(isnan(val)) x[i] = 0;
 			else x[i] = val;
 
@@ -201,12 +226,14 @@ public:
 
 	}; 
 
-	void makePlotWithExp(int J, string channame, string pdfname, function<double(double)> func, double lower_bound, double upper_bound, int num_bins){
+	void makePlotWithExp(string ampname, string channame, string pdfname, function<double(double)> func, double lower_bound, double upper_bound, int num_bins){
 
-		int numchan = getchanindex(J,channame);
+		int numamp = getampindex(ampname);
+		int totnumofchans = amplitudes[numamp].getNumOfChans();
+		int numchan = getchanindex(ampname,channame);
 		
 		double delta = (upper_bound - lower_bound)/num_bins;
-				int num_data_points = data[numchan].amp_expval.size();
+		int num_data_points = data[totnumofchans * numamp + numchan].amp_expval.size();
 
 		TH1D *plotter = new TH1D(pdfname.c_str(),pdfname.c_str(), num_bins, lower_bound, upper_bound);
 		//plotter->SetMinimum(-60.0);
@@ -222,7 +249,7 @@ public:
 		}
 
 		for(int i = 0; i < num_data_points; i++){
-			double val_exp = data.at(numchan).amp_expval.at(i);
+			double val_exp = data.at(totnumofchans * numamp + numchan).amp_expval.at(i);
 			if(isnan(val_exp))plotter_exp->SetBinContent(i + 1,  0);
 			else plotter_exp->SetBinContent(i + 1,  val_exp);
 		}
@@ -241,11 +268,13 @@ public:
 		return;
 	};
 
-	void makePlotGraphWithExp(int J, string channame, string pdfname, function<double(double)> func, double lower_bound, double upper_bound){
+	void makePlotGraphWithExp(string ampname, string channame, string pdfname, function<double(double)> func, double lower_bound, double upper_bound){
 
-		int numchan = getchanindex(J,channame);
+		int numamp = getampindex(ampname);
+		int totnumofchans = amplitudes[numamp].getNumOfChans();
+		int numchan = getchanindex(ampname,channame);
 		
-		int num_exp_pts = data[numchan].amp_expval.size();
+		int num_exp_pts = data[totnumofchans * numamp + numchan].amp_expval.size();
 
 		double x1[num_exp_pts], y1[num_exp_pts], ex1[num_exp_pts], ey1[num_exp_pts];
 
@@ -269,15 +298,15 @@ public:
 
 		for(int i = 0; i < num_exp_pts; i++){
 
-			val = data[numchan].sqrts[i];
+			val = data[totnumofchans * numamp + numchan].sqrts[i];
 			if(isnan(val)) x1[i] = 0;
-			else x1[i] = data[numchan].sqrts[i];
+			else x1[i] = val;
 
-			val = data[numchan].sqrts[i];
+			val = data[totnumofchans * numamp + numchan].sqrts[i];
 			if(isnan(val)) x2[i] = 0;
-			else x2[i] = data[numchan].sqrts[i];
+			else x2[i] = val;
 
-			val = data[numchan].amp_expval[i];
+			val = data[totnumofchans * numamp + numchan].amp_expval[i];
 			if(isnan(val)) y1[i] = 0;
 			else y1[i] = val;
 
@@ -285,7 +314,7 @@ public:
 			if(isnan(val)) y2[i] = 0;
 			else y2[i] = val;
 
-			val = data[numchan].amp_expval_stat_err[i];
+			val = data[totnumofchans * numamp + numchan].amp_expval_stat_err[i];
 			if(isnan(val)) ey1[i] = 0;
 			else ey1[i] = val;
 
@@ -320,17 +349,19 @@ public:
 		
 	};
 
-	void makePlotExpOnly(int J, string channame, string pdfname, double lower_bound, double upper_bound){
+	void makePlotExpOnly(string ampname, string channame, string pdfname, double lower_bound, double upper_bound){
 
-		int numchan = getchanindex(J,channame);
+		int numamp = getampindex(ampname);
+		int totnumofchans = amplitudes[numamp].getNumOfChans();
+		int numchan = getchanindex(ampname,channame);
 
-		int num_data_points = data[numchan].amp_expval.size();
+		int num_data_points = data[totnumofchans * numamp + numchan].amp_expval.size();
 
 		double sqrtS = 1.0;
 		TH1D *plotter_exp = new TH1D("","", num_data_points, lower_bound, upper_bound);
 
 		for(int i = 0; i < num_data_points; i++){
-			double val_exp = data.at(numchan).amp_expval.at(i);
+			double val_exp = data.at(totnumofchans * numamp + numchan).amp_expval.at(i);
 			if(isnan(val_exp))plotter_exp->SetBinContent(i + 1,  0);
 			else plotter_exp->SetBinContent(i + 1,  val_exp);
 		}
@@ -345,11 +376,13 @@ public:
 		return;
 	};
 
-	void makePlotGraph_ExpOnly(int J, string channame, string pdfname, double lower_bound, double upper_bound){	
+	void makePlotGraph_ExpOnly(string ampname, string channame, string pdfname, double lower_bound, double upper_bound){	
 
-		int numchan = getchanindex(J,channame);
+		int numamp = getampindex(ampname);
+		int totnumofchans = amplitudes[numamp].getNumOfChans();
+		int numchan = getchanindex(ampname,channame);
 
-		int num_exp_pts = data[numchan].amp_expval.size();
+		int num_exp_pts = data[totnumofchans * numamp + numchan].amp_expval.size();
 
 		double delta = (upper_bound - lower_bound)/ num_exp_pts;
 
@@ -368,17 +401,17 @@ public:
 
 		for(int i = 0; i < num_exp_pts; i++){
 
-			val = data[numchan].sqrts[i];
+			val = data[totnumofchans * numamp + numchan].sqrts[i];
 			if(isnan(val)) x[i] = 0;
 			else x[i] = val;
 
-			val = data[numchan].amp_expval[i];
+			val = data[totnumofchans * numamp + numchan].amp_expval[i];
 			if(isnan(val)) y[i] = 0;
 			else y[i] = val;
 
 			ex[i] = 0;
 
-			val = data[numchan].amp_expval_stat_err[i];
+			val = data[totnumofchans * numamp + numchan].amp_expval_stat_err[i];
 			if(isnan(val)) ey[i] = 0;
 			else ey[i] = val;
 
@@ -417,7 +450,7 @@ public:
 
 	};
 
-	void plotCompGraph(int J, string channame, string pdfname,function<comp(double)> func, double lower_bound, double upper_bound){
+	void plotCompGraph(string ampname, string channame, string pdfname,function<comp(double)> func, double lower_bound, double upper_bound){
 
 		auto realFunc = [&](double x){
 			return func(x).real();
@@ -426,12 +459,12 @@ public:
 			return func(x).imag();
 		};
 
-		makePlotGraph(J, channame, "Re "+pdfname, realFunc, lower_bound, upper_bound);
-		makePlotGraph(J, channame, "Im "+pdfname, imagFunc, lower_bound, upper_bound);
+		makePlotGraph(ampname, channame, "Re "+pdfname, realFunc, lower_bound, upper_bound);
+		makePlotGraph(ampname, channame, "Im "+pdfname, imagFunc, lower_bound, upper_bound);
 
 	};
 
-	void plotCompWithExp(int J, string channame, string pdfname,function<comp(double)> func, double lower_bound, double upper_bound, int num_bins){
+	void plotCompWithExp(string ampname, string channame, string pdfname,function<comp(double)> func, double lower_bound, double upper_bound, int num_bins){
 
 		auto realFunc = [&](double x){
 			return func(x).real();
@@ -440,12 +473,12 @@ public:
 			return func(x).imag();
 		};
 
-		makePlotWithExp(J, channame, "Exp_plus_Re "+pdfname, realFunc, lower_bound, upper_bound, num_bins);
-		makePlotWithExp(J, channame, "Exp_plus_Im "+pdfname, imagFunc, lower_bound, upper_bound, num_bins);
+		makePlotWithExp(ampname, channame, "Exp_plus_Re "+pdfname, realFunc, lower_bound, upper_bound, num_bins);
+		makePlotWithExp(ampname, channame, "Exp_plus_Im "+pdfname, imagFunc, lower_bound, upper_bound, num_bins);
 
 	};
 
-	void plotCompGraphWithExp(int J, string channame, string pdfname,function<comp(double)> func, double lower_bound, double upper_bound, int num_bins){
+	void plotCompGraphWithExp(string ampname, string channame, string pdfname,function<comp(double)> func, double lower_bound, double upper_bound, int num_bins){
 
 		auto realFunc = [&](double x){
 			return func(x).real();
@@ -454,8 +487,8 @@ public:
 			return func(x).imag();
 		};
 
-		makePlotGraphWithExp(J, channame, "Exp_plus_Re "+pdfname, realFunc, lower_bound, upper_bound);
-		makePlotGraphWithExp(J, channame, "Exp_plus_Im "+pdfname, imagFunc, lower_bound, upper_bound);
+		makePlotGraphWithExp(ampname, channame, "Exp_plus_Re "+pdfname, realFunc, lower_bound, upper_bound);
+		makePlotGraphWithExp(ampname, channame, "Exp_plus_Im "+pdfname, imagFunc, lower_bound, upper_bound);
 
 	};
 

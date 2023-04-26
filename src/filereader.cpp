@@ -481,7 +481,17 @@ void filereader::loadExpData(){
 
 	ifstream letsread;
 	int nWaves = obsObject.getNumAmps();
+	int nChans = obsObject.amplitudes[0].getNumOfChans();
 	vector<expchan> allDat = {};
+
+	vector<expchan> withDummies;
+
+	for(string ampname: obsObject.getAmpNames()){
+		for(string chname: obsObject.amplitudes[0].getChanNames()){
+			expchan aux = expchan(ampname, chname, {}, {}, {});
+			withDummies.push_back(aux);
+		}
+	}
 
 	for(string s : getExpDataList()){
 		//for each command in the input file
@@ -490,7 +500,7 @@ void filereader::loadExpData(){
 		expdataDat expd = readExpData(s);
 		//read the file
 		letsread.open(expd.filename);
-		vector<double> a(17,0);
+		vector<double> a(17);
 		vector<double> x = {};
 		vector<double> y = {};
 		vector<double> y_stat_err = {};
@@ -500,10 +510,22 @@ void filereader::loadExpData(){
 			y_stat_err.push_back(a[2]);
 
 		}
+		letsread.close();
 		//make a data object from that file.			
 		expchan tempData = expchan(expd.wavename, expd.channame, x, y, y_stat_err);
 		allDat.push_back(tempData);
 	}
+
+	cout << withDummies.size() << " " << allDat.size() << endl;
+
+	for(int i = 0; i < withDummies.size(); i++){
+		for(int j = 0; j < allDat.size(); i++){
+			//cout << withDummies[i].wavename << " " << allDat[j].wavename << " " << withDummies[i].channame << " " << allDat[j].channame << endl;
+			//if((withDummies[i].wavename == allDat[j].wavename) && (withDummies[i].channame == allDat[j].channame)) cout << "hello" << endl;
+		}
+	}
+
+	//obsObject.setData(withDummies);
 	obsObject.setData(allDat);
 }
 
