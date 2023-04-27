@@ -523,7 +523,7 @@ void filereader::loadExpData(){
 			//cout << withDummies[i].wavename << " " << allDat[j].wavename << " " << withDummies[i].channame << " " << allDat[j].channame << endl;
 			//if((withDummies[i].wavename == allDat[j].wavename) && (withDummies[i].channame == allDat[j].channame)) cout << "hello" << endl;
 		}
-	}
+	}//it has to be fixed
 
 	//obsObject.setData(withDummies);
 	obsObject.setData(allDat);

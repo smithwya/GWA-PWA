@@ -175,7 +175,7 @@ public:
 	void makePlotGraph(string ampname, string channame, string pdfname, function<double(double)> func, double lower_bound, double upper_bound){	
 		
 		int numamp = getampindex(ampname);
-		int totnumofchans = amplitudes[numamp].getNumOfChans();
+		int totnumofchans = data.size(); //in this way is always consistent with the case in which we consider or not the dummy channels
 		int numchan = getchanindex(ampname,channame);
 
 		int numpts = data[totnumofchans * numamp + numchan].amp_expval.size();
@@ -229,7 +229,7 @@ public:
 	void makePlotWithExp(string ampname, string channame, string pdfname, function<double(double)> func, double lower_bound, double upper_bound, int num_bins){
 
 		int numamp = getampindex(ampname);
-		int totnumofchans = amplitudes[numamp].getNumOfChans();
+		int totnumofchans = data.size();
 		int numchan = getchanindex(ampname,channame);
 		
 		double delta = (upper_bound - lower_bound)/num_bins;
@@ -271,7 +271,7 @@ public:
 	void makePlotGraphWithExp(string ampname, string channame, string pdfname, function<double(double)> func, double lower_bound, double upper_bound){
 
 		int numamp = getampindex(ampname);
-		int totnumofchans = amplitudes[numamp].getNumOfChans();
+		int totnumofchans = data.size();
 		int numchan = getchanindex(ampname,channame);
 		
 		int num_exp_pts = data[totnumofchans * numamp + numchan].amp_expval.size();
@@ -352,7 +352,7 @@ public:
 	void makePlotExpOnly(string ampname, string channame, string pdfname, double lower_bound, double upper_bound){
 
 		int numamp = getampindex(ampname);
-		int totnumofchans = amplitudes[numamp].getNumOfChans();
+		int totnumofchans = data.size();
 		int numchan = getchanindex(ampname,channame);
 
 		int num_data_points = data[totnumofchans * numamp + numchan].amp_expval.size();
@@ -379,7 +379,7 @@ public:
 	void makePlotGraph_ExpOnly(string ampname, string channame, string pdfname, double lower_bound, double upper_bound){	
 
 		int numamp = getampindex(ampname);
-		int totnumofchans = amplitudes[numamp].getNumOfChans();
+		int totnumofchans = data.size();
 		int numchan = getchanindex(ampname,channame);
 
 		int num_exp_pts = data[totnumofchans * numamp + numchan].amp_expval.size();

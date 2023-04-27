@@ -48,7 +48,7 @@ double minfunc(const double *xx){
 
 	int numamp = testObs.getampindex(ampname);
 	int numchan = testObs.getchanindex(ampname, channame);
-	int totnumofchans = testObs.amplitudes[numamp].getNumOfChans();
+	int totnumofchans = testObs.getData().size();
 	int npts = testObs.getData()[totnumofchans * numamp + numchan].amp_expval.size();
 
 	for(int i = 0; i < npts; i++){
@@ -173,14 +173,14 @@ int main()
 
 
 
-for(double x: testObs.getData()[0].sqrts) cout << x << endl; //the first 4 num are broken
+/*for(double x: testObs.getData()[0].sqrts) cout << x << endl; //the first 4 num are broken
 cout << testObs.getData().size() << endl;
 for(expchan k: testObs.getData()) cout << k.wavename << " " << k.channame << endl;
 expchan k = testObs.getData()[0];
 for(int i = 0; i < k.amp_expval.size(); i++){
 	cout << k.sqrts[i] << " " << k.amp_expval[i] << " " << k.amp_expval_stat_err[i] << endl;
 } 
-return 0;
+return 0;*/
 
 
 	//make the minimzer
