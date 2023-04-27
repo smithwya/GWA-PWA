@@ -488,7 +488,7 @@ void filereader::loadExpData(){
 
 	for(string ampname: obsObject.getAmpNames()){
 		for(string chname: obsObject.amplitudes[0].getChanNames()){
-			expchan aux = expchan(ampname, chname, {}, {}, {});
+			expchan aux = expchan(ampname, chname, {}, {}, {}, {});
 			withDummies.push_back(aux);
 		}
 	}
@@ -500,19 +500,21 @@ void filereader::loadExpData(){
 		expdataDat expd = readExpData(s);
 		//read the file
 		letsread.open(expd.filename);
-		vector<double> a(17);
+		vector<double> a(5);
 		vector<double> x = {};
 		vector<double> y = {};
 		vector<double> y_stat_err = {};
-		while(letsread>>a[0]>>a[1]>>a[2]>>a[3]>>a[4]>>a[5]>>a[6]>>a[7]>>a[8]>>a[9]>>a[10]>>a[11]>>a[12]>>a[13]>>a[14]>>a[15]>>a[16]){
+		vector<double> y_sist_err = {};
+		while(letsread>>a[0]>>a[1]>>a[2]>>a[3]>>a[4]){
 			x.push_back(a[0]);
 			y.push_back(a[1]);
 			y_stat_err.push_back(a[2]);
-
+			y_sist_err.push_back(a[3]);
 		}
 		letsread.close();
+		
 		//make a data object from that file.			
-		expchan tempData = expchan(expd.wavename, expd.channame, x, y, y_stat_err);
+		expchan tempData = expchan(expd.wavename, expd.channame, x, y, y_stat_err, y_sist_err);
 		allDat.push_back(tempData);
 	}
 

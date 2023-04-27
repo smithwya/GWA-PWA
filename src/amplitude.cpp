@@ -87,10 +87,10 @@ vector<channel> amplitude::getChannels(){
 	// return E_gamma * p_i * numerator * denominator.inverse()
 VectorXcd amplitude::getValue(comp s) {
 	
-	double m_JPsi = 3.0969;
+	double m_bottomonium = 9.460;
 
-	//comp Egamma = pow((s-pow(m_JPsi,2)),2)/(4.0*s);
-	comp Egamma = (pow(m_JPsi,2)-s)/(2.0*sqrt(s));
+	//comp Egamma = pow((s-pow(m_bottomonium,2)),2)/(4.0*s);
+	comp Egamma = (pow(m_bottomonium,2)-s)/(2.0*sqrt(s));
 	MatrixXcd phsp = MatrixXcd::Identity(numChannels,numChannels);
 
 

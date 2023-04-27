@@ -10,7 +10,7 @@ using Eigen::VectorXcd;
 typedef std::complex<double> comp;
 
 
-class JPsi : public observable{
+class bottomonium : public observable{
     public:
 
     using observable::observable;
@@ -24,7 +24,7 @@ class JPsi : public observable{
 	    makePlot("wave"+to_string(wav)+"-"+to_string(ch),s_intens,1.0,2.5,300);
     };
     
-    double JPsiminfunc(vector<double> x){
+    double Bott_minfunc(vector<double> x){
 	return x[0]*x[0];
     }
 };

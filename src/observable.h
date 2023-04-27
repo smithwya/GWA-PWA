@@ -23,15 +23,16 @@ struct expchan{//this has to be modify according to the format of the exp data f
 		string wavename;
 		string channame;
 		vector<double> sqrts;
-		vector<double> amp_expval, amp_expval_stat_err;
+		vector<double> amp_expval, amp_expval_stat_err, amp_expval_sist_err;
 
-		expchan(string wn, string cn, vector<double> x, vector<double> y, vector<double> y_stat_err){
+		expchan(string wn, string cn, vector<double> x, vector<double> y, vector<double> y_stat_err, vector<double> y_sist_err){
 			wavename = wn;
 			channame = cn;
 			sqrts = x;
 			
 			amp_expval = y;
 			amp_expval_stat_err = y_stat_err;
+			amp_expval_sist_err = y_sist_err;
 		}
 
 
@@ -213,7 +214,7 @@ public:
    		gr->SetMarkerColor(4);
    		gr->SetMarkerStyle(21);
 		gr->GetXaxis()->SetRangeUser(lower_bound, upper_bound);
-		gr->GetYaxis()->SetRangeUser(0, 15500);
+		//gr->GetYaxis()->SetRangeUser(0, 15500);
 		gr->SetLineWidth(1);
 
 		TFile file("pdf_folder.root", "recreate");
@@ -327,13 +328,13 @@ public:
    		gr1->SetMarkerColor(4);
    		gr1->SetMarkerStyle(21);
 		gr1->GetXaxis()->SetRangeUser(lower_bound, upper_bound);
-		gr1->GetYaxis()->SetRangeUser(0, 15500);
+		//gr1->GetYaxis()->SetRangeUser(0, 15500);
 		gr1->SetLineWidth(1);
 
 		//gr2->SetTitle("TGraphErrors Example");
    		gr2->SetMarkerSize(0);
 		gr2->GetXaxis()->SetRangeUser(lower_bound, upper_bound);
-		gr2->GetYaxis()->SetRangeUser(0, 15500);
+		//gr2->GetYaxis()->SetRangeUser(0, 15500);
 		gr2->SetLineWidth(1);
 		gr2->SetLineColor(kRed);
 
@@ -423,7 +424,7 @@ public:
    		gr->SetMarkerColor(4);
    		gr->SetMarkerStyle(21);
 		gr->GetXaxis()->SetRangeUser(lower_bound, upper_bound);
-		gr->GetYaxis()->SetRangeUser(0, 15500);
+		//gr->GetYaxis()->SetRangeUser(0, 15500);
 		gr->SetLineWidth(1);
 
 		TFile file("pdf_folder.root", "recreate");

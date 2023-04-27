@@ -1,14 +1,18 @@
 SetSeed(3)
-FitRegion(0.9975, 2.5)
 
-AddChannel("PiPi", {0.13498, 0.13498})
+FitRegion(10632.2,11020.8)
 
-
-AddWave("S","kmat","nominal", 0, 0.6)
-ChebyCoeffs("S", "PiPi","p+s = 1", {-2173.73 \pm 8, 3272.05 \pm 10, -1553.73 \pm 9, 361.79 \pm 8}) 
-
-AddPole("S", 0.00631603 \pm 10, {"PiPi"}, {-6.05845 \pm 70})
+AddChannel("BB", {5, 5})
 
 
-AddKmatBackground("S", 0, {{16.1903 \pm 0, 18.3081 \pm 908, 0 \pm 8}, {19.2388 \pm 8, 0 \pm 7000}, {-15.811 \pm  8 }})
-AddKmatBackground("S", 1, {{-6.27393 \pm 0, -9.19686 \pm 0, 0 \pm 0}, {-13.3706\pm9, 0 \pm 9}, {6.03082 \pm 9}})
+AddWave("P","kmat","nominal", 0, 0.6)
+
+ChebyCoeffs("P", "BB","p+s = 1", {-2160.73 \pm 10, 3272.05 \pm 10, -1543.73 \pm 9, 371.79 \pm 8}) 
+
+
+AddPole("P", 3.29 \pm 10, {"BB"}, {-6.05845 \pm 70})
+
+AddKmatBackground("P", 0, {{-15.811 \pm  8 }})
+AddKmatBackground("P", 1, {{6.03082 \pm 9}})
+
+LoadExpData("P", "BB", "Data/BB-nominal.dat")

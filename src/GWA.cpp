@@ -10,7 +10,7 @@
 #include "channel.h"
 #include "filereader.h"
 #include "observable.h"
-#include "JPsi.h"
+#include "bottomonium.h"
 
 #include "Math/Minimizer.h"
 #include "Math/Factory.h"
@@ -38,12 +38,14 @@ double minfunc(const double *xx){
 	
 	double sum = 0;
 	double std = 0;
-	string ampname = "S";
-	string channame = "PiPi";
-	double lower_bound = 0.9975;
-	double upper_bound = 2.5;
+	string ampname = "P";
+	string channame = "BB";
+	double lower_bound = 10632.2;
+	double upper_bound = 11020.8;
 	double x = 0;
 	double y = 0;
+	double stat_err = 0;
+	double sist_err = 0;
 	comp temp = 0;
 
 	int numamp = testObs.getampindex(ampname);
@@ -57,7 +59,9 @@ double minfunc(const double *xx){
 
 			temp = testObs.amplitudes[numamp].getValue(pow(x,2))(numchan);
 			y = (temp*conj(temp)).real();
-			std = testObs.getData()[totnumofchans * numamp + numchan].amp_expval_stat_err[i];
+			stat_err = testObs.getData()[totnumofchans * numamp + numchan].amp_expval_stat_err[i];
+			sist_err = testObs.getData()[totnumofchans * numamp + numchan].amp_expval_sist_err[i];
+			std = sqrt(pow(stat_err, 2) + pow(sist_err, 2));
 			sum += pow(((y - testObs.getData()[totnumofchans * numamp + numchan].amp_expval[i])/std), 2);
 			//if(i == 56) cout << x << "	" << y << "	" << testObs.getData()[totnumofchans * numamp + numchan].amp_expval[i] << "	" << std << endl;
 		
@@ -66,7 +70,7 @@ double minfunc(const double *xx){
 
 	double tot = sum;
 
-	
+	/*
 	sum = 0;
 	std = 0;
 	
@@ -91,7 +95,7 @@ double minfunc(const double *xx){
 	}
 
 	tot += sum;
-	
+	*/
 
 	//cout<<"param: "<<params[3]<<" chisq "<<tot<<endl;
 	return tot;
@@ -126,13 +130,8 @@ double minfuncforpoles(const double *xx){
 int main()
 {
 
-	auto intensityS_PiPi = [&](double x){
+	auto intensityP_BB = [&](double x){
 		comp value = testObs.amplitudes[0].getValue(pow(x,2))(0);
-		return (value*conj(value)).real();
-	};
-
-	auto intensityS_KK = [&](double x){
-		comp value = testObs.amplitudes[0].getValue(pow(x,2))(1);
 		return (value*conj(value)).real();
 	};
 
@@ -150,9 +149,7 @@ int main()
 	//saves the observable object outside of filereader object
 	testObs = testReader.getObs();
 
-	testObs.makePlotGraphWithExp("S", "PiPi", "JPsiS_PiPi_Graph_WithExp", intensityS_PiPi, 0.9975,2.5);
-
-	testObs.makePlotGraphWithExp("S", "KK", "JPsiS_KK_Graph_WithExp", intensityS_KK, 0.9975,2.5);
+	testObs.makePlotGraphWithExp("P", "BB", "BottP_BB_Graph_WithExp", intensityP_BB, 10632.2,11020.8);
 
 	/*
 	TRandom3 gen(testReader.getSeed());
@@ -222,9 +219,7 @@ return 0;*/
 	//store the parameters for the minimum that the minimizer found in xs
 	const double *xs = min->X();
 	
-	testObs.makePlotGraphWithExp("S", "PiPi", "testJPsi_PiPi", intensityS_PiPi, 0.9975, 2.5);
-
-	testObs.makePlotGraphWithExp("S", "KK", "testJPsi_KK", intensityS_KK, 0.9975, 2.5);
+	testObs.makePlotGraphWithExp("P", "BB", "testBott_BB", intensityP_BB, 10632.2, 11020.8);
 
 	//note to self: need to get rid of 'dumbJ' in amplitude.cpp later when doing non-radJPsi fits
 
