@@ -1,6 +1,6 @@
 SetSeed(3)
 
-FitRegion(10632.2,11020.8)
+FitRegion(10.6322,11.0208)
 
 AddChannel("BB", {5, 5})
 AddChannel("BBstar", {5, 5})

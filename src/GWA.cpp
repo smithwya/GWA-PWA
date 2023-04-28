@@ -40,8 +40,8 @@ double minfunc(const double *xx){
 	double std = 0;
 	string ampname = "P";
 	string channame = "BB";
-	double lower_bound = 10632.2;
-	double upper_bound = 11020.8;
+	double lower_bound = 10.6322;
+	double upper_bound = 11.0208;
 	double x = 0;
 	double y = 0;
 	double stat_err = 0;
@@ -137,7 +137,7 @@ int main()
 
 
 	//reads the file and creates an observable object with the information from the file
-	filereader testReader("Data/GWA_dataformat.txt");
+	filereader testReader("Data/simpledat.txt");
 	testReader.SetAllCommandLists();
 	testReader.ConstructBareAmps();
 	testReader.setChebys();
@@ -149,7 +149,7 @@ int main()
 	//saves the observable object outside of filereader object
 	testObs = testReader.getObs();
 
-	testObs.makePlotGraphWithExp("P", "BB", "BottP_BB_Graph_WithExp", intensityP_BB, 10632.2,11020.8);
+	testObs.makePlotGraphWithExp("P", "BB", "BottP_BB_Graph_WithExp", intensityP_BB, 10.6322,11.0208);
 
 	/*
 	TRandom3 gen(testReader.getSeed());
@@ -219,7 +219,7 @@ return 0;*/
 	//store the parameters for the minimum that the minimizer found in xs
 	const double *xs = min->X();
 	
-	testObs.makePlotGraphWithExp("P", "BB", "testBott_BB", intensityP_BB, 10632.2, 11020.8);
+	testObs.makePlotGraphWithExp("P", "BB", "testBott_BB", intensityP_BB, 10.6322, 11.0208);
 
 	//note to self: need to get rid of 'dumbJ' in amplitude.cpp later when doing non-radJPsi fits
 
