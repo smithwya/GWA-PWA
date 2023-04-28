@@ -9,9 +9,9 @@ AddChannel("BstarBstar", {5, 5})
 
 AddWave("P","kmat","nominal", 0, 0.6)
 
-ChebyCoeffs("P", "BB","p+s = 1", {-2160.73 \pm 10, 3272.05 \pm 10}) 
-ChebyCoeffs("P", "BBstar", "p+s = 1", {1927.5 \pm 49, -2996.84 \pm 45})
-ChebyCoeffs("P", "BstarBstar", "p+s = 1", {0 \pm 0, -2996.84 \pm 45})
+ChebyCoeffs("P", "BB","p+s = 1", {-2160.73 \pm 10, 3272.05 \pm 10,5000 \pm 10}) 
+ChebyCoeffs("P", "BBstar", "p+s = 1", {1927.5 \pm 49, -2996.84 \pm 45,5000 \pm 10})
+ChebyCoeffs("P", "BstarBstar", "p+s = 1", {1000 \pm 0, -2996.84 \pm 45, 5000 \pm 10})
 
 
 
