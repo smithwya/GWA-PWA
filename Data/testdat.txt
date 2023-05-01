@@ -1,0 +1,18 @@
+SetSeed(3)
+
+FitRegion(10.6322,11.0208)
+
+AddChannel("BB", {5.27925, 5.27925})
+
+
+AddWave("P","kmat","nominal", 0, 0.6)
+
+ChebyCoeffs("P", "BB","p+s = 1", {0.00335 \pm 10}) 
+
+
+
+AddPole("P", 118.48 \pm 10, {"BB"}, {10 \pm 70})
+
+
+
+LoadExpData("P", "BB", "Data/BB-nominal.dat")

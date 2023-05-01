@@ -328,13 +328,13 @@ public:
    		gr1->SetMarkerColor(4);
    		gr1->SetMarkerStyle(21);
 		gr1->GetXaxis()->SetRangeUser(lower_bound, upper_bound);
-		//gr1->GetYaxis()->SetRangeUser(0, 15500);
+		//gr1->GetYaxis()->SetRangeUser(0, 0.2);
 		gr1->SetLineWidth(1);
 
 		//gr2->SetTitle("TGraphErrors Example");
    		gr2->SetMarkerSize(0);
 		gr2->GetXaxis()->SetRangeUser(lower_bound, upper_bound);
-		//gr2->GetYaxis()->SetRangeUser(0, 15500);
+		//gr2->GetYaxis()->SetRangeUser(0, 0.2);
 		gr2->SetLineWidth(1);
 		gr2->SetLineColor(kRed);
 

@@ -35,13 +35,60 @@ double minfunc(const double *xx){
 	}
 
 	testObs.setFitParams(params);
+/*
+	double tot = 0;
+
+	for(string an: testObs.getAmpNames()){
+		for(string cn: testObs.amplitudes[0].getChanNames()){
+			double sum = 0;
+			double std = 0;
+			string ampname = an;
+			string channame = cn;
+			double lower_bound = 10.6322;
+			double upper_bound = 11.0208;
+			double x = 0;
+			double y = 0;
+			double stat_err = 0;
+			double sist_err = 0;
+			comp temp = 0;
+		
+			int numamp = testObs.getampindex(ampname);
+			int numchan = testObs.getchanindex(ampname, channame);
+			int totnumofchans = testObs.getData().size();
+			int npts = testObs.getData()[totnumofchans * numamp + numchan].amp_expval.size();
+		
+			for(int i = 0; i < npts; i++){
+				x = testObs.getData()[totnumofchans * numamp + numchan].sqrts[i];
+				if(x >= lower_bound && x <= upper_bound){	
+				
+					temp = testObs.amplitudes[numamp].getValue(pow(x,2))(numchan);
+					y = (temp*conj(temp)).real();
+					stat_err = testObs.getData()[totnumofchans * numamp + numchan].amp_expval_stat_err[i];
+					sist_err = testObs.getData()[totnumofchans * numamp + numchan].amp_expval_sist_err[i];
+					std = sqrt(pow(stat_err, 2) + pow(sist_err, 2));
+					sum += pow(((y - testObs.getData()[totnumofchans * numamp + numchan].amp_expval[i])/std), 2);
+					//if(i == 56) cout << x << "	" << y << "	" << testObs.getData()[totnumofchans * numamp + numchan].amp_expval[i] << "	" << std << endl;
+				
+				}
+			}
+			tot += sum;
+		}
+	}
+
+	/*
+	double tot = sum;
+		}
+	}
+
+	*/
 	
 	double sum = 0;
 	double std = 0;
 	string ampname = "P";
 	string channame = "BB";
-	double lower_bound = 10.6322;
-	double upper_bound = 11.0208;
+	double lower_bound = sqrt(testObs.amplitudes[0].getFitInterval()[0]);
+	double upper_bound = sqrt(testObs.amplitudes[0].getFitInterval()[1]);
+	cout << lower_bound << " " << upper_bound << endl;
 	double x = 0;
 	double y = 0;
 	double stat_err = 0;
@@ -69,6 +116,7 @@ double minfunc(const double *xx){
 	}
 
 	double tot = sum;
+	
 
 	/*
 	sum = 0;
@@ -137,7 +185,7 @@ int main()
 
 
 	//reads the file and creates an observable object with the information from the file
-	filereader testReader("Data/simpledat.txt");
+	filereader testReader("Data/testdat.txt");
 	testReader.SetAllCommandLists();
 	testReader.ConstructBareAmps();
 	testReader.setChebys();
@@ -185,7 +233,7 @@ return 0;*/
 	//Set some criteria for the minimzer to stop
 	min->SetMaxFunctionCalls(1000000);
 	min->SetMaxIterations(10000);
-	min->SetTolerance(0.01);
+	min->SetTolerance(0.001);
 	min->SetPrintLevel(1);
 	//get the initial parameters and steps from the constructed observable object
 	vector<double> fitparams = testObs.getFitParams();
@@ -214,7 +262,7 @@ return 0;*/
 
 	testObs.setFitParams(finalParams);
 	
-	//cout<<testObs.amplitudes[0]<<endl;
+	for(double x: testObs.getFitParams()) cout<< x <<endl;
 
 	//store the parameters for the minimum that the minimizer found in xs
 	const double *xs = min->X();
@@ -259,6 +307,8 @@ return 0;*/
 		cout<<tchan.sqrts[i]<<" "<<tchan.amp_expval[i]<<endl;
 	}
 	*/
+
+cout << min->MinValue() / (testObs.getData()[0].amp_expval.size() - testObs.getFitParams().size()) << endl;
 
 	return 0;
 }

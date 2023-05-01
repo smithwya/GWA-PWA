@@ -79,6 +79,7 @@ public:
 	vector<double> getPoleSteps();
 	vector<double> getStepSizes();
 	vector<double> getFittedSteps();
+	vector<double> getFitInterval();
 private:
 	vector<channel> channels;
 	vector<MatrixXcd> kParameters;
