@@ -71,6 +71,7 @@ public:
 	vector<double> getParamList();
 	void setParamList(vector<double> params);
 	void setResMasses(vector<double> rm);
+	vector<double> getResMasses();
 	vector<double> getFittedParamList();
 	void setFittedParamList(vector<double> fittedParams);
 	string getName();

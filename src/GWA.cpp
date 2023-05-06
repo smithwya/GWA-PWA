@@ -35,117 +35,52 @@ double minfunc(const double *xx){
 	}
 
 	testObs.setFitParams(params);
-/*
-	double tot = 0;
 
-	for(string an: testObs.getAmpNames()){
-		for(string cn: testObs.amplitudes[0].getChanNames()){
+	//for(string ampname: testObs.getAmpNames()){
+	string ampname = "P";
+		
+		int amp_index = testObs.getampindex(ampname);
+		
+		double lower_bound = sqrt(testObs.amplitudes[amp_index].getFitInterval()[0]);
+		double upper_bound = sqrt(testObs.amplitudes[amp_index].getFitInterval()[1]);
+
+		int totnumofchans = testObs.getData().size();
+
+		double tot = 0;
+
+		//for(string channame: testObs.amplitudes[amp_index].getChanNames()){
+		for(string channame: {"BB", "BBstar"}){
+			
 			double sum = 0;
 			double std = 0;
-			string ampname = an;
-			string channame = cn;
-			double lower_bound = 10.6322;
-			double upper_bound = 11.0208;
 			double x = 0;
 			double y = 0;
 			double stat_err = 0;
 			double sist_err = 0;
 			comp temp = 0;
-		
-			int numamp = testObs.getampindex(ampname);
-			int numchan = testObs.getchanindex(ampname, channame);
-			int totnumofchans = testObs.getData().size();
-			int npts = testObs.getData()[totnumofchans * numamp + numchan].amp_expval.size();
-		
+			
+			int chan_index = testObs.getchanindex(ampname ,channame);
+			int npts = testObs.getData()[totnumofchans * amp_index + chan_index].amp_expval.size();
+
 			for(int i = 0; i < npts; i++){
-				x = testObs.getData()[totnumofchans * numamp + numchan].sqrts[i];
+				x = testObs.getData()[totnumofchans * amp_index + chan_index].sqrts[i];
 				if(x >= lower_bound && x <= upper_bound){	
-				
-					temp = testObs.amplitudes[numamp].getValue(pow(x,2))(numchan);
+
+					temp = testObs.amplitudes[amp_index].getValue(pow(x,2))(chan_index);
 					y = (temp*conj(temp)).real();
-					stat_err = testObs.getData()[totnumofchans * numamp + numchan].amp_expval_stat_err[i];
-					sist_err = testObs.getData()[totnumofchans * numamp + numchan].amp_expval_sist_err[i];
+					stat_err = testObs.getData()[totnumofchans * amp_index + chan_index].amp_expval_stat_err[i];
+					sist_err = testObs.getData()[totnumofchans * amp_index + chan_index].amp_expval_sist_err[i];
 					std = sqrt(pow(stat_err, 2) + pow(sist_err, 2));
-					sum += pow(((y - testObs.getData()[totnumofchans * numamp + numchan].amp_expval[i])/std), 2);
+					sum += pow(((y - testObs.getData()[totnumofchans * amp_index + chan_index].amp_expval[i])/std), 2);
 					//if(i == 56) cout << x << "	" << y << "	" << testObs.getData()[totnumofchans * numamp + numchan].amp_expval[i] << "	" << std << endl;
-				
+		
 				}
 			}
+
 			tot += sum;
+			
 		}
-	}
 
-	/*
-	double tot = sum;
-		}
-	}
-
-	*/
-	
-	double sum = 0;
-	double std = 0;
-	string ampname = "P";
-	string channame = "BB";
-	double lower_bound = sqrt(testObs.amplitudes[0].getFitInterval()[0]);
-	double upper_bound = sqrt(testObs.amplitudes[0].getFitInterval()[1]);
-	cout << lower_bound << " " << upper_bound << endl;
-	double x = 0;
-	double y = 0;
-	double stat_err = 0;
-	double sist_err = 0;
-	comp temp = 0;
-
-	int numamp = testObs.getampindex(ampname);
-	int numchan = testObs.getchanindex(ampname, channame);
-	int totnumofchans = testObs.getData().size();
-	int npts = testObs.getData()[totnumofchans * numamp + numchan].amp_expval.size();
-
-	for(int i = 0; i < npts; i++){
-		x = testObs.getData()[totnumofchans * numamp + numchan].sqrts[i];
-		if(x >= lower_bound && x <= upper_bound){	
-
-			temp = testObs.amplitudes[numamp].getValue(pow(x,2))(numchan);
-			y = (temp*conj(temp)).real();
-			stat_err = testObs.getData()[totnumofchans * numamp + numchan].amp_expval_stat_err[i];
-			sist_err = testObs.getData()[totnumofchans * numamp + numchan].amp_expval_sist_err[i];
-			std = sqrt(pow(stat_err, 2) + pow(sist_err, 2));
-			sum += pow(((y - testObs.getData()[totnumofchans * numamp + numchan].amp_expval[i])/std), 2);
-			//if(i == 56) cout << x << "	" << y << "	" << testObs.getData()[totnumofchans * numamp + numchan].amp_expval[i] << "	" << std << endl;
-		
-		}
-	}
-
-	double tot = sum;
-	
-
-	/*
-	sum = 0;
-	std = 0;
-	
-	channame = "KK";
-	numchan = testObs.getchanindex(ampname, channame);
-	
-	x = 0; 
-	y = 0;
-
-	temp = 0;
-	npts = testObs.getData()[totnumofchans * numamp + numchan].amp_expval.size();
-
-	for(int i = 0; i < npts; i++){
-		x = testObs.getData()[totnumofchans * numamp + numchan].sqrts[i];
-		if(x >= lower_bound && x <= upper_bound){	
-			temp = testObs.amplitudes[numamp].getValue(pow(x,2))(numchan);//this numchan should be wrong because it is no more 0
-			y = (temp*conj(temp)).real();
-			std = testObs.getData()[totnumofchans * numamp + numchan].amp_expval_stat_err[i];
-			sum += pow(((y - testObs.getData()[totnumofchans * numamp + numchan].amp_expval[i])/std), 2);
-			//if(i == 56) cout << x << "	" << y << "	" << testObs.getData()[totnumofchans * numamp + numchan].amp_expval[i] << "	" << std << endl;
-		}
-	}
-
-	tot += sum;
-	*/
-
-	//cout<<"param: "<<params[3]<<" chisq "<<tot<<endl;
 	return tot;
 
 }
@@ -183,6 +118,18 @@ int main()
 		return (value*conj(value)).real();
 	};
 
+	auto intensityP_BBstar = [&](double x){
+		comp value = testObs.amplitudes[0].getValue(pow(x,2))(1);
+		return (value*conj(value)).real();
+	};
+
+	/*
+	auto intensityP_BstarBstar = [&](double x){
+		comp value = testObs.amplitudes[0].getValue(pow(x,2))(2);
+		return (value*conj(value)).real();
+	};
+	*/
+
 
 	//reads the file and creates an observable object with the information from the file
 	filereader testReader("Data/testdat.txt");
@@ -197,7 +144,11 @@ int main()
 	//saves the observable object outside of filereader object
 	testObs = testReader.getObs();
 
+cout << testObs.amplitudes[0] << endl; 
+
 	testObs.makePlotGraphWithExp("P", "BB", "BottP_BB_Graph_WithExp", intensityP_BB, 10.6322,11.0208);
+	testObs.makePlotGraphWithExp("P", "BBstar", "BottP_BBstar_Graph_WithExp", intensityP_BBstar, 10.6322,11.0208);
+	//testObs.makePlotGraphWithExp("P", "BstarBstar", "BottP_BstarBstar_Graph_WithExp", intensityP_BstarBstar, 10.6322,11.0208);
 
 	/*
 	TRandom3 gen(testReader.getSeed());
@@ -248,7 +199,7 @@ return 0;*/
 		
 		min->SetVariable(i,to_string(i),fitparams[i],steps[i]);
 		//min->VariableLimits(i, fitparams[i] - 100, fitparams[i] + 100); // to do with the uncertanties of input file
-		//if(i != 3) min->FixVariable(i); 
+		//if(i < 3) min->FixVariable(i); 
 	}
 	
 	min->Minimize();
@@ -262,12 +213,14 @@ return 0;*/
 
 	testObs.setFitParams(finalParams);
 	
-	for(double x: testObs.getFitParams()) cout<< x <<endl;
+	for(double x: testObs.getFitParams()) cout << x <<endl;
 
 	//store the parameters for the minimum that the minimizer found in xs
 	const double *xs = min->X();
 	
 	testObs.makePlotGraphWithExp("P", "BB", "testBott_BB", intensityP_BB, 10.6322, 11.0208);
+	testObs.makePlotGraphWithExp("P", "BBstar", "testBott_BBstar", intensityP_BBstar, 10.6322, 11.0208);
+	//testObs.makePlotGraphWithExp("P", "BstarBstar", "testBott_BstarBstar", intensityP_BstarBstar, 10.6322, 11.0208);
 
 	//note to self: need to get rid of 'dumbJ' in amplitude.cpp later when doing non-radJPsi fits
 
@@ -308,7 +261,9 @@ return 0;*/
 	}
 	*/
 
-cout << min->MinValue() / (testObs.getData()[0].amp_expval.size() - testObs.getFitParams().size()) << endl;
+cout << "Chi2/ndf = " << min->MinValue() / (testObs.getData()[0].amp_expval.size() + testObs.getData()[1].amp_expval.size() - testObs.getFitParams().size()) << endl;
+
+cout << testObs.amplitudes[0] << endl;
 
 	return 0;
 }

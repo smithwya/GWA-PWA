@@ -200,6 +200,7 @@ void filereader::SetAddPoleList(){
 	smatch cmdmatch;
 	for(int i = 0; i < commands.size(); i++){
 		if(regex_search(commands.at(i), cmdmatch, reg_AddPole)){
+			//cout << commands[i] << endl;
             AddPole_list.push_back(commands[i]);
 		}
     }		
@@ -376,13 +377,18 @@ poleDat filereader::readPole(string cmd){
 	regex testreg_name("[A-Za-z]+");
 	
 	string wname = "";
-	double mass, mass_inc = 0;
+	double mass = 0; 
+	double mass_inc = 0;
 	vector<string> chnames = {};
-	vector<double> couplings, couplings_inc = {};
+	vector<double> couplings = {};
+	vector<double> couplings_inc = {};
 
 	if(regex_search(cmd, match, reg_AddPole)){
+		//for (int i = 0; i<15; i++) cout << i << ": " << match[i] << endl;
+		//exit(0);
 		wname = match[1];
 		remove(wname.begin(), wname.end(), ' ');
+		//cout << wname << endl;
 		
 		string mySuffix, temp;
 		mySuffix = match[2];
@@ -393,8 +399,10 @@ poleDat filereader::readPole(string cmd){
             mySuffix = testmatch.suffix();
 			if (counter%2 == 0){
                 mass = stod(string(temp));
+				//cout << mass << endl;
             }else{
                 mass_inc = stod(string(temp));
+				//cout << mass_inc << endl;
             }
 			counter++;
         }
@@ -406,17 +414,19 @@ poleDat filereader::readPole(string cmd){
         {
             temp = testmatch[0];
 			remove(temp.begin(), temp.end(), ' ');
+			//cout << temp << endl;
 			chnames.push_back(temp);
             mySuffix = testmatch.suffix();
             counter++;
         }
 		
-		mySuffix = match[3 + counter];
+		mySuffix = match[6];
 
 		counter = 0;
 		while(regex_search(mySuffix, testmatch, testreg_number))
 		{
 			temp = testmatch[0];
+			//cout << temp << endl;
 			mySuffix = testmatch.suffix();
 			if (counter%2 == 0){
 				couplings.push_back(stod(string(temp)));
@@ -429,7 +439,23 @@ poleDat filereader::readPole(string cmd){
 
 	}
 
-	if(chnames.size()!=couplings.size()) return poleDat("",0,0,{},{},{});
+	if(chnames.size()!=couplings.size()) {
+		cout << "chnames.size and couplings.size don't match: " << chnames.size() << " vs " << couplings.size() << endl; 
+		return poleDat("",0,0,{},{},{});
+	}
+
+	//cout << "in filereader::readPole: " << chnames.size() << " vs " << couplings.size() << endl; 
+
+	/*
+	cout << wname << " " << mass << " " << mass_inc << endl;
+	for(int i = 0; i < chnames.size(); i++){
+		cout << chnames[i] << endl;
+	}
+
+	for(int i = 0; i < couplings.size(); i++){
+		cout << couplings[i] << " " << couplings_inc[i] << endl;
+	}
+	*/
 
 	return poleDat(wname, mass, mass_inc, chnames, couplings, couplings_inc);
 }
@@ -518,7 +544,7 @@ void filereader::loadExpData(){
 		allDat.push_back(tempData);
 	}
 
-	cout << withDummies.size() << " " << allDat.size() << endl;
+	//cout << withDummies.size() << " " << allDat.size() << endl;
 
 	for(int i = 0; i < withDummies.size(); i++){
 		for(int j = 0; j < allDat.size(); i++){

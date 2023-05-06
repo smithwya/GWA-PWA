@@ -62,7 +62,7 @@ public:
 		amplitudes = a;
 		data = {};
 		numAmps = a.size();
-		numChans = a[0].getChanNames().size();
+		numChans = a[0].getNumOfChans();
 	};
 
 	vector<amplitude> getAmps(){
@@ -279,7 +279,8 @@ public:
 
 		double x1[num_exp_pts], y1[num_exp_pts], ex1[num_exp_pts], ey1[num_exp_pts];
 
-		double x2[num_exp_pts], y2[num_exp_pts], ex2[num_exp_pts], ey2[num_exp_pts];
+		const int num_th_pts = 100;
+		double x2[num_th_pts], y2[num_th_pts], ex2[num_th_pts], ey2[num_th_pts];
 
 		for(int i = 0; i < num_exp_pts; i++){
 
@@ -288,10 +289,12 @@ public:
 			ex1[i] = 0;
 			ey1[i] = 0;
 
-			x2[i] = 0;
-			y2[i] = 0;
-			ex2[i] = 0;
-			ey2[i] = 0;
+		}
+
+
+		for (int i = 0; i < num_th_pts; i++){
+
+			x2[i] = lower_bound + (upper_bound - lower_bound) * i / ((double)num_th_pts - 1.);
 
 		}
 
@@ -303,17 +306,11 @@ public:
 			if(isnan(val)) x1[i] = 0;
 			else x1[i] = val;
 
-			val = data[totnumofchans * numamp + numchan].sqrts[i];
-			if(isnan(val)) x2[i] = 0;
-			else x2[i] = val;
 
 			val = data[totnumofchans * numamp + numchan].amp_expval[i];
 			if(isnan(val)) y1[i] = 0;
 			else y1[i] = val;
 
-			val = func(x2[i]);
-			if(isnan(val)) y2[i] = 0;
-			else y2[i] = val;
 
 			val = data[totnumofchans * numamp + numchan].amp_expval_stat_err[i];
 			if(isnan(val)) ey1[i] = 0;
@@ -321,8 +318,16 @@ public:
 
 		}
 
+		for(int i = 0; i < num_th_pts; i++){
+
+			val = func(x2[i]);
+			if(isnan(val)) y2[i] = 0;
+			else y2[i] = val;
+
+		}
+
 		auto gr1 = new TGraphErrors(num_exp_pts,x1,y1,ex1,ey1);
-		auto gr2 = new TGraphErrors(num_exp_pts,x2,y2,ex2,ey2);
+		auto gr2 = new TGraph(num_th_pts,x2,y2);
 
    		//gr1->SetTitle("TGraphErrors Example");
    		gr1->SetMarkerColor(4);

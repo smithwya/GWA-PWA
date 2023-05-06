@@ -151,7 +151,7 @@ ostream& operator<<(ostream& os, channel const& m) {
 	for (int i = 0; i < m.couplings.size(); i++) {
 		os << m.couplings[i] << ", ";
 	}
-	os << "}" << endl;
+	os << "}" << endl; // << " and the couplings.size is " << m.couplings.size() << endl;
 	os << "chebyCoeffs = { ";
 	for (int i = 0; i < m.chebyCoefficients.size(); i++) {
 		os << m.chebyCoefficients[i] << ", ";
