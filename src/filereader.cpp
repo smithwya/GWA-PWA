@@ -24,6 +24,8 @@ filereader::filereader(string filename){
 //read a file and save the list of commands in the file
 void filereader::readFile(string filename){
 	ifstream infile(filename);
+	if (!infile) { cout << "Error: file " << filename << " not found!!!" << endl; exit(0); }
+
     string line;
         
     for(std::string line; getline(infile, line); )
@@ -148,7 +150,7 @@ void filereader::SetSeed(){
 	smatch cmdmatch;
 	for(int i = 0; i < commands.size(); i++){
 		if(regex_search(commands.at(i), cmdmatch, reg_Seed)){
-            Seed = commands[i];
+            SeedCmd = commands[i];
 		}
     }		
 }
@@ -198,6 +200,7 @@ void filereader::SetAddPoleList(){
 	smatch cmdmatch;
 	for(int i = 0; i < commands.size(); i++){
 		if(regex_search(commands.at(i), cmdmatch, reg_AddPole)){
+			//cout << commands[i] << endl;
             AddPole_list.push_back(commands[i]);
 		}
     }		
@@ -224,8 +227,8 @@ void filereader::SetAllCommandLists(){
 	SetExpDataList();
 }
 
-string filereader::getSeed(){
-	return Seed;
+int filereader::getSeed(){
+	return readSeed(SeedCmd);
 }
 
 string filereader::getFitRegion(){
@@ -374,13 +377,18 @@ poleDat filereader::readPole(string cmd){
 	regex testreg_name("[A-Za-z]+");
 	
 	string wname = "";
-	double mass, mass_inc = 0;
+	double mass = 0; 
+	double mass_inc = 0;
 	vector<string> chnames = {};
-	vector<double> couplings, couplings_inc = {};
+	vector<double> couplings = {};
+	vector<double> couplings_inc = {};
 
 	if(regex_search(cmd, match, reg_AddPole)){
+		//for (int i = 0; i<15; i++) cout << i << ": " << match[i] << endl;
+		//exit(0);
 		wname = match[1];
 		remove(wname.begin(), wname.end(), ' ');
+		//cout << wname << endl;
 		
 		string mySuffix, temp;
 		mySuffix = match[2];
@@ -391,8 +399,10 @@ poleDat filereader::readPole(string cmd){
             mySuffix = testmatch.suffix();
 			if (counter%2 == 0){
                 mass = stod(string(temp));
+				//cout << mass << endl;
             }else{
                 mass_inc = stod(string(temp));
+				//cout << mass_inc << endl;
             }
 			counter++;
         }
@@ -404,17 +414,19 @@ poleDat filereader::readPole(string cmd){
         {
             temp = testmatch[0];
 			remove(temp.begin(), temp.end(), ' ');
+			//cout << temp << endl;
 			chnames.push_back(temp);
             mySuffix = testmatch.suffix();
             counter++;
         }
 		
-		mySuffix = match[3 + counter];
+		mySuffix = match[6];
 
 		counter = 0;
 		while(regex_search(mySuffix, testmatch, testreg_number))
 		{
 			temp = testmatch[0];
+			//cout << temp << endl;
 			mySuffix = testmatch.suffix();
 			if (counter%2 == 0){
 				couplings.push_back(stod(string(temp)));
@@ -427,7 +439,23 @@ poleDat filereader::readPole(string cmd){
 
 	}
 
-	if(chnames.size()!=couplings.size()) return poleDat("",0,0,{},{},{});
+	if(chnames.size()!=couplings.size()) {
+		cout << "chnames.size and couplings.size don't match: " << chnames.size() << " vs " << couplings.size() << endl; 
+		return poleDat("",0,0,{},{},{});
+	}
+
+	//cout << "in filereader::readPole: " << chnames.size() << " vs " << couplings.size() << endl; 
+
+	/*
+	cout << wname << " " << mass << " " << mass_inc << endl;
+	for(int i = 0; i < chnames.size(); i++){
+		cout << chnames[i] << endl;
+	}
+
+	for(int i = 0; i < couplings.size(); i++){
+		cout << couplings[i] << " " << couplings_inc[i] << endl;
+	}
+	*/
 
 	return poleDat(wname, mass, mass_inc, chnames, couplings, couplings_inc);
 }
@@ -476,54 +504,57 @@ observable filereader::getObs(){
 
 
 void filereader::loadExpData(){
-	
-	//make list of experimental data objects
-	for(string s : getExpDataList()){
-		expdataDat expd = readExpData(s);
-		ifstream letsread;
-		vector<expchan> exp_xy;
-		vector<double> x, y = {};
-		cout<<expd.filename<<endl;
-		for(int i = 0; i < obsObject.getNumAmps(); i++){
 
-			if(expd.wavename == obsObject.amplitudes[i].getName()){
-				
-				for(int j = 0; j < obsObject.numChans; j++){
+	ifstream letsread;
+	int nWaves = obsObject.getNumAmps();
+	int nChans = obsObject.amplitudes[0].getNumOfChans();
+	vector<expchan> allDat = {};
 
-					if(expd.channame == obsObject.amplitudes[i].getChanNames()[j]){
+	vector<expchan> withDummies;
 
-						double a[17];
-
-						for(int k = 0; k < 17; k++){
-							a[k] = 0;
-						}
-
-						letsread.open(expd.filename);
-
-						while(letsread>>a[1]>>a[2]>>a[3]>>a[4]>>a[5]>>a[6]>>a[7]>>a[8]>>a[9]>>a[10]>>a[11]>>a[12]>>a[13]>>a[14]>>a[15]>>a[16]>>a[17]){
-							x.push_back(a[1]);
-							y.push_back(a[2]);
-						}
-
-						exp_xy.push_back(expchan(expd.wavename, expd.channame, x, y));
-						
-						x.clear();
-						y.clear();
-						letsread.close();
-
-					}
-					else{
-						exp_xy.push_back(expchan(expd.wavename, obsObject.amplitudes[i].getChanNames()[j], {}, {})); //in order to consider also possible dummy channels
-					}
-
-				}
-				
-			}
-
+	for(string ampname: obsObject.getAmpNames()){
+		for(string chname: obsObject.amplitudes[0].getChanNames()){
+			expchan aux = expchan(ampname, chname, {}, {}, {}, {});
+			withDummies.push_back(aux);
 		}
-		obsObject.addData(exp_xy);
 	}
 
+	for(string s : getExpDataList()){
+		//for each command in the input file
+
+		//getting info from the file, chan name, wave name, data name
+		expdataDat expd = readExpData(s);
+		//read the file
+		letsread.open(expd.filename);
+		vector<double> a(5);
+		vector<double> x = {};
+		vector<double> y = {};
+		vector<double> y_stat_err = {};
+		vector<double> y_sist_err = {};
+		while(letsread>>a[0]>>a[1]>>a[2]>>a[3]>>a[4]){
+			x.push_back(a[0]);
+			y.push_back(a[1]);
+			y_stat_err.push_back(a[2]);
+			y_sist_err.push_back(a[3]);
+		}
+		letsread.close();
+		
+		//make a data object from that file.			
+		expchan tempData = expchan(expd.wavename, expd.channame, x, y, y_stat_err, y_sist_err);
+		allDat.push_back(tempData);
+	}
+
+	//cout << withDummies.size() << " " << allDat.size() << endl;
+
+	for(int i = 0; i < withDummies.size(); i++){
+		for(int j = 0; j < allDat.size(); i++){
+			//cout << withDummies[i].wavename << " " << allDat[j].wavename << " " << withDummies[i].channame << " " << allDat[j].channame << endl;
+			//if((withDummies[i].wavename == allDat[j].wavename) && (withDummies[i].channame == allDat[j].channame)) cout << "hello" << endl;
+		}
+	}//it has to be fixed
+
+	//obsObject.setData(withDummies);
+	obsObject.setData(allDat);
 }
 
 void filereader::SetExpDataList(){

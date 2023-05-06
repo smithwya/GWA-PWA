@@ -1,14 +1,26 @@
 SetSeed(3)
-FitRegion(0.9975, 2.5)
 
-AddChannel("PiPi", {0.13498, 0.13498})
+FitRegion(10.6322,11.0208)
 
-
-AddWave("S","kmat","nominal", 0, 0.6)
-ChebyCoeffs("S", "PiPi","p+s = 1", {-2173.73 \pm 8, 3272.05 \pm 10, -1553.73 \pm 9, 361.79 \pm 8}) 
-
-AddPole("S", 0.00631603 \pm 10, {"PiPi"}, {-6.05845 \pm 70})
+AddChannel("BB", {5, 5})
+AddChannel("BBstar", {5, 5})
+AddChannel("BstarBstar", {5, 5})
 
 
-AddKmatBackground("S", 0, {{16.1903 \pm 0, 18.3081 \pm 908, 0 \pm 8}, {19.2388 \pm 8, 0 \pm 7000}, {-15.811 \pm  8 }})
-AddKmatBackground("S", 1, {{-6.27393 \pm 0, -9.19686 \pm 0, 0 \pm 0}, {-13.3706\pm9, 0 \pm 9}, {6.03082 \pm 9}})
+AddWave("P","kmat","nominal", 0, 0.6)
+
+ChebyCoeffs("P", "BB","p+s = 1", {-2160.73 \pm 10, 3272.05 \pm 10,5000 \pm 10}) 
+ChebyCoeffs("P", "BBstar", "p+s = 1", {1927.5 \pm 49, -2996.84 \pm 45,5000 \pm 10})
+ChebyCoeffs("P", "BstarBstar", "p+s = 1", {1035 \pm 0, -2996.84 \pm 45, 5000 \pm 10})
+
+
+
+AddPole("P", 117.91 \pm 10, {"BB","BBstar","BstarBstar"}, {-6.05845 \pm 70, -7.24665 \pm 0,1.95572  \pm 8})
+AddPole("P", 114.95 \pm 10, {"BB","BBstar","BstarBstar"}, {-6.05845 \pm 70, -7.24665 \pm 0,1.95572  \pm 8})
+
+AddKmatBackground("P", 0, {{16.1903 \pm 8, 18.3081 \pm 908, 0 \pm 0}, {19.2388 \pm 8, 0 \pm 0}, {-15.811 \pm  8 }})
+AddKmatBackground("P", 1, {{-6.27393 \pm 8, -9.19686 \pm 8, 0 \pm 0}, {-13.3706\pm9, 0 \pm 0}, {6.03082 \pm 9}})
+
+LoadExpData("P", "BB", "Data/BB-nominal.dat")
+LoadExpData("P", "BBstar", "Data/BBstar-nominal.dat")
+LoadExpData("P", "BstarBstar", "Data/BstarBstar-nominal.dat")

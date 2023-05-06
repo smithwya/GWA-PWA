@@ -84,23 +84,46 @@ vector<channel> amplitude::getChannels(){
 	return channels;
 }
 
+vector<double> amplitude::getResMasses(){
+	return resmasses;
+}
+
 	// return E_gamma * p_i * numerator * denominator.inverse()
 VectorXcd amplitude::getValue(comp s) {
 	
-	double m_JPsi = 3.0969;
-
-	//comp Egamma = pow((s-pow(m_JPsi,2)),2)/(4.0*s);
-	comp Egamma = (pow(m_JPsi,2)-s)/(2.0*sqrt(s));
+	/*
+	//comp Egamma = (pow(m_bottomonium,2)-s)/(2.0*sqrt(s));
 	MatrixXcd phsp = MatrixXcd::Identity(numChannels,numChannels);
 
 
 	for(int i = 0; i < numChannels; i++){
-		//phsp(i,i)=sqrt(Egamma*pow(channels[i].getMomentum(s),2.0*J+1.0));
-		phsp(i,i)=Egamma*pow(getMomentum(i,s),J+0.5);
+		//phsp(i,i)=Egamma*pow(getMomentum(i,s),J+0.5);
+		phsp(i,i)= pow(getMomentum(i,s),J+0.5)/pow(s,.25);
 	}
 	
 	//return (phsp*getDenominator(s).inverse())*(getNumerator(s,3));
 	return ((getNumerator(s,3).transpose())*(getDenominator(s).inverse()))*phsp;
+	*/
+
+	
+	MatrixXcd phsp = MatrixXcd::Identity(numChannels,numChannels);
+
+	for(int i = 0; i < numChannels; i++){
+		phsp(i,i)= pow(getMomentum(i,s),J+0.5)/pow(s,.25);
+	}
+
+	MatrixXcd K = getKMatrix(s);
+	MatrixXcd I = MatrixXcd::Identity(numChannels,numChannels);
+
+	MatrixXcd DispRhoN = MatrixXcd::Zero(numChannels,numChannels);
+
+	for(int k = 0; k < numChannels; k++){
+		DispRhoN(k,k) = getIntegral(s,k);
+	}
+
+	return (getNumerator(s, 3).transpose() * (I - K * DispRhoN).inverse() * K) * phsp;
+	
+
 }
 
 
@@ -260,13 +283,15 @@ void amplitude::setResMasses(vector<double> rm){
 }
 
 MatrixXcd amplitude::getKMatrix(comp s) {
+//return MatrixXcd::Ones(numChannels, numChannels);
+
 	MatrixXcd kmat = MatrixXcd::Zero(numChannels, numChannels);
 
 	for (int k = 0; k < numChannels; k++) {
 		for (int i = 0; i <= k; i++) {
 			comp tempMatrixTerm = 0;
 
-			for (int R = 0; R < numChannels; R++) {
+			for (int R = 0; R < resmasses.size(); R++) {
 				tempMatrixTerm += channels[k].getCoupling(R) * channels[i].getCoupling(R) / (resmasses[R] - s);
 			}
 
@@ -388,7 +413,12 @@ void amplitude::addPole(double mass,double mass_step, vector<string> chan_names,
 
 	int nCouplings = chan_names.size();
 
-	if(nCouplings != couplings.size()) return;
+	if(nCouplings != numChannels){
+		cout << "(in amplitude.cpp) nCouplings != numChannels" << endl;
+		return;
+	}
+
+	//cout << nCouplings << " " << numChannels << endl;
 
 	resmasses.push_back(mass);
 	resmasses_steps.push_back(mass_step);
@@ -591,6 +621,14 @@ vector<string> amplitude::getChanNames(){
 	vector<string> chlist = {};
 	for(channel c : channels) chlist.push_back(c.getName());
 	return chlist;
+}
+
+int amplitude::getNumOfChans(){
+	return getChanNames().size();
+}
+
+vector<double> amplitude::getFitInterval(){
+	return {smin, smax};
 }
 
 ostream& operator<<(ostream& os, amplitude const& m) {

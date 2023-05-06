@@ -66,10 +66,12 @@ public:
 	void addPole(double mass,vector<string> chan_names, vector<double> couplings);
 	void addPole(double mass,double mass_step,vector<string> chan_names, vector<double> couplings, vector<double> steps);
 	vector<string> getChanNames();
+	int getNumOfChans();
 	void calcIntegrals(vector<comp> slist,int k);
 	vector<double> getParamList();
 	void setParamList(vector<double> params);
 	void setResMasses(vector<double> rm);
+	vector<double> getResMasses();
 	vector<double> getFittedParamList();
 	void setFittedParamList(vector<double> fittedParams);
 	string getName();
@@ -78,6 +80,7 @@ public:
 	vector<double> getPoleSteps();
 	vector<double> getStepSizes();
 	vector<double> getFittedSteps();
+	vector<double> getFitInterval();
 private:
 	vector<channel> channels;
 	vector<MatrixXcd> kParameters;
