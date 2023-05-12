@@ -3,21 +3,13 @@ SetSeed(34)
 FitRegion(10.64,11.0208)
 
 AddChannel("BB", {5.27925, 5.27925})
-AddChannel("BBstar", {5.27925, 5.27925})
 
 
 
 AddWave("P","kmat","nominal", 0, 0.6)
 
-ChebyCoeffs("P", "BB","p = 1", {0.35 \pm 10, 10.0 \pm 8, -15.811 \pm  8 }) 
-ChebyCoeffs("P", "BBstar","p = 1", {0.35 \pm 10, 10.0 \pm 8, -15.811 \pm  8 }) 
+ChebyCoeffs("P", "BB","p = 1", {100 \pm .0001})
 
-
-AddPole("P", 118.48 \pm 10, {"BB, BBstar"}, {10.0 \pm 8, 20. \pm 70})
-
-
-AddKmatBackground("P", 0, {{19.2388 \pm 8, 0 \pm 0}, {-15.811 \pm  8 }})
-
+AddPole("P", 123 \pm 0.1, {"BB"}, {100 \pm 0.1})
 
 LoadExpData("P", "BB", "Data/BB-nominal.dat")
-LoadExpData("P", "BBstar", "Data/BBstar-nominal.dat")
