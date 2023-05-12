@@ -49,7 +49,7 @@ double minfunc(const double *xx){
 		double tot = 0;
 
 		//for(string channame: testObs.amplitudes[amp_index].getChanNames()){
-		for(string channame: {"BB", "BBstar"}){
+		for(string channame: {"BB"}){
 			
 			double sum = 0;
 			double std = 0;
@@ -118,10 +118,12 @@ int main()
 		return (value*conj(value)).real();
 	};
 
+	/*
 	auto intensityP_BBstar = [&](double x){
 		comp value = testObs.amplitudes[0].getValue(pow(x,2))(1);
 		return (value*conj(value)).real();
 	};
+	*/
 
 	/*
 	auto intensityP_BstarBstar = [&](double x){
@@ -147,7 +149,7 @@ int main()
 cout << testObs.amplitudes[0] << endl; 
 
 	testObs.makePlotGraphWithExp("P", "BB", "BottP_BB_Graph_WithExp", intensityP_BB, 10.6322,11.0208);
-	testObs.makePlotGraphWithExp("P", "BBstar", "BottP_BBstar_Graph_WithExp", intensityP_BBstar, 10.6322,11.0208);
+	//testObs.makePlotGraphWithExp("P", "BBstar", "BottP_BBstar_Graph_WithExp", intensityP_BBstar, 10.6322,11.0208);
 	//testObs.makePlotGraphWithExp("P", "BstarBstar", "BottP_BstarBstar_Graph_WithExp", intensityP_BstarBstar, 10.6322,11.0208);
 
 	/*
@@ -219,7 +221,7 @@ return 0;*/
 	const double *xs = min->X();
 	
 	testObs.makePlotGraphWithExp("P", "BB", "testBott_BB", intensityP_BB, 10.6322, 11.0208);
-	testObs.makePlotGraphWithExp("P", "BBstar", "testBott_BBstar", intensityP_BBstar, 10.6322, 11.0208);
+	//testObs.makePlotGraphWithExp("P", "BBstar", "testBott_BBstar", intensityP_BBstar, 10.6322, 11.0208);
 	//testObs.makePlotGraphWithExp("P", "BstarBstar", "testBott_BstarBstar", intensityP_BstarBstar, 10.6322, 11.0208);
 
 	//note to self: need to get rid of 'dumbJ' in amplitude.cpp later when doing non-radJPsi fits
@@ -261,7 +263,8 @@ return 0;*/
 	}
 	*/
 
-cout << "Chi2/ndf = " << min->MinValue() / (testObs.getData()[0].amp_expval.size() + testObs.getData()[1].amp_expval.size() - testObs.getFitParams().size()) << endl;
+//cout << "Chi2/ndf = " << min->MinValue() / (testObs.getData()[0].amp_expval.size() + testObs.getData()[1].amp_expval.size() + testObs.getData()[2].amp_expval.size() - testObs.getFitParams().size()) << endl;
+cout << "Chi2/ndf = " << min->MinValue() / (testObs.getData()[0].amp_expval.size()) << endl;
 
 cout << testObs.amplitudes[0] << endl;
 
