@@ -25,6 +25,8 @@ class bottomonium : public observable{
     };
     
     double Bott_minfunc(vector<double> x){
-	return x[0]*x[0];
+	    return x[0]*x[0];
     }
+
+    
 };
