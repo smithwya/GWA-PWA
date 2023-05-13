@@ -48,9 +48,11 @@ private:
 	int numAmps;
 
 
+
 public:
 	vector<amplitude> amplitudes;
 	int numChans;
+	int nParams;
 	observable(){
 		amplitudes = {};
 		data = {};
@@ -123,27 +125,6 @@ public:
 		file.Close();
 		return;
 	};
-
-	/*
-	void makePlotGraph(string pdfname, function<double(double)> func, double lower_bound, double upper_bound){	
-
-		auto myFunc = [&](double x){return func(x);};
-
-		TF1 *f = new TF1("f", "myFunc(x)", lower_bound, upper_bound, 0);
-
-		auto gr = new TGraph(f);
-
-		TFile file("pdf_folder.root", "recreate");
-		TCanvas canv;
-		//gr->Write();
-		//gr->Draw();
-		f->Draw();
-		canv.SaveAs(("Plots/"+pdfname+".pdf").c_str());
-		file.Close();
-		return;
-
-	}; //not working!
-	*/
 
 	int getampindex(string ampname){
 
@@ -529,6 +510,49 @@ public:
 		return steps;
 	};
 
+	double chisq(vector<double> params){
+		double result = 0;
+		//for every amplitude in the list
+		for(string ampname : getAmpNames()){
+			//locate the amplitude
+			int amp_index = getampindex(ampname);
+			amplitude amp = amplitudes[amp_index];
+			//read out the start and end of the fit interval
+			double lower_bound = sqrt(amp.getFitInterval()[0]);
+			double upper_bound = sqrt(amp.getFitInterval()[1]);
+			int numChans = amp.getNumOfChans();
+
+			//if you don't have data for every energy point, the code breaks anyways
+			vector<double> sqrts_vals = data[0].sqrts;
+
+			//for every data point
+			for(int i = 0; i < sqrts_vals.size(); i++){
+				double x = sqrts_vals[i];
+				double sum = 0;
+				double std = 0;
+				double y = 0;
+				double stat_err = 0;
+				double sist_err = 0;
+				//for sqrts in the fitting range, calculate relevant quantities
+				if(x >= lower_bound && x <= upper_bound){
+					//calculate the value of the amplitude
+					VectorXcd val = amp.getValue(pow(x,2));
+
+					for(int j = 0; j < numChans; j++){
+						//y = value of amplitude for channel j
+						y = (val(j)*conj(val(j))).real();
+						stat_err = data[numChans * amp_index + j].amp_expval_stat_err[i];
+						sist_err = data[numChans * amp_index + j].amp_expval_sist_err[i];
+						std = sqrt(pow(stat_err, 2) + pow(sist_err, 2));
+						sum += pow(((y - data[numChans * amp_index + j].amp_expval[i])/std), 2);
+						}
+				}
+				result +=sum;
+			}
+
+		}
+		return result;
+	}
 
 	friend ostream& operator<<(std::ostream& os, observable const& m){
 		for(amplitude a: m.amplitudes) cout<<a<<endl<<endl;

@@ -498,10 +498,9 @@ kmatDat filereader::readKmat(string cmd){
 
 
 observable filereader::getObs(){
-
+	obsObject.nParams = obsObject.getFitParams().size();
 	return obsObject;
 }
-
 
 void filereader::loadExpData(){
 
@@ -510,7 +509,7 @@ void filereader::loadExpData(){
 	int nChans = obsObject.amplitudes[0].getNumOfChans();
 	vector<expchan> allDat = {};
 
-	vector<expchan> withDummies;
+	vector<expchan> withDummies = {};
 
 	for(string ampname: obsObject.getAmpNames()){
 		for(string chname: obsObject.amplitudes[0].getChanNames()){
