@@ -58,6 +58,32 @@ int main()
 	cout << testObs.amplitudes[0] << endl; 
 	vector<double> params = testObs.getFitParams();
 
+	//Giorgio's graphing shit
+	auto intensityP_BB = [&](double x){
+		comp value = testObs.amplitudes[0].getValue(pow(x,2))(0);
+		return (value*conj(value)).real();
+	};
+
+	/*
+	auto intensityP_BBstar = [&](double x){
+		comp value = testObs.amplitudes[0].getValue(pow(x,2))(1);
+		return (value*conj(value)).real();
+	};
+	*/
+
+	/*
+	auto intensityP_BstarBstar = [&](double x){
+		comp value = testObs.amplitudes[0].getValue(pow(x,2))(2);
+		return (value*conj(value)).real();
+	};
+	*/
+
+	testObs.makePlotGraphWithExp("P", "BB", "BottP_BB_Graph_WithExp", intensityP_BB, 10.6322,11.0208);
+	//testObs.makePlotGraphWithExp("P", "BBstar", "BottP_BBstar_Graph_WithExp", intensityP_BBstar, 10.6322,11.0208);
+	//testObs.makePlotGraphWithExp("P", "BstarBstar", "BottP_BstarBstar_Graph_WithExp", intensityP_BstarBstar, 10.6322,11.0208);
+
+
+
 	//make the minimzer
 	ROOT::Math::Minimizer* min = ROOT::Math::Factory::CreateMinimizer("Minuit2","");
 	//Set some criteria for the minimzer to stop
@@ -98,6 +124,12 @@ int main()
 	const double *xs = min->X();
 	//print out the final params
 	cout << testObs.amplitudes[0] << endl;
+	
+	//more graphing shit
+	testObs.makePlotGraphWithExp("P", "BB", "testBott_BB", intensityP_BB, 10.6322, 11.0208);
+	//testObs.makePlotGraphWithExp("P", "BBstar", "testBott_BBstar", intensityP_BBstar, 10.6322, 11.0208);
+	//testObs.makePlotGraphWithExp("P", "BstarBstar", "testBott_BstarBstar", intensityP_BstarBstar, 10.6322, 11.0208);
+
 
 	return 0;
 	
