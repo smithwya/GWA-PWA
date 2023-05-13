@@ -511,7 +511,6 @@ public:
 	};
 
 	double chisq(vector<double> params){
-
 		double result = 0;
 		//for every amplitude in the list
 		for(string ampname : getAmpNames()){
