@@ -547,7 +547,7 @@ void filereader::loadExpData(){
 	//cout << withDummies.size() << " " << allDat.size() << endl;
 
 	for(int i = 0; i < withDummies.size(); i++){
-		for(int j = 0; j < allDat.size(); i++){
+		for(int j = 0; j < allDat.size(); j++){
 			//cout << withDummies[i].wavename << " " << allDat[j].wavename << " " << withDummies[i].channame << " " << allDat[j].channame << endl;
 			//if((withDummies[i].wavename == allDat[j].wavename) && (withDummies[i].channame == allDat[j].channame)) cout << "hello" << endl;
 		}
