@@ -510,18 +510,9 @@ public:
 		return steps;
 	};
 
-	double chisq(const double *xx){
+	double chisq(vector<double> params){
 
 		double result = 0;
-
-		//read in the parameters
-		vector<double> params = {};
-		for(int i = 0; i < nParams; i++){
-			params.push_back(xx[i]);
-		}
-		//set to new parameters
-		setFitParams(params);
-
 		//for every amplitude in the list
 		for(string ampname : getAmpNames()){
 			//locate the amplitude
