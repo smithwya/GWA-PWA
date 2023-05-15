@@ -566,6 +566,20 @@ void filereader::SetExpDataList(){
     }
 }
 
+
+void filereader::randomize(){
+	vector<double> params = obsObject.getFitParams();
+
+	//might need to make sure pole masses are positive somehow
+	for(int i = 0; i < params.size(); i++){
+		params[i]=0;
+	}
+
+	obsObject.setFitParams(params);
+
+	return;
+}
+
 expdataDat filereader::readExpData(string cmd){
 	regex reg_ExpData("LoadExpData\\(\\s*\"(.*?)\"\\s*,\\s*\"(.*?)\"\\s*,\\s*\"(.*?)\"\\s*\\)");
 	regex testreg_name("[A-Za-z0-9\\.\\-\\_]+");

@@ -4,9 +4,7 @@ FitRegion(10.64,11.0208)
 
 AddChannel("BB", {5.27925, 5.27925})
 
-
-
-AddWave("P","kmat","nominal", 0, 0.6)
+AddWave("P","kmat","nominal", 1, 0.6)
 
 ChebyCoeffs("P", "BB","p = 1", {100 \pm 50})
 
