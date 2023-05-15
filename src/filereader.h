@@ -152,6 +152,7 @@ public:
 	expdataDat readExpData(string cmd);
 	void SetExpDataList();
 	vector<string> getExpDataList();
+	void randomize();
 
 
 private:
