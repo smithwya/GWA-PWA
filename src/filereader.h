@@ -153,9 +153,10 @@ public:
 	void SetExpDataList();
 	vector<string> getExpDataList();
 	void randomize();
-
+	void writeOutputFile();
 
 private:
+	string NameOfFile;
 	vector<std::string> commands;
 	smatch match, testmatch;
 	string SeedCmd, FitRegion;

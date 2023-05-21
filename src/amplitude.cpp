@@ -196,7 +196,7 @@ VectorXcd amplitude::getNumerator(comp s, int type){
 comp amplitude::getRhoN(comp sprime,int k)
 {
 	int dumbJ = J;
-	if(k==2) dumbJ = 0;
+	//if(k==2) dumbJ = 0;
 
 	comp x = pow(2.0*channels[k].getMomentum(sprime),2.0*dumbJ+1.0)/pow(sprime + sL,dumbJ+alpha);
 

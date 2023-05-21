@@ -49,13 +49,13 @@ int main()
 	testReader.setPoles();
 	testReader.setKmats();
 	testReader.loadExpData();
-
+	testReader.randomize();
 
 	//saves the observable object outside of filereader object
 	testObs = testReader.getObs();
 
 	//print out the observable starting params
-	cout << testObs.amplitudes[0] << endl; 
+	cout << testObs.amplitudes[0] << endl; return 0;
 	vector<double> params = testObs.getFitParams();
 
 	//Giorgio's graphing shit
@@ -87,9 +87,9 @@ int main()
 	//make the minimzer
 	ROOT::Math::Minimizer* min = ROOT::Math::Factory::CreateMinimizer("Minuit2","");
 	//Set some criteria for the minimzer to stop
-	min->SetMaxFunctionCalls(100);
-	min->SetMaxIterations(100);
-	min->SetTolerance(0.01);
+	min->SetMaxFunctionCalls(1000000);
+	min->SetMaxIterations(10000);
+	min->SetTolerance(0.001);
 	min->SetPrintLevel(1);
 	//get the initial parameters and steps from the constructed observable object
 	vector<double> fitparams = testObs.getFitParams();

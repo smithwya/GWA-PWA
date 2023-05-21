@@ -11,6 +11,7 @@
 #include <fstream>
 #include <sstream>
 #include <regex>
+#include <TRandom3.h>
 
 using namespace std;
 
@@ -19,6 +20,7 @@ filereader::filereader(string filename){
 	commands = {};
 	readFile(filename);
 	obsObject = observable();
+	NameOfFile = filename;
 }
 
 //read a file and save the list of commands in the file
@@ -569,10 +571,13 @@ void filereader::SetExpDataList(){
 
 void filereader::randomize(){
 	vector<double> params = obsObject.getFitParams();
+	vector<double> stepsizes = obsObject.getStepSizes();
+
+	TRandom3 gen(getSeed());
 
 	//might need to make sure pole masses are positive somehow
 	for(int i = 0; i < params.size(); i++){
-		params[i]=0;
+		params[i]= gen.Uniform(params[i] - stepsizes[i], params[i] + stepsizes[i]);
 	}
 
 	obsObject.setFitParams(params);
@@ -598,4 +603,11 @@ expdataDat filereader::readExpData(string cmd){
     }
 
 	return expdataDat(wavename, chname, fname);
+}
+
+void filereader::writeOutputFile(){
+
+	ofstream letswrite("output_of_" + NameOfFile);
+
+	return;
 }
