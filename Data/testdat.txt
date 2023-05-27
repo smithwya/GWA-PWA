@@ -6,8 +6,12 @@ AddChannel("BB", {5.27925, 5.27925})
 
 AddWave("P","kmat","nominal", 1, 0.6)
 
-ChebyCoeffs("P", "BB","p = 1", {0.35 \pm 5})
+ChebyCoeffs("P", "BB","p = 1", {100 \pm 200, 100 \pm 200,100 \pm 200}) 
 
-AddPole("P",123 \pm 10, {"BB"}, {10 \pm 5})
+AddPole("P",123 \pm 100, {"BB"}, {100 \pm 100})
+
+
+AddKmatBackground("P", 0, {{100 \pm 200 }})
+AddKmatBackground("P", 1, {{100 \pm 200 }})
 
 LoadExpData("P", "BB", "Data/BB-nominal.dat")
