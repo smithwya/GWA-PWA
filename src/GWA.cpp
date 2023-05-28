@@ -49,8 +49,7 @@ int main()
 	testReader.setPoles();
 	testReader.setKmats();
 	testReader.loadExpData();
-	//testReader.randomize(); //uncomment if you want to randomize the starting values of fit params
-	testReader.writeOutputFile(); return 0;
+	testReader.randomize(); //uncomment if you want to randomize the starting values of fit params
 
 	//saves the observable object outside of filereader object
 	testObs = testReader.getObs();
@@ -88,9 +87,9 @@ int main()
 	//make the minimzer
 	ROOT::Math::Minimizer* min = ROOT::Math::Factory::CreateMinimizer("Minuit2","");
 	//Set some criteria for the minimzer to stop
-	min->SetMaxFunctionCalls(1000000);
-	min->SetMaxIterations(10000);
-	min->SetTolerance(0.001);
+	min->SetMaxFunctionCalls(1000);
+	min->SetMaxIterations(100);
+	min->SetTolerance(0.01);
 	min->SetPrintLevel(1);
 	//get the initial parameters and steps from the constructed observable object
 	vector<double> fitparams = testObs.getFitParams();
@@ -125,6 +124,8 @@ int main()
 	const double *xs = min->X();
 	//print out the final params
 	cout << testObs.amplitudes[0] << endl;
+
+	testReader.writeOutputFile();
 	
 	//more graphing shit
 	testObs.makePlotGraphWithExp("P", "BB", "testBott_BB", intensityP_BB, 10.6322, 11.0208);
