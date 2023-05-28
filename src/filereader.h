@@ -154,10 +154,13 @@ public:
 	vector<string> getExpDataList();
 	void randomize();
 	void writeOutputFile();
+	void RewriteChebyList();
+	void RewriteAddPoleList();
+	void RewriteKmatList();
 
 private:
 	string NameOfFile;
-	vector<std::string> commands;
+	vector<std::string> commands = {}, output_cmds = {};
 	smatch match, testmatch;
 	string SeedCmd, FitRegion;
 	vector<string> AddChannel_list, AddWave_list, Cheby_list, AddPole_list, Kmat_list,ExpData_list;

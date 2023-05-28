@@ -42,20 +42,21 @@ int main()
 {
 
 	//reads the file and creates an observable object with the information from the file
-	filereader testReader("Data/testdat.txt");
+	filereader testReader("Data/simpledat.txt");
 	testReader.SetAllCommandLists();
 	testReader.ConstructBareAmps();
 	testReader.setChebys();
 	testReader.setPoles();
 	testReader.setKmats();
 	testReader.loadExpData();
-	testReader.randomize();
+	//testReader.randomize(); //uncomment if you want to randomize the starting values of fit params
+	testReader.writeOutputFile(); return 0;
 
 	//saves the observable object outside of filereader object
 	testObs = testReader.getObs();
 
 	//print out the observable starting params
-	cout << testObs.amplitudes[0] << endl; return 0;
+	cout << testObs.amplitudes[0] << endl; 
 	vector<double> params = testObs.getFitParams();
 
 	//Giorgio's graphing shit

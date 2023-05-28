@@ -72,15 +72,18 @@ public:
 	void setParamList(vector<double> params);
 	void setResMasses(vector<double> rm);
 	vector<double> getResMasses();
+	vector<double> getResMassesSteps();
 	vector<double> getFittedParamList();
 	void setFittedParamList(vector<double> fittedParams);
 	string getName();
 	vector<channel> getChannels();
+	vector<MatrixXcd> getkParameters();
 	vector<double> getKSteps(int i);
 	vector<double> getPoleSteps();
 	vector<double> getStepSizes();
 	vector<double> getFittedSteps();
 	vector<double> getFitInterval();
+
 private:
 	vector<channel> channels;
 	vector<MatrixXcd> kParameters;
