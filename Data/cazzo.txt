@@ -1,0 +1,38 @@
+SetSeed(3)
+
+FitRegion(10.6322,11.0208)
+
+AddWave("P","kmat","nominal", 1, 0.6)
+
+ChebyCoeffs("P", "BB","p+s = 1", {-17.567044 \pm 10.000000, 38.848981 \pm 10.000000, 45.818095 \pm 10.000000})
+ChebyCoeffs("P", "BBstar", "p+s = 1", {-19.609799 \pm 49.000000, -25.865516 \pm 45.000000, 51.386227 \pm 10.000000})
+ChebyCoeffs("P", "BstarBstar", "p+s = 1", {10.000000 \pm 0.000000, 5.826378 \pm 45.000000, 40.374960 \pm 10.000000})
+
+AddPole("P", 117.910000 \pm 0.000000, {"BB","BBstar","BstarBstar"}, {1.053257 \pm 70.000000, -7.246650 \pm 0.000000, 8.242871 \pm 8.000000})
+AddPole("P", 105.547524 \pm 10.000000, {"BB","BBstar","BstarBstar"}, {-66.098517 \pm 70.000000, -7.000000 \pm 0.000000, -0.007009 \pm 8.000000})
+
+AddKmatBackground("P", 0, {{10.199665 \pm 8.000000, -815.906481 \pm 908.000000, 0.000000 \pm 0.000000}, {14.554686 \pm 8.000000, 0.000000 \pm 0.000000}, {-19.844787 \pm 8.000000}})
+AddKmatBackground("P", 1, {{-13.450455 \pm 8.000000, -15.700036 \pm 8.000000, 0.000000 \pm 0.000000}, {-14.436023 \pm 9.000000, 0.000000 \pm 0.000000}, {9.537646 \pm 9.000000}})
+
+LoadExpData("P", "BB", "Data/BB-nominal.dat")
+LoadExpData("P", "BBstar", "Data/BBstar-nominal.dat")
+LoadExpData("P", "BstarBstar", "Data/BstarBstar-nominal.dat")
+SetSeed(3)
+
+FitRegion(10.6322,11.0208)
+
+AddWave("P","kmat","nominal", 1, 0.6)
+
+ChebyCoeffs("P", "BB","p+s = 1", {-17.567044 \pm 10.000000, 38.848981 \pm 10.000000, 45.818095 \pm 10.000000})
+ChebyCoeffs("P", "BBstar", "p+s = 1", {-19.609799 \pm 49.000000, -25.865516 \pm 45.000000, 51.386227 \pm 10.000000})
+ChebyCoeffs("P", "BstarBstar", "p+s = 1", {10.000000 \pm 0.000000, 5.826378 \pm 45.000000, 40.374960 \pm 10.000000})
+
+AddPole("P", 117.910000 \pm 0.000000, {"BB","BBstar","BstarBstar"}, {1.053257 \pm 70.000000, -7.246650 \pm 0.000000, 8.242871 \pm 8.000000})
+AddPole("P", 105.547524 \pm 10.000000, {"BB","BBstar","BstarBstar"}, {-66.098517 \pm 70.000000, -7.000000 \pm 0.000000, -0.007009 \pm 8.000000})
+
+AddKmatBackground("P", 0, {{10.199665 \pm 8.000000, -815.906481 \pm 908.000000, 0.000000 \pm 0.000000}, {14.554686 \pm 8.000000, 0.000000 \pm 0.000000}, {-19.844787 \pm 8.000000}})
+AddKmatBackground("P", 1, {{-13.450455 \pm 8.000000, -15.700036 \pm 8.000000, 0.000000 \pm 0.000000}, {-14.436023 \pm 9.000000, 0.000000 \pm 0.000000}, {9.537646 \pm 9.000000}})
+
+LoadExpData("P", "BB", "Data/BB-nominal.dat")
+LoadExpData("P", "BBstar", "Data/BBstar-nominal.dat")
+LoadExpData("P", "BstarBstar", "Data/BstarBstar-nominal.dat")

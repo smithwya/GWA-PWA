@@ -122,6 +122,9 @@ public:
 	//void CompleteBareAmps(vector<amplitude> amplist);
 	void printCommands();
 	string getCommand(int i);
+	void SetChi2CutOff();
+	void SetFitFlag();
+	void SetRandomize();
 	void SetSeed();
 	void SetFitRegion();
 	void SetAddChannelList();
@@ -131,12 +134,18 @@ public:
 	void SetKmatList();
 	void SetAllCommandLists();
 	int getSeed();
+	bool getFitFlag();
+	bool getRandomize();
+	double getChi2CutOff();
 	string getFitRegion();
 	vector<string> getAddChannelList();
 	vector<string> getAddWaveList();
 	vector<string> getChebyList();
 	vector<string> getAddPoleList();
 	vector<string> getKmatList();
+	double readChi2CutOffCmd(string cmd);
+	void readFitFlag(string cmd);
+	void readRandomize(string cmd);
 	int readSeed(string cmd);
 	vector<double> readFitReg(string cmd);
 	chanDat readCh(string cmd);
@@ -159,10 +168,12 @@ public:
 	void RewriteKmatList();
 
 private:
+	bool Randomize = true;
+	bool FitFlag = true;
 	string NameOfFile;
 	vector<std::string> commands = {}, output_cmds = {};
 	smatch match, testmatch;
-	string SeedCmd, FitRegion;
+	string FitFlagCmd, SeedCmd, FitRegion, Chi2CutOffCmd, RandomizeCmd;
 	vector<string> AddChannel_list, AddWave_list, Cheby_list, AddPole_list, Kmat_list,ExpData_list;
 	observable obsObject;
 };

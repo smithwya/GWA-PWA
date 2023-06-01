@@ -148,6 +148,36 @@ string filereader::getCommand(int i){
 	return "";
 }
 
+void filereader::SetChi2CutOff(){
+	regex reg_Chi2CutOff("ReducedChi2CutOff\\(\\s*([0-9\\.-]+)\\s*\\)");
+	smatch cmdmatch;
+	for(int i = 0; i < commands.size(); i++){
+		if(regex_search(commands.at(i), cmdmatch, reg_Chi2CutOff)){
+            Chi2CutOffCmd = commands[i];
+		}
+    }
+}
+
+void filereader::SetFitFlag(){
+	regex reg_FitFlag("DoFit\\(\\s*(.*?)\\s*\\)");
+	smatch cmdmatch;
+	for(int i = 0; i < commands.size(); i++){
+		if(regex_search(commands.at(i), cmdmatch, reg_FitFlag)){
+            FitFlagCmd = commands[i];
+		}
+    }
+}
+
+void filereader::SetRandomize(){
+	regex reg_Randomize("DoRandomize\\(\\s*(.*?)\\s*\\)");
+	smatch cmdmatch;
+	for(int i = 0; i < commands.size(); i++){
+		if(regex_search(commands.at(i), cmdmatch, reg_Randomize)){
+            RandomizeCmd = commands[i];
+		}
+    }
+}
+
 void filereader::SetSeed(){
 	regex reg_Seed("SetSeed\\(\\s*([0-9]+)\\s*\\)");
 	smatch cmdmatch;
@@ -222,12 +252,29 @@ void filereader::SetKmatList(){
 void filereader::SetAllCommandLists(){
 	SetSeed();
 	SetFitRegion();
+	SetChi2CutOff();
+	SetFitFlag();
+	SetRandomize();
 	SetAddChannelList();
 	SetAddWaveList();
 	SetChebyList();
 	SetAddPoleList();
 	SetKmatList();
 	SetExpDataList();
+}
+
+double filereader::getChi2CutOff(){
+	return readChi2CutOffCmd(Chi2CutOffCmd);
+}
+
+bool filereader::getFitFlag(){
+	readFitFlag(FitFlagCmd);
+	return FitFlag;
+}
+
+bool filereader::getRandomize(){
+	readRandomize(RandomizeCmd);
+	return Randomize;
 }
 
 int filereader::getSeed(){
@@ -272,7 +319,39 @@ int filereader::readSeed(string cmd){
 	return 0;
 }
 
+void filereader::readFitFlag(string cmd){
+	regex reg_FitFlag("DoFit\\(\\s*(.*?)\\s*\\)");
 
+	if(regex_search(cmd, match, reg_FitFlag)){
+		string my_str = match[1];
+		remove(my_str.begin(), my_str.end(), ' ');
+		if (my_str == "No"){
+			FitFlag = false;
+		}
+	}
+}
+
+void filereader::readRandomize(string cmd){
+	regex reg_Randomize("DoRandomize\\(\\s*(.*?)\\s*\\)");
+
+	if(regex_search(cmd, match, reg_Randomize)){
+		string my_str = match[1];
+		remove(my_str.begin(), my_str.end(), ' ');
+		if (my_str == "No"){
+			Randomize = false;
+		}
+	}
+}
+
+double filereader::readChi2CutOffCmd(string cmd){
+	regex reg_Chi2CutOff("ReducedChi2CutOff\\(\\s*([0-9\\.-]+)\\s*\\)");
+
+	if(regex_search(cmd, match, reg_Chi2CutOff)){
+		return stod(string(match[1]));
+	}
+
+	return 0;
+}
 
 vector<double> filereader::readFitReg(string cmd){
 	regex reg_FitRegion("FitRegion\\(\\s*([0-9\\.-]+)\\s*,\\s*([0-9\\.-]+)\\s*\\)"); //FitRegion(0.9975, 2.5)
@@ -608,13 +687,36 @@ expdataDat filereader::readExpData(string cmd){
 
 void filereader::writeOutputFile(){
 
-	ofstream letswrite("Data/output_of_" + NameOfFile);
+	char str[200];
+	cout << NameOfFile << endl;
+	regex name("(.*?).txt");
+
+	regex_search(NameOfFile, match, name);
+
+	NameOfFile = string(match[1]) + "_output.txt";
+
+	/*sprintf(str, "Data/output_of_%s", NameOfFile.c_str());
+	ofstream letswrite(str);*/
+
+	ofstream letswrite(NameOfFile);
 
 	output_cmds.push_back(SeedCmd);
 
 	output_cmds.push_back("");
 
 	output_cmds.push_back(FitRegion);
+
+	output_cmds.push_back("");
+
+	output_cmds.push_back(Chi2CutOffCmd);
+
+	output_cmds.push_back("");
+
+	output_cmds.push_back(FitFlagCmd);
+
+	output_cmds.push_back("");
+
+	output_cmds.push_back(RandomizeCmd);
 
 	output_cmds.push_back("");
 
@@ -638,7 +740,9 @@ void filereader::writeOutputFile(){
 
 	for(string s: output_cmds) letswrite << s << endl;
 
-	for(string s: output_cmds) cout << s << endl;
+	//for(string s: output_cmds) cout << s << endl;
+
+	letswrite.close();
 	 
 }
 

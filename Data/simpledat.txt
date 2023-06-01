@@ -2,6 +2,13 @@ SetSeed(3)
 
 FitRegion(10.6322,11.0208)
 
+ReducedChi2CutOff(3)
+
+DoFit(No)
+DoRandomize(No)
+DoBootstrap(No)
+
+
 AddChannel("BB", {5, 5})
 AddChannel("BBstar", {5, 5})
 AddChannel("BstarBstar", {5, 5})
@@ -15,7 +22,7 @@ ChebyCoeffs("P", "BstarBstar", "p+s = 1", {10 \pm 0, -29.84 \pm 45, 50 \pm 10})
 
 
 
-AddPole("P", 117.91 \pm 10, {"BB","BBstar","BstarBstar"}, {-6.05845 \pm 70, -7.24665 \pm 0,1.95572  \pm 8})
+AddPole("P", 117.91 \pm 0, {"BB","BBstar","BstarBstar"}, {-6.05845 \pm 70, -7.24665 \pm 0,1.95572  \pm 8})
 AddPole("P", 114.95 \pm 10, {"BB","BBstar","BstarBstar"}, {-6 \pm 70, -7 \pm 0,1  \pm 8})
 
 AddKmatBackground("P", 0, {{16.1903 \pm 8, 18.3081 \pm 908, 0 \pm 0}, {19.2388 \pm 8, 0 \pm 0}, {-15.811 \pm  8 }})
