@@ -52,7 +52,7 @@ int main(int argc, char *argv[])
 	testReader.setPoles();
 	testReader.setKmats();
 	testReader.loadExpData();
-	if(testReader.getRandomize()) testReader.randomize(); 
+	if(testReader.getRandomizeFlag()) testReader.randomize(); 
 
 	//saves the observable object outside of filereader object
 	testObs = testReader.getObs();

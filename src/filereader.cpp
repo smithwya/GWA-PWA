@@ -168,12 +168,12 @@ void filereader::SetFitFlag(){
     }
 }
 
-void filereader::SetRandomize(){
+void filereader::SetRandomizeFlag(){
 	regex reg_Randomize("DoRandomize\\(\\s*(.*?)\\s*\\)");
 	smatch cmdmatch;
 	for(int i = 0; i < commands.size(); i++){
 		if(regex_search(commands.at(i), cmdmatch, reg_Randomize)){
-            RandomizeCmd = commands[i];
+            RandomizeFlagCmd = commands[i];
 		}
     }
 }
@@ -254,7 +254,7 @@ void filereader::SetAllCommandLists(){
 	SetFitRegion();
 	SetChi2CutOff();
 	SetFitFlag();
-	SetRandomize();
+	SetRandomizeFlag();
 	SetAddChannelList();
 	SetAddWaveList();
 	SetChebyList();
@@ -272,9 +272,9 @@ bool filereader::getFitFlag(){
 	return FitFlag;
 }
 
-bool filereader::getRandomize(){
-	readRandomize(RandomizeCmd);
-	return Randomize;
+bool filereader::getRandomizeFlag(){
+	readRandomizeFlag(RandomizeFlagCmd);
+	return RandomizeFlag;
 }
 
 int filereader::getSeed(){
@@ -331,14 +331,14 @@ void filereader::readFitFlag(string cmd){
 	}
 }
 
-void filereader::readRandomize(string cmd){
+void filereader::readRandomizeFlag(string cmd){
 	regex reg_Randomize("DoRandomize\\(\\s*(.*?)\\s*\\)");
 
 	if(regex_search(cmd, match, reg_Randomize)){
 		string my_str = match[1];
 		remove(my_str.begin(), my_str.end(), ' ');
 		if (my_str == "No"){
-			Randomize = false;
+			RandomizeFlag = false;
 		}
 	}
 }
@@ -716,7 +716,7 @@ void filereader::writeOutputFile(){
 
 	output_cmds.push_back("");
 
-	output_cmds.push_back(RandomizeCmd);
+	output_cmds.push_back(RandomizeFlagCmd);
 
 	output_cmds.push_back("");
 
