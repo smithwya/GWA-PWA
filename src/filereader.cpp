@@ -720,6 +720,10 @@ void filereader::writeOutputFile(){
 
 	output_cmds.push_back("");
 
+	for(string s: AddChannel_list) output_cmds.push_back(s);
+
+	output_cmds.push_back("");
+
 	for(string s: AddWave_list) output_cmds.push_back(s);
 
 	output_cmds.push_back("");
