@@ -554,12 +554,6 @@ public:
 		return result;
 	}
 
-	void writeDatFile(int seed){
-		
-		return;
-	}
-
-
 	friend ostream& operator<<(std::ostream& os, observable const& m){
 		for(amplitude a: m.amplitudes) cout<<a<<endl<<endl;
 		return os;

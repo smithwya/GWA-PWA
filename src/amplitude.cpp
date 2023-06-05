@@ -631,6 +631,14 @@ vector<double> amplitude::getFitInterval(){
 	return {smin, smax};
 }
 
+vector<double> amplitude::getResMassesSteps(){
+	return resmasses_steps;
+}
+
+vector<MatrixXcd> amplitude::getkParameters(){
+	return kParameters;
+}
+
 ostream& operator<<(ostream& os, amplitude const& m) {
 	os << m.name<<"-wave: J = " << m.J << ", alpha = " << m.alpha << ", sL = " << m.sL <<" num_channels = "<<m.numChannels<<" kmat_mat_params = " <<m.kParameters.size() <<endl;
 	os<<"numPoles = "<<m.resmasses.size() <<" s0= "<<m.s0<<" smin = "<<m.smin<<" smax ="<<m.smax<<endl<<endl;

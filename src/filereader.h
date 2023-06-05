@@ -122,6 +122,9 @@ public:
 	//void CompleteBareAmps(vector<amplitude> amplist);
 	void printCommands();
 	string getCommand(int i);
+	void SetChi2CutOff();
+	void SetFitFlag();
+	void SetRandomizeFlag();
 	void SetSeed();
 	void SetFitRegion();
 	void SetAddChannelList();
@@ -131,12 +134,18 @@ public:
 	void SetKmatList();
 	void SetAllCommandLists();
 	int getSeed();
+	bool getFitFlag();
+	bool getRandomizeFlag();
+	double getChi2CutOff();
 	string getFitRegion();
 	vector<string> getAddChannelList();
 	vector<string> getAddWaveList();
 	vector<string> getChebyList();
 	vector<string> getAddPoleList();
 	vector<string> getKmatList();
+	double readChi2CutOffCmd(string cmd);
+	void readFitFlag(string cmd);
+	void readRandomizeFlag(string cmd);
 	int readSeed(string cmd);
 	vector<double> readFitReg(string cmd);
 	chanDat readCh(string cmd);
@@ -154,12 +163,17 @@ public:
 	vector<string> getExpDataList();
 	void randomize();
 	void writeOutputFile();
+	void RewriteChebyList();
+	void RewriteAddPoleList();
+	void RewriteKmatList();
 
 private:
+	bool RandomizeFlag = true;
+	bool FitFlag = true;
 	string NameOfFile;
-	vector<std::string> commands;
+	vector<std::string> commands = {}, output_cmds = {};
 	smatch match, testmatch;
-	string SeedCmd, FitRegion;
+	string FitFlagCmd, SeedCmd, FitRegion, Chi2CutOffCmd, RandomizeFlagCmd;
 	vector<string> AddChannel_list, AddWave_list, Cheby_list, AddPole_list, Kmat_list,ExpData_list;
 	observable obsObject;
 };

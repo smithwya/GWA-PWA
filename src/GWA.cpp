@@ -38,24 +38,27 @@ double minfunc(const double *xx){
 	return testObs.chisq(params);
 }
 
-int main()
+int main(int argc, char *argv[])
 {
 
 	//reads the file and creates an observable object with the information from the file
-	filereader testReader("Data/testdat.txt");
+	
+	//filereader testReader("Data/simpledat.txt");
+	if (argc == 1) { cout << "Missing filename" << endl; exit(0);}
+	filereader testReader(argv[1]);
 	testReader.SetAllCommandLists();
 	testReader.ConstructBareAmps();
 	testReader.setChebys();
 	testReader.setPoles();
 	testReader.setKmats();
 	testReader.loadExpData();
-	testReader.randomize();
+	if(testReader.getRandomizeFlag()) testReader.randomize(); 
 
 	//saves the observable object outside of filereader object
 	testObs = testReader.getObs();
 
 	//print out the observable starting params
-	cout << testObs.amplitudes[0] << endl;
+	cout << testObs.amplitudes[0] << endl; 
 	vector<double> params = testObs.getFitParams();
 
 	//Giorgio's graphing shit
@@ -64,32 +67,32 @@ int main()
 		return (value*conj(value)).real();
 	};
 
-	/*
+	
 	auto intensityP_BBstar = [&](double x){
 		comp value = testObs.amplitudes[0].getValue(pow(x,2))(1);
 		return (value*conj(value)).real();
 	};
-	*/
+	
 
-	/*
+	
 	auto intensityP_BstarBstar = [&](double x){
 		comp value = testObs.amplitudes[0].getValue(pow(x,2))(2);
 		return (value*conj(value)).real();
 	};
-	*/
+	
 
 	testObs.makePlotGraphWithExp("P", "BB", "BottP_BB_Graph_WithExp", intensityP_BB, 10.6322,11.0208);
-	//testObs.makePlotGraphWithExp("P", "BBstar", "BottP_BBstar_Graph_WithExp", intensityP_BBstar, 10.6322,11.0208);
-	//testObs.makePlotGraphWithExp("P", "BstarBstar", "BottP_BstarBstar_Graph_WithExp", intensityP_BstarBstar, 10.6322,11.0208);
+	testObs.makePlotGraphWithExp("P", "BBstar", "BottP_BBstar_Graph_WithExp", intensityP_BBstar, 10.6322,11.0208);
+	testObs.makePlotGraphWithExp("P", "BstarBstar", "BottP_BstarBstar_Graph_WithExp", intensityP_BstarBstar, 10.6322,11.0208);
 
 
-
+if(testReader.getFitFlag()){
 	//make the minimzer
 	ROOT::Math::Minimizer* min = ROOT::Math::Factory::CreateMinimizer("Minuit2","");
 	//Set some criteria for the minimzer to stop
 	min->SetMaxFunctionCalls(1000);
 	min->SetMaxIterations(100);
-	min->SetTolerance(0.001);
+	min->SetTolerance(0.01);
 	min->SetPrintLevel(1);
 	//get the initial parameters and steps from the constructed observable object
 	vector<double> fitparams = testObs.getFitParams();
@@ -124,6 +127,9 @@ int main()
 	const double *xs = min->X();
 	//print out the final params
 	cout << testObs.amplitudes[0] << endl;
+}	
+
+	testReader.writeOutputFile();
 	
 	//more graphing shit
 	testObs.makePlotGraphWithExp("P", "BB", "testBott_BB", intensityP_BB, 10.6322, 11.0208);
