@@ -162,10 +162,12 @@ public:
 	void SetExpDataList();
 	vector<string> getExpDataList();
 	void randomize();
-	void writeOutputFile();
+	void randomize(int newseed);
+	void writeOutputFile(string outfile);
 	void RewriteChebyList();
 	void RewriteAddPoleList();
 	void RewriteKmatList();
+	void setSeed(int newseed);
 
 private:
 	bool RandomizeFlag = true;
@@ -176,4 +178,5 @@ private:
 	string FitFlagCmd, SeedCmd, FitRegion, Chi2CutOffCmd, RandomizeFlagCmd;
 	vector<string> AddChannel_list, AddWave_list, Cheby_list, AddPole_list, Kmat_list,ExpData_list;
 	observable obsObject;
+	int seed;
 };

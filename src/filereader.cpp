@@ -21,6 +21,7 @@ filereader::filereader(string filename){
 	readFile(filename);
 	obsObject = observable();
 	NameOfFile = filename;
+	seed = 0;
 }
 
 //read a file and save the list of commands in the file
@@ -278,7 +279,11 @@ bool filereader::getRandomizeFlag(){
 }
 
 int filereader::getSeed(){
-	return readSeed(SeedCmd);
+	return seed;
+}
+
+void filereader::setSeed(int newseed){
+	seed = newseed;
 }
 
 string filereader::getFitRegion(){
@@ -665,6 +670,22 @@ void filereader::randomize(){
 	return;
 }
 
+void filereader::randomize(int seed){
+	vector<double> params = obsObject.getFitParams();
+	vector<double> stepsizes = obsObject.getStepSizes();
+
+	TRandom3 gen(seed);
+
+	//might need to make sure pole masses are positive somehow
+	for(int i = 0; i < params.size(); i++){
+		params[i]= gen.Uniform(params[i] - stepsizes[i], params[i] + stepsizes[i]);
+	}
+
+	obsObject.setFitParams(params);
+
+	return;
+}
+
 expdataDat filereader::readExpData(string cmd){
 	regex reg_ExpData("LoadExpData\\(\\s*\"(.*?)\"\\s*,\\s*\"(.*?)\"\\s*,\\s*\"(.*?)\"\\s*\\)");
 	regex testreg_name("[A-Za-z0-9\\.\\-\\_]+");
@@ -685,20 +706,9 @@ expdataDat filereader::readExpData(string cmd){
 	return expdataDat(wavename, chname, fname);
 }
 
-void filereader::writeOutputFile(){
+void filereader::writeOutputFile(string outname){
 
-	char str[200];
-	cout << NameOfFile << endl;
-	regex name("(.*?).txt");
-
-	regex_search(NameOfFile, match, name);
-
-	NameOfFile = string(match[1]) + "_output.txt";
-
-	/*sprintf(str, "Data/output_of_%s", NameOfFile.c_str());
-	ofstream letswrite(str);*/
-
-	ofstream letswrite(NameOfFile);
+	ofstream letswrite(outname);
 
 	output_cmds.push_back(SeedCmd);
 
@@ -743,8 +753,6 @@ void filereader::writeOutputFile(){
 	for(string s: ExpData_list) output_cmds.push_back(s);
 
 	for(string s: output_cmds) letswrite << s << endl;
-
-	//for(string s: output_cmds) cout << s << endl;
 
 	letswrite.close();
 	 

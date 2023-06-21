@@ -38,104 +38,77 @@ double minfunc(const double *xx){
 	return testObs.chisq(params);
 }
 
-int main(int argc, char *argv[])
+int main(int argc, char ** argv)
 {
+
+	int jobnum = atoi(argv[1]);
+	int numFits = atoi(argv[2]);
+	string inputfile = (string) argv[3];
+//	string fitsfolder = (string) argv[4];
+
+	//selects a seed based off clock + job number
+	int seed = std::chrono::system_clock::now().time_since_epoch().count()+jobnum;
 
 	//reads the file and creates an observable object with the information from the file
 	
-	//filereader testReader("Data/simpledat.txt");
-	if (argc == 1) { cout << "Missing filename" << endl; exit(0);}
-	filereader testReader(argv[1]);
+	filereader testReader(inputfile);
 	testReader.SetAllCommandLists();
 	testReader.ConstructBareAmps();
 	testReader.setChebys();
 	testReader.setPoles();
 	testReader.setKmats();
 	testReader.loadExpData();
-	if(testReader.getRandomizeFlag()) testReader.randomize(); 
+	testReader.setSeed(seed);
+
+	//randomizes with the seed chosen previously
+	if(testReader.getRandomizeFlag()) testReader.randomize(seed); 
+
+	//gets chisq cutoff
+	double cutoff = testReader.getChi2CutOff();
 
 	//saves the observable object outside of filereader object
 	testObs = testReader.getObs();
 
-	//print out the observable starting params
-	cout << testObs.amplitudes[0] << endl; 
-	vector<double> params = testObs.getFitParams();
-
-	//Giorgio's graphing shit
-	auto intensityP_BB = [&](double x){
-		comp value = testObs.amplitudes[0].getValue(pow(x,2))(0);
-		return (value*conj(value)).real();
-	};
-
-	
-	auto intensityP_BBstar = [&](double x){
-		comp value = testObs.amplitudes[0].getValue(pow(x,2))(1);
-		return (value*conj(value)).real();
-	};
-	
-
-	
-	auto intensityP_BstarBstar = [&](double x){
-		comp value = testObs.amplitudes[0].getValue(pow(x,2))(2);
-		return (value*conj(value)).real();
-	};
-	
-
-	testObs.makePlotGraphWithExp("P", "BB", "BottP_BB_Graph_WithExp", intensityP_BB, 10.6322,11.0208);
-	testObs.makePlotGraphWithExp("P", "BBstar", "BottP_BBstar_Graph_WithExp", intensityP_BBstar, 10.6322,11.0208);
-	testObs.makePlotGraphWithExp("P", "BstarBstar", "BottP_BstarBstar_Graph_WithExp", intensityP_BstarBstar, 10.6322,11.0208);
-
-
-if(testReader.getFitFlag()){
-	//make the minimzer
-	ROOT::Math::Minimizer* min = ROOT::Math::Factory::CreateMinimizer("Minuit2","");
-	//Set some criteria for the minimzer to stop
-	min->SetMaxFunctionCalls(1000);
-	min->SetMaxIterations(100);
-	min->SetTolerance(0.01);
-	min->SetPrintLevel(1);
-	//get the initial parameters and steps from the constructed observable object
-	vector<double> fitparams = testObs.getFitParams();
+	//saves original starting parameters
+	vector<double> startparams = testObs.getFitParams();
 	vector<double> steps = testObs.getStepSizes();
-	nParams = fitparams.size();
 
-	//make a function wrapper to minimize the function minfunc (=chisquared)
-	ROOT::Math::Functor f(&minfunc,nParams);
-	min->SetFunction(f);
-	//set the initial conditions and step sizes
-	for(int i = 0; i < nParams; i++){
-		min->SetVariable(i,to_string(i),fitparams[i],steps[i]);
-	}
-	//run the minimization
-	min->Minimize();
-	min->X();
+	if(testReader.getFitFlag()){
+		for(int i = 0; i < numFits; i ++){
+			//make the minimzer
+			ROOT::Math::Minimizer* min = ROOT::Math::Factory::CreateMinimizer("Minuit2","");
+			//Set some criteria for the minimzer to stop
+			min->SetMaxFunctionCalls(1000);
+			min->SetMaxIterations(100);
+			min->SetTolerance(0.01);
+			min->SetPrintLevel(1);
+			//get the initial parameters and steps from the constructed observable object
+			vector<double> fitparams = startparams;
+			nParams = fitparams.size();
 
-	//extract the resulting fit parameters
-	vector<double> finalParams = {};
-	for(int i = 0; i < nParams; i ++){
-		finalParams.push_back(min->X()[i]);
-	}
+			//make a function wrapper to minimize the function minfunc (=chisquared)
+			ROOT::Math::Functor f(&minfunc,nParams);
+			min->SetFunction(f);
+			//set the initial conditions and step sizes
+			for(int i = 0; i < nParams; i++){
+				min->SetVariable(i,to_string(i),fitparams[i],steps[i]);
+			}
+			//run the minimization
+			min->Minimize();
+			min->X();
 
-	//is this necessary?
-	testObs.setFitParams(finalParams);
-	
-	//print out all the fit parameters
-	for(double x: testObs.getFitParams()) cout << x <<endl;
+			//extract the resulting fit parameters
+			vector<double> finalParams = {};
+			for(int i = 0; i < nParams; i ++){
+				finalParams.push_back(min->X()[i]);
+			}
 
-	//store the parameters for the minimum that the minimizer found in xs
-	//unnecessary?
-	const double *xs = min->X();
-	//print out the final params
-	cout << testObs.amplitudes[0] << endl;
-}	
-
-	testReader.writeOutputFile();
-	
-	//more graphing shit
-	testObs.makePlotGraphWithExp("P", "BB", "testBott_BB", intensityP_BB, 10.6322, 11.0208);
-	//testObs.makePlotGraphWithExp("P", "BBstar", "testBott_BBstar", intensityP_BBstar, 10.6322, 11.0208);
-	//testObs.makePlotGraphWithExp("P", "BstarBstar", "testBott_BstarBstar", intensityP_BstarBstar, 10.6322, 11.0208);
-
+			if(min->Edm()<cutoff){
+				testObs.setFitParams(finalParams);
+				testReader.writeOutputFile("Fits/"+to_string(jobnum)+"-"+to_string(i));
+			}
+		}
+	}	
 
 	return 0;
 	

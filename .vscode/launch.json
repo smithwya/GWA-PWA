@@ -1,27 +1,41 @@
 {
-    // Use IntelliSense to learn about possible attributes.
-    // Hover to view descriptions of existing attributes.
-    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
-    "version": "0.2.0",
-    "configurations": [
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "(Linux) Launch",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "${workspaceRoot}/test.out",
+      "args": [],
+      "stopAtEntry": false,
+      "cwd": "${workspaceRoot}",
+      "environment": [],
+      "externalConsole": true
+    },
+    {
+      "name": "Attach",
+      "type": "cppdbg",
+      "request": "attach",
+      "processId": "${command:PickProcess}"
+    },
+    {
+      "name": "C/C++ Runner: Debug Session",
+      "type": "cppdbg",
+      "request": "launch",
+      "args": [],
+      "stopAtEntry": false,
+      "externalConsole": false,
+      "cwd": "/home/wyatt/GWA-PWA",
+      "program": "/home/wyatt/GWA-PWA/build/Debug/outDebug",
+      "MIMode": "gdb",
+      "miDebuggerPath": "gdb",
+      "setupCommands": [
         {
-            "name": "(Linux) Launch",
-            "type": "cppdbg",
-            "request": "launch",
-            "program": "${workspaceRoot}/test.out",
-            "args": [],
-            "stopAtEntry": false,
-            "cwd"  :"${workspaceRoot}",
-            "environment": [], 
-            "externalConsole": true
-        },
-        {
-            "name":"Attach",
-            "type": "cppdbg",
-            "request": "attach",
-            "processId": "${command:PickProcess}"
+          "description": "Enable pretty-printing for gdb",
+          "text": "-enable-pretty-printing",
+          "ignoreFailures": true
         }
-
-    ]
- 
+      ]
+    }
+  ]
 }
