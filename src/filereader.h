@@ -154,6 +154,7 @@ public:
 	poleDat readPole(string cmd);
 	kmatDat readKmat(string cmd);
 	observable getObs();
+	void setObs(observable o);
 	void setChebys();
 	void setKmats();
 	void setPoles();

@@ -589,6 +589,11 @@ observable filereader::getObs(){
 	return obsObject;
 }
 
+void filereader::setObs(observable o){
+	obsObject = o;
+	return;
+}
+
 void filereader::loadExpData(){
 
 	ifstream letsread;

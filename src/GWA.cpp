@@ -42,12 +42,10 @@ int main(int argc, char ** argv)
 {
 
 	int jobnum = atoi(argv[1]);
-	int numFits = atoi(argv[2]);
+	int fitnum = atoi(argv[2]);
 	string inputfile = (string) argv[3];
-//	string fitsfolder = (string) argv[4];
+	string fitsfolder = (string) argv[4];
 
-	//selects a seed based off clock + job number
-	int seed = std::chrono::system_clock::now().time_since_epoch().count()+jobnum;
 
 	//reads the file and creates an observable object with the information from the file
 	
@@ -58,10 +56,10 @@ int main(int argc, char ** argv)
 	testReader.setPoles();
 	testReader.setKmats();
 	testReader.loadExpData();
+	//selects a seed based off clock + job number
+	int seed = std::chrono::system_clock::now().time_since_epoch().count()+jobnum+fitnum;
 	testReader.setSeed(seed);
-
-	//randomizes with the seed chosen previously
-	if(testReader.getRandomizeFlag()) testReader.randomize(seed); 
+	testReader.randomize(seed); 
 
 	//gets chisq cutoff
 	double cutoff = testReader.getChi2CutOff();
@@ -74,39 +72,42 @@ int main(int argc, char ** argv)
 	vector<double> steps = testObs.getStepSizes();
 
 	if(testReader.getFitFlag()){
-		for(int i = 0; i < numFits; i ++){
-			//make the minimzer
-			ROOT::Math::Minimizer* min = ROOT::Math::Factory::CreateMinimizer("Minuit2","");
-			//Set some criteria for the minimzer to stop
-			min->SetMaxFunctionCalls(1000);
-			min->SetMaxIterations(100);
-			min->SetTolerance(0.01);
-			min->SetPrintLevel(1);
-			//get the initial parameters and steps from the constructed observable object
-			vector<double> fitparams = startparams;
-			nParams = fitparams.size();
-
-			//make a function wrapper to minimize the function minfunc (=chisquared)
-			ROOT::Math::Functor f(&minfunc,nParams);
-			min->SetFunction(f);
-			//set the initial conditions and step sizes
-			for(int i = 0; i < nParams; i++){
-				min->SetVariable(i,to_string(i),fitparams[i],steps[i]);
-			}
-			//run the minimization
-			min->Minimize();
-			min->X();
-
-			//extract the resulting fit parameters
-			vector<double> finalParams = {};
-			for(int i = 0; i < nParams; i ++){
-				finalParams.push_back(min->X()[i]);
-			}
-
-			if(min->Edm()<cutoff){
-				testObs.setFitParams(finalParams);
-				testReader.writeOutputFile("Fits/"+to_string(jobnum)+"-"+to_string(i));
-			}
+		//make the minimzer
+		ROOT::Math::Minimizer* min = ROOT::Math::Factory::CreateMinimizer("Minuit2","");
+		//Set some criteria for the minimzer to stop
+		min->SetMaxFunctionCalls(1000);
+		min->SetMaxIterations(100);
+		min->SetTolerance(0.01);
+		min->SetPrintLevel(1);
+		//get the initial parameters and steps from the constructed observable object
+		vector<double> fitparams = testObs.getFitParams();
+		nParams = fitparams.size();
+		//make a function wrapper to minimize the function minfunc (=chisquared)
+		ROOT::Math::Functor f(&minfunc,nParams);
+		min->SetFunction(f);
+		//set the initial conditions and step sizes
+		for(int i = 0; i < nParams; i++){
+			min->SetVariable(i,to_string(i),fitparams[i],steps[i]);
+		}
+		//run the minimization
+		min->Minimize();
+		//extract the resulting fit parameters
+		vector<double> finalParams = {};
+		for(int i = 0; i < nParams; i ++){
+			finalParams.push_back(min->X()[i]);
+		}
+		double chisq = min->Edm();
+		cout<<"fit "<<fitnum<<" chi^2: "<<chisq<<endl;
+		cout<<"Seed "<<seed<<endl;
+		
+		if(chisq<cutoff){
+			string fname = fitsfolder+"fit"+to_string(jobnum)+"-"+to_string(fitnum);
+			testObs.setFitParams(finalParams);
+			testReader.setObs(testObs);
+			testReader.writeOutputFile(fname);
+			ofstream outputfile(fname,ios::app);
+			outputfile<<"Edm = "<<chisq<<endl;
+			outputfile.close();
 		}
 	}	
 
