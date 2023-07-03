@@ -38,6 +38,17 @@ double minfunc(const double *xx){
 	return testObs.chisq(params);
 }
 
+double minfunc_with_InclCrossSec(const double *xx){
+
+	vector<double> params = {};
+	for(int i = 0; i < nParams; i++){
+		params.push_back(xx[i]);
+	}
+
+	testObs.setFitParams(params);
+	return testObs.chisq_with_InclCrossSec(params);
+}
+
 int main(int argc, char ** argv)
 {
 
@@ -56,16 +67,25 @@ int main(int argc, char ** argv)
 	testReader.setPoles();
 	testReader.setKmats();
 	testReader.loadExpData();
+	if(testReader.getInclCrossSecFlag()) testReader.loadExpInclCrossSec();
 	//selects a seed based off clock + job number
 	int seed = std::chrono::system_clock::now().time_since_epoch().count()+jobnum+fitnum;
 	testReader.setSeed(seed);
-	testReader.randomize(seed); 
+	if(testReader.getRandomizeFlag()) testReader.randomize(seed); 
 
 	//gets chisq cutoff
 	double cutoff = testReader.getChi2CutOff();
 
 	//saves the observable object outside of filereader object
 	testObs = testReader.getObs();
+
+	////tests
+
+	double lower_bound = testObs.amplitudes[0].getFitInterval()[0];
+	double upper_bound = testObs.amplitudes[0].getFitInterval()[1];
+	testObs.plotInclCrossSec("InclCrossSec", lower_bound, upper_bound);
+
+	////
 
 	//saves original starting parameters
 	vector<double> startparams = testObs.getFitParams();
@@ -84,7 +104,9 @@ int main(int argc, char ** argv)
 		nParams = fitparams.size();
 		//make a function wrapper to minimize the function minfunc (=chisquared)
 		ROOT::Math::Functor f(&minfunc,nParams);
-		min->SetFunction(f);
+		ROOT::Math::Functor g(&minfunc_with_InclCrossSec,nParams);
+		if(testReader.getInclCrossSecFlag()) min->SetFunction(g);
+		else min->SetFunction(f);
 		//set the initial conditions and step sizes
 		for(int i = 0; i < nParams; i++){
 			min->SetVariable(i,to_string(i),fitparams[i],steps[i]);

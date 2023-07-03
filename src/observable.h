@@ -5,6 +5,7 @@
 #include <Eigen/Dense>
 #include "amplitude.h"
 #include "channel.h"
+#include "filereader.h"
 #include "TCanvas.h"
 #include "TF1.h"
 #include "TH1D.h"
@@ -38,6 +39,21 @@ struct expchan{//this has to be modify according to the format of the exp data f
 
 };
 
+struct expInclCrossSec{
+
+	vector<double> sqrts = {};
+	vector<double> amp_expval = {}, amp_expval_stat_err = {}, amp_expval_sist_err = {};
+
+	expInclCrossSec(vector<double> x, vector<double> y, vector<double> y_stat_err, vector<double> y_sist_err){
+			sqrts = x;
+			
+			amp_expval = y;
+			amp_expval_stat_err = y_stat_err;
+			amp_expval_sist_err = y_sist_err;
+	}
+
+};
+
 
 class observable {
 
@@ -46,7 +62,7 @@ private:
 	
 	vector<expchan> data;
 	int numAmps;
-
+	expInclCrossSec data_InclCrossSec = expInclCrossSec({},{},{},{});
 
 
 public:
@@ -56,6 +72,7 @@ public:
 	observable(){
 		amplitudes = {};
 		data = {};
+		data_InclCrossSec;
 		numAmps = 0;
 		numChans =0;
 	};
@@ -63,6 +80,7 @@ public:
 	observable(vector<amplitude> a){
 		amplitudes = a;
 		data = {};
+		data_InclCrossSec;
 		numAmps = a.size();
 		numChans = a[0].getNumOfChans();
 	};
@@ -93,6 +111,14 @@ public:
 
 	vector<expchan> getData(){
 		return data;
+	}
+
+	void setData_InclCrossSec(expInclCrossSec sigma){
+		data_InclCrossSec = sigma;
+	};
+
+	expInclCrossSec getData_InclCrossSec(){
+		return data_InclCrossSec;
 	}
 
 	void readData(string filename){
@@ -157,7 +183,7 @@ public:
 	void makePlotGraph(string ampname, string channame, string pdfname, function<double(double)> func, double lower_bound, double upper_bound){	
 		
 		int numamp = getampindex(ampname);
-		int totnumofchans = data.size(); //in this way is always consistent with the case in which we consider or not the dummy channels
+		int totnumofchans = numChans; 
 		int numchan = getchanindex(ampname,channame);
 
 		int numpts = data[totnumofchans * numamp + numchan].amp_expval.size();
@@ -211,7 +237,7 @@ public:
 	void makePlotWithExp(string ampname, string channame, string pdfname, function<double(double)> func, double lower_bound, double upper_bound, int num_bins){
 
 		int numamp = getampindex(ampname);
-		int totnumofchans = data.size();
+		int totnumofchans = numChans;
 		int numchan = getchanindex(ampname,channame);
 		
 		double delta = (upper_bound - lower_bound)/num_bins;
@@ -253,7 +279,7 @@ public:
 	void makePlotGraphWithExp(string ampname, string channame, string pdfname, function<double(double)> func, double lower_bound, double upper_bound){
 
 		int numamp = getampindex(ampname);
-		int totnumofchans = data.size();
+		int totnumofchans = numChans;
 		int numchan = getchanindex(ampname,channame);
 		
 		int num_exp_pts = data[totnumofchans * numamp + numchan].amp_expval.size();
@@ -339,7 +365,7 @@ public:
 	void makePlotExpOnly(string ampname, string channame, string pdfname, double lower_bound, double upper_bound){
 
 		int numamp = getampindex(ampname);
-		int totnumofchans = data.size();
+		int totnumofchans = numChans;
 		int numchan = getchanindex(ampname,channame);
 
 		int num_data_points = data[totnumofchans * numamp + numchan].amp_expval.size();
@@ -366,7 +392,7 @@ public:
 	void makePlotGraph_ExpOnly(string ampname, string channame, string pdfname, double lower_bound, double upper_bound){	
 
 		int numamp = getampindex(ampname);
-		int totnumofchans = data.size();
+		int totnumofchans = numChans;
 		int numchan = getchanindex(ampname,channame);
 
 		int num_exp_pts = data[totnumofchans * numamp + numchan].amp_expval.size();
@@ -479,6 +505,60 @@ public:
 
 	};
 
+	void plotInclCrossSec(string pdfname, double lower_bound, double upper_bound){
+		
+		int num_exp_pts = data_InclCrossSec.sqrts.size();
+
+		double x[num_exp_pts], y[num_exp_pts], ex[num_exp_pts], ey[num_exp_pts];
+
+		for(int i = 0; i < num_exp_pts; i++){
+
+			x[i] = 0;
+			y[i] = 0;
+			ex[i] = 0;
+			ey[i] = 0;
+
+		}
+
+		double val = 0;
+
+		for(int i = 0; i < num_exp_pts; i++){
+
+			val = data_InclCrossSec.sqrts[i];
+			if(isnan(val)) x[i] = 0;
+			else x[i] = val;
+
+			val = data_InclCrossSec.amp_expval[i];
+			if(isnan(val)) y[i] = 0;
+			else y[i] = val;
+
+			ex[i] = 0;
+
+			val = data_InclCrossSec.amp_expval_stat_err[i];
+			if(isnan(val)) ey[i] = 0;
+			else ey[i] = val;
+
+		}
+
+		auto gr = new TGraphErrors(num_exp_pts,x,y,ex,ey);
+
+   		//gr->SetTitle("TGraphErrors Example");
+   		gr->SetMarkerColor(4);
+   		gr->SetMarkerStyle(21);
+		gr->GetXaxis()->SetRangeUser(lower_bound, upper_bound);
+		//gr->GetYaxis()->SetRangeUser(0, 15500);
+		gr->SetLineWidth(1);
+
+		TFile file("pdf_folder.root", "recreate");
+		TCanvas canv;
+		gr->Write();
+		gr->Draw("ALP");
+		canv.SaveAs(("Plots/"+pdfname+".pdf").c_str());
+		file.Close();
+		return;
+
+	}
+
 
 	vector<double> getFitParams(){
 		vector<double> params = {};
@@ -520,7 +600,6 @@ public:
 			//read out the start and end of the fit interval
 			double lower_bound = sqrt(amp.getFitInterval()[0]);
 			double upper_bound = sqrt(amp.getFitInterval()[1]);
-			int numChans = amp.getNumOfChans();
 
 			//if you don't have data for every energy point, the code breaks anyways
 			vector<double> sqrts_vals = data[0].sqrts;
@@ -539,18 +618,114 @@ public:
 					VectorXcd val = amp.getValue(pow(x,2));
 
 					for(int j = 0; j < numChans; j++){
-						//y = value of amplitude for channel j
-						y = (val(j)*conj(val(j))).real();
-						stat_err = data[numChans * amp_index + j].amp_expval_stat_err[i];
-						sist_err = data[numChans * amp_index + j].amp_expval_sist_err[i];
-						std = sqrt(pow(stat_err, 2) + pow(sist_err, 2));
-						sum += pow(((y - data[numChans * amp_index + j].amp_expval[i])/std), 2);
+						if(data[numChans * amp_index + j].sqrts.size() != 0){//i.e. if the j-th channel is NOT a dummy channel
+							//y = value of amplitude for channel j
+							y = (val(j)*conj(val(j))).real();
+							stat_err = data[numChans * amp_index + j].amp_expval_stat_err[i];
+							sist_err = data[numChans * amp_index + j].amp_expval_sist_err[i];
+							std = sqrt(pow(stat_err, 2) + pow(sist_err, 2));
+							sum += pow(((y - data[numChans * amp_index + j].amp_expval[i])/std), 2);
 						}
+					}
+
 				}
+
 				result +=sum;
 			}
 
 		}
+		return result;
+	}
+
+	double chisq_with_InclCrossSec(vector<double> params){
+		double result = 0;
+		//for every amplitude in the list
+		for(string ampname : getAmpNames()){
+			//locate the amplitude
+			int amp_index = getampindex(ampname);
+			amplitude amp = amplitudes[amp_index];
+			//read out the start and end of the fit interval
+			double lower_bound = sqrt(amp.getFitInterval()[0]);
+			double upper_bound = sqrt(amp.getFitInterval()[1]);
+
+			//if you don't have data for every energy point, the code breaks anyways
+			vector<double> sqrts_vals = data[0].sqrts;
+
+			//for every data point
+			for(int i = 0; i < sqrts_vals.size(); i++){
+				double x = sqrts_vals[i];
+				double sum = 0;
+				double std = 0;
+				double y = 0;
+				double stat_err = 0;
+				double sist_err = 0;
+				//for sqrts in the fitting range, calculate relevant quantities
+				if(x >= lower_bound && x <= upper_bound){
+					//calculate the value of the amplitude
+					VectorXcd val = amp.getValue(pow(x,2));
+
+					for(int j = 0; j < numChans; j++){
+						if(data[numChans * amp_index + j].sqrts.size() != 0){//i.e. if the j-th channel is NOT a dummy channel
+							//y = value of amplitude for channel j
+							y = (val(j)*conj(val(j))).real();
+							stat_err = data[numChans * amp_index + j].amp_expval_stat_err[i];
+							sist_err = data[numChans * amp_index + j].amp_expval_sist_err[i];
+							std = sqrt(pow(stat_err, 2) + pow(sist_err, 2));
+							sum += pow(((y - data[numChans * amp_index + j].amp_expval[i])/std), 2);
+						}
+					}
+
+				}
+
+				result +=sum;
+			}
+
+		}
+
+		double sum2 = 0;
+
+		for(int i = 0; i < data_InclCrossSec.sqrts.size(); i++){
+
+			double x = data_InclCrossSec.sqrts[i];
+			
+			VectorXcd temp = {};
+					
+			double aux = 0;
+			double stat_err2 = 0;
+			double sist_err2 = 0;
+			double std2 = 0;
+
+			double lower_bound = sqrt(amplitudes[0].getFitInterval()[0]);
+			double upper_bound = sqrt(amplitudes[0].getFitInterval()[1]);
+
+			if(x >= lower_bound && x <= upper_bound){
+
+				for(string ampname : getAmpNames()){
+
+					int amp_index = getampindex(ampname);
+					amplitude amp = amplitudes[amp_index];
+
+					for(string channame : amp.getChanNames()){
+
+						int chan_index = getchanindex(ampname, channame);
+						temp = amp.getValue(pow(x,2));
+						aux += (temp(chan_index)*conj(temp(chan_index))).real();
+
+					}
+
+				}
+
+				stat_err2 = data_InclCrossSec.amp_expval_stat_err[i];
+				sist_err2 = data_InclCrossSec.amp_expval_sist_err[i];
+				std2 = sqrt(pow(stat_err2, 2) + pow(sist_err2, 2));
+				sum2 += pow(((aux - data_InclCrossSec.amp_expval[i])/std2), 2);
+
+			}
+
+		}
+
+		result += sum2;
+
 		return result;
 	}
 

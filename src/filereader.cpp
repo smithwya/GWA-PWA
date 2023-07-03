@@ -179,6 +179,16 @@ void filereader::SetRandomizeFlag(){
     }
 }
 
+void filereader::SetInclCrossSecFlag(){
+	regex reg_InclCrossSecFlag("FitAlsoToInclusiveCrossSection\\(\\s*(.*?)\\s*\\)");
+	smatch cmdmatch;
+	for(int i = 0; i < commands.size(); i++){
+		if(regex_search(commands.at(i), cmdmatch, reg_InclCrossSecFlag)){
+            InclCrossSecFlagCmd = commands[i];
+		}
+    }
+}
+
 void filereader::SetSeed(){
 	regex reg_Seed("SetSeed\\(\\s*([0-9]+)\\s*\\)");
 	smatch cmdmatch;
@@ -197,6 +207,16 @@ void filereader::SetFitRegion(){
             FitRegion = commands[i];
 		}
     }		
+}
+
+void filereader::setExpInclCrossSec(){
+	regex reg_inclcrosssec("LoadExpInclusiveCrossSection\\(\\s*\"(.*?)\"\\s*\\)");
+	smatch cmdmatch;
+	for(int i = 0; i < commands.size(); i++){
+		if(regex_search(commands.at(i), cmdmatch, reg_inclcrosssec)){
+            ExpInclCrossSecCmd = commands[i];
+		}
+    }
 }
 
 void filereader::SetAddChannelList(){
@@ -255,6 +275,7 @@ void filereader::SetAllCommandLists(){
 	SetFitRegion();
 	SetChi2CutOff();
 	SetFitFlag();
+	SetInclCrossSecFlag();
 	SetRandomizeFlag();
 	SetAddChannelList();
 	SetAddWaveList();
@@ -262,6 +283,7 @@ void filereader::SetAllCommandLists(){
 	SetAddPoleList();
 	SetKmatList();
 	SetExpDataList();
+	if(getInclCrossSecFlag()) setExpInclCrossSec();
 }
 
 double filereader::getChi2CutOff(){
@@ -271,6 +293,11 @@ double filereader::getChi2CutOff(){
 bool filereader::getFitFlag(){
 	readFitFlag(FitFlagCmd);
 	return FitFlag;
+}
+
+bool filereader::getInclCrossSecFlag(){
+	readFitFlag(InclCrossSecFlagCmd);
+	return InclCrossSecFlag;
 }
 
 bool filereader::getRandomizeFlag(){
@@ -344,6 +371,18 @@ void filereader::readRandomizeFlag(string cmd){
 		remove(my_str.begin(), my_str.end(), ' ');
 		if (my_str == "No"){
 			RandomizeFlag = false;
+		}
+	}
+}
+
+void filereader::readInclCrossSecFlag(string cmd){
+	regex reg_InclCrossSecFlag("FitAlsoToInclusiveCrossSection\\(\\s*(.*?)\\s*\\)");
+
+	if(regex_search(cmd, match, reg_InclCrossSecFlag)){
+		string my_str = match[1];
+		remove(my_str.begin(), my_str.end(), ' ');
+		if (my_str == "No"){
+			InclCrossSecFlag = false;
 		}
 	}
 }
@@ -461,7 +500,7 @@ chebyDat filereader::readCheby(string cmd){
 poleDat filereader::readPole(string cmd){
 	regex reg_AddPole("AddPole\\(\"(.*?)\"\\s*,\\s*([0-9\\.-]+\\s*\\\\pm\\s*[0-9\\.]+)\\s*,\\s*\\{\\s*((\"(.*?)\"\\s*,?\\s*)+)\\}\\s*,\\s*\\{\\s*(([0-9\\.-]+\\s*\\\\pm\\s*[0-9\\.]+\\s*,?\\s*)+)\\}\\s*\\)"); 
 	regex testreg_number("([+-]{0,1}?(?=\\.\\d|\\d)(?:\\d+)?(?:\\.?\\d*))(?:[Ee]([+-]{0,1}?\\d+))?");
-	regex testreg_name("[A-Za-z]+");
+	regex testreg_name("[A-Za-z\\_]+");
 	
 	string wname = "";
 	double mass = 0; 
@@ -640,12 +679,41 @@ void filereader::loadExpData(){
 	for(int i = 0; i < withDummies.size(); i++){
 		for(int j = 0; j < allDat.size(); j++){
 			//cout << withDummies[i].wavename << " " << allDat[j].wavename << " " << withDummies[i].channame << " " << allDat[j].channame << endl;
-			//if((withDummies[i].wavename == allDat[j].wavename) && (withDummies[i].channame == allDat[j].channame)) cout << "hello" << endl;
+			if((withDummies[i].wavename == allDat[j].wavename) && (withDummies[i].channame == allDat[j].channame)){
+				withDummies[i] = allDat[j];
+			}
 		}
-	}//it has to be fixed
+	}
 
-	//obsObject.setData(withDummies);
-	obsObject.setData(allDat);
+	obsObject.setData(withDummies);
+	//obsObject.setData(allDat);
+	/*for(expchan x: obsObject.getData()){
+		if(x.sqrts.size() != 0) cout << x.sqrts[0] << endl;
+		else cout << "dummy" << endl;
+	}*/
+}
+
+void filereader::loadExpInclCrossSec(){
+
+	readExpInclCrossSecCmd(ExpInclCrossSecCmd);
+
+	ifstream letsread(ExpInclCrossSecFilename);
+
+	vector<double> a(5);
+	vector<double> x = {};
+	vector<double> y = {};
+	vector<double> y_stat_err = {};
+	vector<double> y_sist_err = {};
+	while(letsread>>a[0]>>a[1]>>a[2]>>a[3]>>a[4]){
+		x.push_back(a[0]);
+		y.push_back(a[1]);
+		y_stat_err.push_back(a[2]);
+		y_sist_err.push_back(a[3]);
+	}
+	letsread.close();
+
+	obsObject.setData_InclCrossSec(expInclCrossSec(x, y, y_stat_err, y_sist_err)); 
+
 }
 
 void filereader::SetExpDataList(){
@@ -711,6 +779,14 @@ expdataDat filereader::readExpData(string cmd){
 	return expdataDat(wavename, chname, fname);
 }
 
+void filereader::readExpInclCrossSecCmd(string cmd){
+	regex testreg_name("[A-Za-z0-9\\.\\-\\_]+");
+	
+	if(regex_search(cmd, match, testreg_name)){
+		ExpInclCrossSecFilename = match[1];
+    }
+}
+
 void filereader::writeOutputFile(string outname){
 
 	ofstream letswrite(outname);
@@ -728,6 +804,10 @@ void filereader::writeOutputFile(string outname){
 	output_cmds.push_back("");
 
 	output_cmds.push_back(FitFlagCmd);
+
+	output_cmds.push_back("");
+
+	output_cmds.push_back(InclCrossSecFlagCmd);
 
 	output_cmds.push_back("");
 

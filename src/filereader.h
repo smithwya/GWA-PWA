@@ -127,6 +127,7 @@ public:
 	void SetRandomizeFlag();
 	void SetSeed();
 	void SetFitRegion();
+	void SetInclCrossSecFlag();
 	void SetAddChannelList();
 	void SetAddWaveList();
 	void SetChebyList();
@@ -135,6 +136,7 @@ public:
 	void SetAllCommandLists();
 	int getSeed();
 	bool getFitFlag();
+	bool getInclCrossSecFlag();
 	bool getRandomizeFlag();
 	double getChi2CutOff();
 	string getFitRegion();
@@ -145,6 +147,7 @@ public:
 	vector<string> getKmatList();
 	double readChi2CutOffCmd(string cmd);
 	void readFitFlag(string cmd);
+	void readInclCrossSecFlag(string cmd);
 	void readRandomizeFlag(string cmd);
 	int readSeed(string cmd);
 	vector<double> readFitReg(string cmd);
@@ -159,7 +162,9 @@ public:
 	void setKmats();
 	void setPoles();
 	void loadExpData();
+	void loadExpInclCrossSec();
 	expdataDat readExpData(string cmd);
+	void readExpInclCrossSecCmd(string cmd);
 	void SetExpDataList();
 	vector<string> getExpDataList();
 	void randomize();
@@ -169,14 +174,16 @@ public:
 	void RewriteAddPoleList();
 	void RewriteKmatList();
 	void setSeed(int newseed);
+	void setExpInclCrossSec();
 
 private:
 	bool RandomizeFlag = true;
 	bool FitFlag = true;
+	bool InclCrossSecFlag = true; 
 	string NameOfFile;
 	vector<std::string> commands = {}, output_cmds = {};
 	smatch match, testmatch;
-	string FitFlagCmd, SeedCmd, FitRegion, Chi2CutOffCmd, RandomizeFlagCmd;
+	string FitFlagCmd, SeedCmd, FitRegion, Chi2CutOffCmd, RandomizeFlagCmd, ExpInclCrossSecCmd, ExpInclCrossSecFilename, InclCrossSecFlagCmd;
 	vector<string> AddChannel_list, AddWave_list, Cheby_list, AddPole_list, Kmat_list,ExpData_list;
 	observable obsObject;
 	int seed;
