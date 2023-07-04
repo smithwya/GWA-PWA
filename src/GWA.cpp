@@ -85,6 +85,25 @@ int main(int argc, char ** argv)
 	double upper_bound = testObs.amplitudes[0].getFitInterval()[1];
 	testObs.plotInclCrossSec("InclCrossSec", lower_bound, upper_bound);
 
+	auto intensityP_BB = [&](double x){
+		comp value = testObs.amplitudes[0].getValue(pow(x,2))(0);
+		return (value*conj(value)).real();
+	};
+
+	auto intensityP_BBstar = [&](double x){
+		comp value = testObs.amplitudes[0].getValue(pow(x,2))(1);
+		return (value*conj(value)).real();
+	};
+	
+	auto intensityP_BstarBstar = [&](double x){
+		comp value = testObs.amplitudes[0].getValue(pow(x,2))(2);
+		return (value*conj(value)).real();
+	};
+
+	testObs.makePlotGraphWithExp("P", "BB", "test2BB", intensityP_BB, 10.6322,11.0208);
+	testObs.makePlotGraphWithExp("P", "BBstar", "test2BBstar", intensityP_BBstar, 10.6322,11.0208);
+	testObs.makePlotGraphWithExp("P", "BstarBstar", "test2BstarBstar", intensityP_BstarBstar, 10.6322,11.0208);
+
 	////
 
 	//saves original starting parameters

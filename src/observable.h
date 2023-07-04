@@ -552,7 +552,7 @@ public:
 		TFile file("pdf_folder.root", "recreate");
 		TCanvas canv;
 		gr->Write();
-		gr->Draw("ALP");
+		gr->Draw("AP");
 		canv.SaveAs(("Plots/"+pdfname+".pdf").c_str());
 		file.Close();
 		return;

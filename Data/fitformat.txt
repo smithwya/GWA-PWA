@@ -6,7 +6,7 @@ ReducedChi2CutOff(3)
 
 DoFit(No)
 FitAlsoToInclusiveCrossSection(Yes)
-DoRandomize(Yes)
+DoRandomize(No)
 DoBootstrap(No)
 
 AddChannel("BB", {5.27925, 5.27925})
@@ -37,4 +37,4 @@ LoadExpData("P", "BBstar", "Data/BBstar-nominal.dat")
 LoadExpData("P", "BstarBstar", "Data/BstarBstar-nominal.dat")
 LoadExpData("P", "B_sstarB_sstar", "Data/B_sstarB_sstar-nominal.dat")
 
-LoadExpInclusiveCrossSection("inclusive-cross-section.dat")
+LoadExpInclusiveCrossSection("Data/inclusive-cross-section.dat")

@@ -275,6 +275,7 @@ void filereader::SetAllCommandLists(){
 	SetFitRegion();
 	SetChi2CutOff();
 	SetFitFlag();
+	setExpInclCrossSec();
 	SetInclCrossSecFlag();
 	SetRandomizeFlag();
 	SetAddChannelList();
@@ -283,7 +284,6 @@ void filereader::SetAllCommandLists(){
 	SetAddPoleList();
 	SetKmatList();
 	SetExpDataList();
-	if(getInclCrossSecFlag()) setExpInclCrossSec();
 }
 
 double filereader::getChi2CutOff(){
@@ -296,7 +296,7 @@ bool filereader::getFitFlag(){
 }
 
 bool filereader::getInclCrossSecFlag(){
-	readFitFlag(InclCrossSecFlagCmd);
+	readInclCrossSecFlag(InclCrossSecFlagCmd);
 	return InclCrossSecFlag;
 }
 
@@ -695,7 +695,11 @@ void filereader::loadExpData(){
 
 void filereader::loadExpInclCrossSec(){
 
+	//cout << ExpInclCrossSecFilename << endl;
+
 	readExpInclCrossSecCmd(ExpInclCrossSecCmd);
+
+	//cout << ExpInclCrossSecFilename << endl;
 
 	ifstream letsread(ExpInclCrossSecFilename);
 
@@ -767,23 +771,26 @@ expdataDat filereader::readExpData(string cmd){
 	string fname = "";
 	
 	if(regex_search(cmd, match, reg_ExpData)){
+		cout << match[0] << endl;
 		wavename = match[1];
 		remove(wavename.begin(), wavename.end(), ' ');
 		chname = match[2];
 		remove(chname.begin(), chname.end(), ' ');
 		fname = match[3];
 		remove(fname.begin(), fname.end(), ' ');
-
+		cout << fname << endl;
     }
 
 	return expdataDat(wavename, chname, fname);
 }
 
 void filereader::readExpInclCrossSecCmd(string cmd){
-	regex testreg_name("[A-Za-z0-9\\.\\-\\_]+");
+
+	regex reg_inclcrosssec("LoadExpInclusiveCrossSection\\(\\s*\"(.*?)\"\\s*\\)");
 	
-	if(regex_search(cmd, match, testreg_name)){
+	if(regex_search(cmd, match, reg_inclcrosssec)){
 		ExpInclCrossSecFilename = match[1];
+		cout << ExpInclCrossSecFilename << endl;
     }
 }
 
