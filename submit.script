@@ -1,0 +1,20 @@
+#!/bin/bash
+
+#SBATCH -J "btmonium"
+#SBATCH -p general
+#SBATCH -o output.txt
+#SBATCH -e error.err
+#SBATCH --mail-type=END,FAIL
+#SBATCH --mail-user=smithwya@iu.edu
+#SBATCH --nodes=1
+#SBATCH --ntasks-per-node=1
+#SBATCH --time=1:00:00
+#SBATCH -A general
+
+srun ./runBatch.sh $1 $2 $3 $4
+
+# $1 job number
+# $2 number of fits to perform
+# $3 fit format file path
+# $4 path to save valid fits
+
