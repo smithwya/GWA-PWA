@@ -319,7 +319,9 @@ public:
 			else y1[i] = val;
 
 
-			val = data[totnumofchans * numamp + numchan].amp_expval_stat_err[i];
+			val = pow(data[totnumofchans * numamp + numchan].amp_expval_stat_err[i], 2);
+			val += pow(data[totnumofchans * numamp + numchan].amp_expval_sist_err[i], 2);
+			val = pow(val, 0.5);
 			if(isnan(val)) ey1[i] = 0;
 			else ey1[i] = val;
 
@@ -553,6 +555,127 @@ public:
 		TCanvas canv;
 		gr->Write();
 		gr->Draw("AP");
+		canv.SaveAs(("Plots/"+pdfname+".pdf").c_str());
+		file.Close();
+		return;
+
+	}
+
+	void plotInclCrossSecVsSumOfExcl(string pdfname, double lower_bound, double upper_bound){
+
+		int totnumofmeasuredchans = data.size();
+		
+		int num_excl_pts = data[0].amp_expval.size();
+		int num_Bsstar_pts = data[getchanindex("P", "B_sstarB_sstar")].amp_expval.size();
+		int num_incl_pts = data_InclCrossSec.amp_expval.size();
+
+		//cout << num_excl_pts << " " << num_Bsstar_pts << " " << num_incl_pts << endl; //I have
+		//to exclude B_sstarB_sstar channel from gr1 because it has a different number of points
+		//with respect of the other exclusive sigma!!! 
+
+		double x1[num_excl_pts], y1[num_excl_pts], ex1[num_excl_pts], ey1[num_excl_pts];
+		double x2[num_Bsstar_pts], y2[num_Bsstar_pts], ex2[num_Bsstar_pts], ey2[num_Bsstar_pts];
+		double x3[num_incl_pts], y3[num_incl_pts], ex3[num_incl_pts], ey3[num_incl_pts];
+
+		double val = 0;
+
+		for(int i = 0; i < num_excl_pts; i++){
+
+			val = data[0].sqrts[i];
+			if(isnan(val)) x1[i] = 0;
+			else x1[i] = val;
+			ex1[i] = 0;
+
+			val = 0;
+			for(int j = 0; j < 3; j++) val += data[j].amp_expval[i];
+			if(isnan(val)) y1[i] = 0;
+			else y1[i] = val;
+
+
+			val = pow(data[0].amp_expval_stat_err[i], 2); //this is WRONG because I should have evaluate the error on
+			// the sum, while this is referred to a single exclusive sigma only
+			val += pow(data[0].amp_expval_sist_err[i], 2);
+			val = pow(val, 0.5);
+			if(isnan(val)) ey1[i] = 0;
+			else ey1[i] = val;
+
+		}
+
+		for(int i = 0; i < num_Bsstar_pts; i++){
+
+			int index = getchanindex("P", "B_sstarB_sstar");
+
+			val = data[0].sqrts[i];
+			if(isnan(val)) x2[i] = 0;
+			else x2[i] = val;
+			ex2[i] = 0;
+
+			val += data[index].amp_expval[i];
+			if(isnan(val)) y2[i] = 0;
+			else y2[i] = val;
+
+
+			val = pow(data[index].amp_expval_stat_err[i], 2);
+			val += pow(data[index].amp_expval_sist_err[i], 2);
+			val = pow(val, 0.5);
+			if(isnan(val)) ey2[i] = 0;
+			else ey2[i] = val;
+
+		}
+
+		for(int i = 0; i < num_incl_pts; i++){
+
+			val = data_InclCrossSec.sqrts[i];
+			if(isnan(val)) x3[i] = 0;
+			else x3[i] = val;
+			ex3[i] = 0;
+
+			val += data_InclCrossSec.amp_expval[i];
+			if(isnan(val)) y3[i] = 0;
+			else y3[i] = val;
+
+
+			val = pow(data_InclCrossSec.amp_expval_stat_err[i], 2);
+			val += pow(data_InclCrossSec.amp_expval_sist_err[i], 2);
+			val = pow(val, 0.5);
+			if(isnan(val)) ey3[i] = 0;
+			else ey3[i] = val;
+
+		}
+
+		auto gr1 = new TGraphErrors(num_excl_pts,x1,y1,ex1,ey1);
+		auto gr2 = new TGraphErrors(num_Bsstar_pts,x2,y2,ex2,ey2);
+		auto gr3 = new TGraphErrors(num_incl_pts,x3,y3,ex3,ey3);
+
+   		//gr1->SetTitle("TGraphErrors Example");
+   		gr1->SetMarkerColor(4);
+   		gr1->SetMarkerStyle(21);
+		gr1->GetXaxis()->SetRangeUser(lower_bound, upper_bound);
+		//gr1->GetYaxis()->SetRangeUser(0, 0.2);
+		gr1->SetLineWidth(1);
+
+		//gr2->SetTitle("TGraphErrors Example");
+   		gr2->SetMarkerSize(0);
+		gr2->GetXaxis()->SetRangeUser(lower_bound, upper_bound);
+		//gr2->GetYaxis()->SetRangeUser(0, 0.2);
+		gr2->SetLineWidth(1);
+		gr2->SetLineColor(kRed);
+
+		//gr3->SetTitle("TGraphErrors Example");
+   		gr3->SetMarkerSize(0);
+		gr3->GetXaxis()->SetRangeUser(lower_bound, upper_bound);
+		//gr3->GetYaxis()->SetRangeUser(0, 0.2);
+		gr3->SetLineWidth(1);
+		gr3->SetLineColor(kMagenta);
+
+		TFile file("pdf_folder.root", "recreate");
+		TCanvas canv;
+		gr1->Write();
+		gr2->Write();
+		gr3->Write();
+		gr1->Draw("AP");
+		gr2->Draw("same");
+		gr3->Draw("same");
 		canv.SaveAs(("Plots/"+pdfname+".pdf").c_str());
 		file.Close();
 		return;

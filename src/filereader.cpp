@@ -771,14 +771,14 @@ expdataDat filereader::readExpData(string cmd){
 	string fname = "";
 	
 	if(regex_search(cmd, match, reg_ExpData)){
-		cout << match[0] << endl;
+		//cout << match[0] << endl;
 		wavename = match[1];
 		remove(wavename.begin(), wavename.end(), ' ');
 		chname = match[2];
 		remove(chname.begin(), chname.end(), ' ');
 		fname = match[3];
 		remove(fname.begin(), fname.end(), ' ');
-		cout << fname << endl;
+		//cout << fname << endl;
     }
 
 	return expdataDat(wavename, chname, fname);
@@ -790,7 +790,7 @@ void filereader::readExpInclCrossSecCmd(string cmd){
 	
 	if(regex_search(cmd, match, reg_inclcrosssec)){
 		ExpInclCrossSecFilename = match[1];
-		cout << ExpInclCrossSecFilename << endl;
+		//cout << ExpInclCrossSecFilename << endl;
     }
 }
 
