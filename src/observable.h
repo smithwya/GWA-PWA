@@ -567,6 +567,7 @@ public:
 		
 		int num_excl_pts = data[0].amp_expval.size();
 		int num_Bsstar_pts = data[getchanindex("P", "B_sstarB_sstar")].amp_expval.size();
+		//cout << getchanindex("P", "B_sstarB_sstar") << endl;
 		int num_incl_pts = data_InclCrossSec.amp_expval.size();
 
 		//cout << num_excl_pts << " " << num_Bsstar_pts << " " << num_incl_pts << endl; //I have
@@ -608,11 +609,14 @@ public:
 			val = data[0].sqrts[i];
 			if(isnan(val)) x2[i] = 0;
 			else x2[i] = val;
+			//cout << val << endl;
 			ex2[i] = 0;
+			cout << val << " ";
 
-			val += data[index].amp_expval[i];
+			val = data[index].amp_expval[i];
 			if(isnan(val)) y2[i] = 0;
 			else y2[i] = val;
+			cout << val << " ";
 
 
 			val = pow(data[index].amp_expval_stat_err[i], 2);
@@ -620,6 +624,7 @@ public:
 			val = pow(val, 0.5);
 			if(isnan(val)) ey2[i] = 0;
 			else ey2[i] = val;
+			cout << val << endl;
 
 		}
 
@@ -634,7 +639,6 @@ public:
 			if(isnan(val)) y3[i] = 0;
 			else y3[i] = val;
 
-
 			val = pow(data_InclCrossSec.amp_expval_stat_err[i], 2);
 			val += pow(data_InclCrossSec.amp_expval_sist_err[i], 2);
 			val = pow(val, 0.5);
@@ -648,21 +652,24 @@ public:
 		auto gr3 = new TGraphErrors(num_incl_pts,x3,y3,ex3,ey3);
 
    		//gr1->SetTitle("TGraphErrors Example");
-   		gr1->SetMarkerColor(4);
+   		gr1->SetMarkerColor(kBlue);
    		gr1->SetMarkerStyle(21);
 		gr1->GetXaxis()->SetRangeUser(lower_bound, upper_bound);
-		//gr1->GetYaxis()->SetRangeUser(0, 0.2);
+		gr1->GetYaxis()->SetRangeUser(0,450.);
 		gr1->SetLineWidth(1);
+		gr1->SetLineColor(kBlue);
 
 		//gr2->SetTitle("TGraphErrors Example");
-   		gr2->SetMarkerSize(0);
+   		gr2->SetMarkerColor(kRed);
+		gr2->SetMarkerStyle(21);
 		gr2->GetXaxis()->SetRangeUser(lower_bound, upper_bound);
 		//gr2->GetYaxis()->SetRangeUser(0, 0.2);
 		gr2->SetLineWidth(1);
 		gr2->SetLineColor(kRed);
 
 		//gr3->SetTitle("TGraphErrors Example");
-   		gr3->SetMarkerSize(0);
+   		gr3->SetMarkerColor(kMagenta);
+		gr3->SetMarkerStyle(21);
 		gr3->GetXaxis()->SetRangeUser(lower_bound, upper_bound);
 		//gr3->GetYaxis()->SetRangeUser(0, 0.2);
 		gr3->SetLineWidth(1);
@@ -674,8 +681,8 @@ public:
 		gr2->Write();
 		gr3->Write();
 		gr1->Draw("AP");
-		gr2->Draw("same");
-		gr3->Draw("same");
+		gr2->Draw("Psame");
+		gr3->Draw("Psame");
 		canv.SaveAs(("Plots/"+pdfname+".pdf").c_str());
 		file.Close();
 		return;
