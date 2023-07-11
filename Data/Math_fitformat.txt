@@ -1,0 +1,89 @@
+5 ! number of channels
+5.279250 5.279250    ! masses of channel 1
+5.279250 5.324710    ! masses of channel 2
+5.324710 5.324710    ! masses of channel 3
+5.415400 5.415400    ! masses of channel 4
+5.366890 5.366890    ! masses of channel 5
+3 ! number of conformal parameters in channel 1
+3 ! number of conformal parameters in channel 2
+3 ! number of conformal parameters in channel 3
+3 ! number of conformal parameters in channel 4
+3 ! number of conformal parameters in channel 5
+@@@ ! random conformal (seed)?
+2 0 ! Order of K polynomial
+2 ! number of resonances in wave 1
+10.632200 11.020800 ! Fitted energy region
+0 0 0 2 1 !Adler zero
+0.59999999999999998                1   0.0000000000000000      ! Scale parameter in CM for wave            1
+100.000000                0   200.000000      ! numerator parameter (channel            1 ,wave            1 ) n.            1
+100.000000                0   200.000000      ! numerator parameter (channel            1 ,wave            1 ) n.            2
+100.000000                0   200.000000      ! numerator parameter (channel            1 ,wave            1 ) n.            3
+100.000000                0   200.000000      ! numerator parameter (channel            2 ,wave            1 ) n.            1
+100.000000                0   200.000000      ! numerator parameter (channel            2 ,wave            1 ) n.            2
+100.000000                0   200.000000      ! numerator parameter (channel            2 ,wave            1 ) n.            3
+100.000000                0   200.000000      ! numerator parameter (channel            3 ,wave            1 ) n.            1
+100.000000                0   200.000000      ! numerator parameter (channel            3 ,wave            1 ) n.            2
+100.000000                0   200.000000      ! numerator parameter (channel            3 ,wave            1 ) n.            3
+100.000000                0   200.000000      ! numerator parameter (channel            4 ,wave            1 ) n.            1
+100.000000                0   200.000000      ! numerator parameter (channel            4 ,wave            1 ) n.            2
+100.000000                0   200.000000      ! numerator parameter (channel            4 ,wave            1 ) n.            3
+100.000000                0   200.000000      ! numerator parameter (channel            5 ,wave            1 ) n.            1
+100.000000                0   200.000000      ! numerator parameter (channel            5 ,wave            1 ) n.            2
+100.000000                0   200.000000      ! numerator parameter (channel            5 ,wave            1 ) n.            3
+ 1.0000000000000000                1   0.0000000000000000      ! scale in conf map (channel            1 ,wave            1 )
+ 1.0000000000000000                1   0.0000000000000000      ! scale in conf map (channel            2 ,wave            1 )
+ 1.0000000000000000                1   0.0000000000000000      ! scale in conf map (channel            3 ,wave            1 )
+ 1.0000000000000000                1   0.0000000000000000      ! scale in conf map (channel            4 ,wave            1 )
+ 1.0000000000000000                1   0.0000000000000000      ! scale in conf map (channel            5 ,wave            1 )
+100.000000                0   200.000000      ! coupling (channel            1 ,wave            1 , res            1 )
+100.000000                0   200.000000      ! coupling (channel            2 ,wave            1 , res            1 )
+100.000000                0   200.000000      ! coupling (channel            3 ,wave            1 , res            1 )
+100.000000                0   200.000000      ! coupling (channel            4 ,wave            1 , res            1 )
+100.000000                0   200.000000      ! coupling (channel            5 ,wave            1 , res            1 )
+100.000000                0   200.000000      ! coupling (channel            1 ,wave            1 , res            2 )
+100.000000                0   200.000000      ! coupling (channel            2 ,wave            1 , res            2 )
+100.000000                0   200.000000      ! coupling (channel            3 ,wave            1 , res            2 )
+100.000000                0   200.000000      ! coupling (channel            4 ,wave            1 , res            2 )
+100.000000                0   200.000000      ! coupling (channel            5 ,wave            1 , res            2 )
+115.000000           0   1.000000      ! mass (res            1 ,wave            1 )
+115.000000           0   1.000000      ! mass (res            2 ,wave            1 )
+ 1.0000000000000000                1   0.0000000000000000      ! xn
+ 1.0000000000000000                1   0.0000000000000000      ! xn
+ 1.0000000000000000                1   0.0000000000000000      ! xn
+ 1.0000000000000000                1   0.0000000000000000      ! xn
+ 1.0000000000000000                1   0.0000000000000000      ! xn
+ 1.0000000000000000                1   0.0000000000000000      ! xn
+100.000000                0   200.000000      ! c1  1   deg0   iw1
+100.000000                0   200.000000      ! c1  1   deg0   iw1
+100.000000                0   200.000000      ! c1  1   deg0   iw1
+100.000000                0   200.000000      ! c1  1   deg0   iw1
+100.000000                0   200.000000      ! c1  1   deg0   iw1
+200.000000                0   200.000000      ! c2  1   deg0   iw1
+200.000000                0   200.000000      ! c2  1   deg0   iw1
+200.000000                0   200.000000      ! c2  1   deg0   iw1
+200.000000                0   200.000000      ! c2  1   deg0   iw1
+300.000000                0   200.000000      ! c3  1   deg0   iw1
+300.000000                0   200.000000      ! c3  1   deg0   iw1
+300.000000                0   200.000000      ! c3  1   deg0   iw1
+400.000000                0   200.000000      ! c4  1   deg0   iw1
+400.000000                0   200.000000      ! c4  1   deg0   iw1
+500.000000                0   200.000000      ! c5  1   deg0   iw1
+100.000000                0   200.000000      ! c1  1   deg1   iw1
+100.000000                0   200.000000      ! c1  1   deg1   iw1
+100.000000                0   200.000000      ! c1  1   deg1   iw1
+100.000000                0   200.000000      ! c1  1   deg1   iw1
+100.000000                0   200.000000      ! c1  1   deg1   iw1
+200.000000                0   200.000000      ! c2  1   deg1   iw1
+200.000000                0   200.000000      ! c2  1   deg1   iw1
+200.000000                0   200.000000      ! c2  1   deg1   iw1
+200.000000                0   200.000000      ! c2  1   deg1   iw1
+300.000000                0   200.000000      ! c3  1   deg1   iw1
+300.000000                0   200.000000      ! c3  1   deg1   iw1
+300.000000                0   200.000000      ! c3  1   deg1   iw1
+400.000000                0   200.000000      ! c4  1   deg1   iw1
+400.000000                0   200.000000      ! c4  1   deg1   iw1
+500.000000                0   200.000000      ! c5  1   deg1   iw1
+0.0000000000000000                1   0.0000000000000000      ! CM subtraction            1
+0.0000000000000000                1   0.0000000000000000      ! CM subtraction            2
+           1 ! CM condition
+           1 ! Bootstrap

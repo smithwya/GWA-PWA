@@ -79,7 +79,9 @@ int main(int argc, char ** argv)
 	//saves the observable object outside of filereader object
 	testObs = testReader.getObs();
 
-	////tests
+	////tests and plots
+
+	testReader.writeMathematicaOutputFile("Data/Math_fitformat.txt");return 0;
 
 	double lower_bound = testObs.amplitudes[0].getFitInterval()[0];
 	double upper_bound = testObs.amplitudes[0].getFitInterval()[1];
