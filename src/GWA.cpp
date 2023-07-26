@@ -57,7 +57,6 @@ int main(int argc, char ** argv)
 	string inputfile = (string) argv[3];
 	string fitsfolder = (string) argv[4];
 
-
 	//reads the file and creates an observable object with the information from the file
 	
 	filereader testReader(inputfile);
@@ -78,7 +77,7 @@ int main(int argc, char ** argv)
 
 	//saves the observable object outside of filereader object
 	testObs = testReader.getObs();
-
+/*
 	////tests and plots
 
 	testReader.writeMathematicaOutputFile("Data/Math_fitformat.txt");return 0;
@@ -112,20 +111,22 @@ int main(int argc, char ** argv)
 	testObs.makePlotGraphWithExp("P", "BBstar", "test2BBstar", intensityP_BBstar, 10.6322,11.0208);
 	testObs.makePlotGraphWithExp("P", "BstarBstar", "test2BstarBstar", intensityP_BstarBstar, 10.6322,11.0208);
 	testObs.makePlotGraphWithExp("P", "B_sstarB_sstar", "test2B_sstarB_sstar", intensityP_B_sstarB_sstar, 10.6322,11.0208);
-
-	////
-
+*/
+  
 	//saves original starting parameters
 	vector<double> startparams = testObs.getFitParams();
 	vector<double> steps = testObs.getStepSizes();
+	
+	//gets degrees of freedom
+	int dof = testObs.getNumData()-steps.size();
 
 	if(testReader.getFitFlag()){
 		//make the minimzer
 		ROOT::Math::Minimizer* min = ROOT::Math::Factory::CreateMinimizer("Minuit2","");
 		//Set some criteria for the minimzer to stop
-		min->SetMaxFunctionCalls(1000);
-		min->SetMaxIterations(100);
-		min->SetTolerance(0.01);
+		min->SetMaxFunctionCalls(100000);
+		min->SetMaxIterations(10000);
+		min->SetTolerance(0.001);
 		min->SetPrintLevel(1);
 		//get the initial parameters and steps from the constructed observable object
 		vector<double> fitparams = testObs.getFitParams();
@@ -146,17 +147,16 @@ int main(int argc, char ** argv)
 		for(int i = 0; i < nParams; i ++){
 			finalParams.push_back(min->X()[i]);
 		}
-		double chisq = min->Edm();
-		cout<<"fit "<<fitnum<<" chi^2: "<<chisq<<endl;
-		cout<<"Seed "<<seed<<endl;
-		
+
+		double chisq = min->MinValue()/dof;
+
 		if(chisq<cutoff){
 			string fname = fitsfolder+"fit"+to_string(jobnum)+"-"+to_string(fitnum);
 			testObs.setFitParams(finalParams);
 			testReader.setObs(testObs);
 			testReader.writeOutputFile(fname);
 			ofstream outputfile(fname,ios::app);
-			outputfile<<"Edm = "<<chisq<<endl;
+			outputfile<<"chisq = "<<chisq<<endl;
 			outputfile.close();
 		}
 	}	

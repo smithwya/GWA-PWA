@@ -1,0 +1,30 @@
+SetSeed(3)
+
+FitRegion(10.6322,11.0208)
+
+ReducedChi2CutOff(4)
+
+DoFit(Yes)
+
+DoRandomize(Yes)
+
+AddChannel("BB", {5.27925, 5.27925})
+AddChannel("BBstar", {5.27925, 5.32471})
+AddChannel("BstarBstar", {5.32471, 5.32471})
+
+AddWave("P","kmat","nominal", 1, 0.6)
+
+ChebyCoeffs("P", "BB","s = 1", {-0.070934 \pm 200.000000, 0.044594 \pm 200.000000, 0.153244 \pm 200.000000})
+ChebyCoeffs("P", "BBstar", "s = 1", {-0.375905 \pm 200.000000, 0.448474 \pm 200.000000, -0.374791 \pm 200.000000})
+ChebyCoeffs("P", "BstarBstar", "s = 1", {0.577783 \pm 200.000000, -1.122143 \pm 200.000000, 0.893426 \pm 200.000000})
+
+AddPole("P", 114.750472 \pm 1.000000, {"BB","BBstar","BstarBstar"}, {205.749261 \pm 200.000000, -62.887076 \pm 200.000000, 69.159401 \pm 200.000000})
+AddPole("P", 120.281539 \pm 1.000000, {"BB","BBstar","BstarBstar"}, {72.732337 \pm 200.000000, -16.696864 \pm 200.000000, -144.670128 \pm 200.000000})
+
+AddKmatBackground("P", 0, {{124.935497 \pm 200.000000, 253.023309 \pm 200.000000, 1912.820580 \pm 200.000000}, {213.228783 \pm 200.000000, -1832.044499 \pm 200.000000}, {36996.400634 \pm 200.000000}})
+AddKmatBackground("P", 1, {{252.831031 \pm 200.000000, 149.295322 \pm 200.000000, 52.364198 \pm 200.000000}, {201.990762 \pm 200.000000, -54.423420 \pm 200.000000}, {431.923214 \pm 200.000000}})
+
+LoadExpData("P", "BB", "Data/BB-nominal.dat")
+LoadExpData("P", "BBstar", "Data/BBstar-nominal.dat")
+LoadExpData("P", "BstarBstar", "Data/BstarBstar-nominal.dat")
+chisq = 3985.2
