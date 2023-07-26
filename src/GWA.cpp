@@ -38,6 +38,17 @@ double minfunc(const double *xx){
 	return testObs.chisq(params);
 }
 
+double minfunc_with_InclCrossSec(const double *xx){
+
+	vector<double> params = {};
+	for(int i = 0; i < nParams; i++){
+		params.push_back(xx[i]);
+	}
+
+	testObs.setFitParams(params);
+	return testObs.chisq_with_InclCrossSec(params);
+}
+
 int main(int argc, char ** argv)
 {
 
@@ -55,18 +66,53 @@ int main(int argc, char ** argv)
 	testReader.setPoles();
 	testReader.setKmats();
 	testReader.loadExpData();
+	if(testReader.getInclCrossSecFlag()) testReader.loadExpInclCrossSec();
 	//selects a seed based off clock + job number
 	int seed = std::chrono::system_clock::now().time_since_epoch().count()+jobnum+fitnum;
 	testReader.setSeed(seed);
-	testReader.randomize(seed); 
+	if(testReader.getRandomizeFlag()) testReader.randomize(seed); 
 
 	//gets chisq cutoff
 	double cutoff = testReader.getChi2CutOff();
 
 	//saves the observable object outside of filereader object
 	testObs = testReader.getObs();
+/*
+	////tests and plots
+
+	testReader.writeMathematicaOutputFile("Data/Math_fitformat.txt");return 0;
+
+	double lower_bound = testObs.amplitudes[0].getFitInterval()[0];
+	double upper_bound = testObs.amplitudes[0].getFitInterval()[1];
+	testObs.plotInclCrossSec("InclCrossSec", lower_bound, upper_bound);
+	testObs.plotInclCrossSecVsSumOfExcl("Diff", lower_bound, upper_bound);
+
+	auto intensityP_BB = [&](double x){
+		comp value = testObs.amplitudes[0].getValue(pow(x,2))(0);
+		return (value*conj(value)).real();
+	};
+
+	auto intensityP_BBstar = [&](double x){
+		comp value = testObs.amplitudes[0].getValue(pow(x,2))(1);
+		return (value*conj(value)).real();
+	};
 	
-	
+	auto intensityP_BstarBstar = [&](double x){
+		comp value = testObs.amplitudes[0].getValue(pow(x,2))(2);
+		return (value*conj(value)).real();
+	};
+
+	auto intensityP_B_sstarB_sstar = [&](double x){
+		comp value = testObs.amplitudes[0].getValue(pow(x,2))(3);
+		return (value*conj(value)).real();
+	};
+
+	testObs.makePlotGraphWithExp("P", "BB", "test2BB", intensityP_BB, 10.6322,11.0208);
+	testObs.makePlotGraphWithExp("P", "BBstar", "test2BBstar", intensityP_BBstar, 10.6322,11.0208);
+	testObs.makePlotGraphWithExp("P", "BstarBstar", "test2BstarBstar", intensityP_BstarBstar, 10.6322,11.0208);
+	testObs.makePlotGraphWithExp("P", "B_sstarB_sstar", "test2B_sstarB_sstar", intensityP_B_sstarB_sstar, 10.6322,11.0208);
+*/
+  
 	//saves original starting parameters
 	vector<double> startparams = testObs.getFitParams();
 	vector<double> steps = testObs.getStepSizes();
@@ -87,7 +133,9 @@ int main(int argc, char ** argv)
 		nParams = fitparams.size();
 		//make a function wrapper to minimize the function minfunc (=chisquared)
 		ROOT::Math::Functor f(&minfunc,nParams);
-		min->SetFunction(f);
+		ROOT::Math::Functor g(&minfunc_with_InclCrossSec,nParams);
+		if(testReader.getInclCrossSecFlag()) min->SetFunction(g);
+		else min->SetFunction(f);
 		//set the initial conditions and step sizes
 		for(int i = 0; i < nParams; i++){
 			min->SetVariable(i,to_string(i),fitparams[i],steps[i]);

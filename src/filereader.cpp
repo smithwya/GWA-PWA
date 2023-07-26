@@ -179,6 +179,16 @@ void filereader::SetRandomizeFlag(){
     }
 }
 
+void filereader::SetInclCrossSecFlag(){
+	regex reg_InclCrossSecFlag("FitAlsoToInclusiveCrossSection\\(\\s*(.*?)\\s*\\)");
+	smatch cmdmatch;
+	for(int i = 0; i < commands.size(); i++){
+		if(regex_search(commands.at(i), cmdmatch, reg_InclCrossSecFlag)){
+            InclCrossSecFlagCmd = commands[i];
+		}
+    }
+}
+
 void filereader::SetSeed(){
 	regex reg_Seed("SetSeed\\(\\s*([0-9]+)\\s*\\)");
 	smatch cmdmatch;
@@ -197,6 +207,16 @@ void filereader::SetFitRegion(){
             FitRegion = commands[i];
 		}
     }		
+}
+
+void filereader::setExpInclCrossSec(){
+	regex reg_inclcrosssec("LoadExpInclusiveCrossSection\\(\\s*\"(.*?)\"\\s*\\)");
+	smatch cmdmatch;
+	for(int i = 0; i < commands.size(); i++){
+		if(regex_search(commands.at(i), cmdmatch, reg_inclcrosssec)){
+            ExpInclCrossSecCmd = commands[i];
+		}
+    }
 }
 
 void filereader::SetAddChannelList(){
@@ -255,6 +275,8 @@ void filereader::SetAllCommandLists(){
 	SetFitRegion();
 	SetChi2CutOff();
 	SetFitFlag();
+	setExpInclCrossSec();
+	SetInclCrossSecFlag();
 	SetRandomizeFlag();
 	SetAddChannelList();
 	SetAddWaveList();
@@ -271,6 +293,11 @@ double filereader::getChi2CutOff(){
 bool filereader::getFitFlag(){
 	readFitFlag(FitFlagCmd);
 	return FitFlag;
+}
+
+bool filereader::getInclCrossSecFlag(){
+	readInclCrossSecFlag(InclCrossSecFlagCmd);
+	return InclCrossSecFlag;
 }
 
 bool filereader::getRandomizeFlag(){
@@ -344,6 +371,18 @@ void filereader::readRandomizeFlag(string cmd){
 		remove(my_str.begin(), my_str.end(), ' ');
 		if (my_str == "No"){
 			RandomizeFlag = false;
+		}
+	}
+}
+
+void filereader::readInclCrossSecFlag(string cmd){
+	regex reg_InclCrossSecFlag("FitAlsoToInclusiveCrossSection\\(\\s*(.*?)\\s*\\)");
+
+	if(regex_search(cmd, match, reg_InclCrossSecFlag)){
+		string my_str = match[1];
+		remove(my_str.begin(), my_str.end(), ' ');
+		if (my_str == "No"){
+			InclCrossSecFlag = false;
 		}
 	}
 }
@@ -461,7 +500,7 @@ chebyDat filereader::readCheby(string cmd){
 poleDat filereader::readPole(string cmd){
 	regex reg_AddPole("AddPole\\(\"(.*?)\"\\s*,\\s*([0-9\\.-]+\\s*\\\\pm\\s*[0-9\\.]+)\\s*,\\s*\\{\\s*((\"(.*?)\"\\s*,?\\s*)+)\\}\\s*,\\s*\\{\\s*(([0-9\\.-]+\\s*\\\\pm\\s*[0-9\\.]+\\s*,?\\s*)+)\\}\\s*\\)"); 
 	regex testreg_number("([+-]{0,1}?(?=\\.\\d|\\d)(?:\\d+)?(?:\\.?\\d*))(?:[Ee]([+-]{0,1}?\\d+))?");
-	regex testreg_name("[A-Za-z]+");
+	regex testreg_name("[A-Za-z\\_]+");
 	
 	string wname = "";
 	double mass = 0; 
@@ -640,12 +679,45 @@ void filereader::loadExpData(){
 	for(int i = 0; i < withDummies.size(); i++){
 		for(int j = 0; j < allDat.size(); j++){
 			//cout << withDummies[i].wavename << " " << allDat[j].wavename << " " << withDummies[i].channame << " " << allDat[j].channame << endl;
-			//if((withDummies[i].wavename == allDat[j].wavename) && (withDummies[i].channame == allDat[j].channame)) cout << "hello" << endl;
+			if((withDummies[i].wavename == allDat[j].wavename) && (withDummies[i].channame == allDat[j].channame)){
+				withDummies[i] = allDat[j];
+			}
 		}
-	}//it has to be fixed
+	}
 
-	//obsObject.setData(withDummies);
-	obsObject.setData(allDat);
+	obsObject.setData(withDummies);
+	//obsObject.setData(allDat);
+	/*for(expchan x: obsObject.getData()){
+		if(x.sqrts.size() != 0) cout << x.sqrts[0] << endl;
+		else cout << "dummy" << endl;
+	}*/
+}
+
+void filereader::loadExpInclCrossSec(){
+
+	//cout << ExpInclCrossSecFilename << endl;
+
+	readExpInclCrossSecCmd(ExpInclCrossSecCmd);
+
+	//cout << ExpInclCrossSecFilename << endl;
+
+	ifstream letsread(ExpInclCrossSecFilename);
+
+	vector<double> a(5);
+	vector<double> x = {};
+	vector<double> y = {};
+	vector<double> y_stat_err = {};
+	vector<double> y_sist_err = {};
+	while(letsread>>a[0]>>a[1]>>a[2]>>a[3]>>a[4]){
+		x.push_back(a[0]);
+		y.push_back(a[1]);
+		y_stat_err.push_back(a[2]);
+		y_sist_err.push_back(a[3]);
+	}
+	letsread.close();
+
+	obsObject.setData_InclCrossSec(expInclCrossSec(x, y, y_stat_err, y_sist_err)); 
+
 }
 
 void filereader::SetExpDataList(){
@@ -699,16 +771,27 @@ expdataDat filereader::readExpData(string cmd){
 	string fname = "";
 	
 	if(regex_search(cmd, match, reg_ExpData)){
+		//cout << match[0] << endl;
 		wavename = match[1];
 		remove(wavename.begin(), wavename.end(), ' ');
 		chname = match[2];
 		remove(chname.begin(), chname.end(), ' ');
 		fname = match[3];
 		remove(fname.begin(), fname.end(), ' ');
-
+		//cout << fname << endl;
     }
 
 	return expdataDat(wavename, chname, fname);
+}
+
+void filereader::readExpInclCrossSecCmd(string cmd){
+
+	regex reg_inclcrosssec("LoadExpInclusiveCrossSection\\(\\s*\"(.*?)\"\\s*\\)");
+	
+	if(regex_search(cmd, match, reg_inclcrosssec)){
+		ExpInclCrossSecFilename = match[1];
+		//cout << ExpInclCrossSecFilename << endl;
+    }
 }
 
 void filereader::writeOutputFile(string outname){
@@ -728,6 +811,10 @@ void filereader::writeOutputFile(string outname){
 	output_cmds.push_back("");
 
 	output_cmds.push_back(FitFlagCmd);
+
+	output_cmds.push_back("");
+
+	output_cmds.push_back(InclCrossSecFlagCmd);
 
 	output_cmds.push_back("");
 
@@ -757,11 +844,195 @@ void filereader::writeOutputFile(string outname){
 
 	for(string s: ExpData_list) output_cmds.push_back(s);
 
+	output_cmds.push_back("");
+
+	output_cmds.push_back(ExpInclCrossSecCmd);
+
 	for(string s: output_cmds) letswrite << s << endl;
 
 	letswrite.close();
 	 
 }
+
+
+void filereader::writeMathematicaOutputFile(string outname){
+
+	ofstream letswrite(outname);
+
+	string temp = "";
+
+	temp = to_string(obsObject.numChans) + " ! number of channels";
+
+	Math_output_cmds.push_back(temp);
+
+	vector<double> masses = {};
+
+	for(int i = 0; i < obsObject.numChans; i++){
+		temp = "";
+		masses = obsObject.amplitudes[0].getChannels()[i].getMasses();
+		for(int j = 0; j < masses.size(); j++){
+			temp += to_string(masses[j]) + " ";
+		}
+		temp += "   ! masses of channel " + to_string(i + 1);
+		Math_output_cmds.push_back(temp);
+	}
+
+	int num_conform_params = 0;
+
+	for(int i = 0; i < obsObject.numChans; i++){
+		temp = "";
+		num_conform_params = obsObject.amplitudes[0].getChannels()[i].getChebyCoeffs().size();
+		temp += to_string(num_conform_params) + " ! number of conformal parameters in channel " + to_string(i + 1);
+		Math_output_cmds.push_back(temp);
+	}
+
+	temp = "@@@ ! random conformal (seed)?";//check
+	Math_output_cmds.push_back(temp);
+
+	temp = to_string(getKmatList().size()) + " 0 ! Order of K polynomial";
+	Math_output_cmds.push_back(temp);
+
+	for(int i = 0; i < obsObject.getNumAmps(); i++){
+		temp = to_string(obsObject.amplitudes[i].getResMasses().size()) + " ! number of resonances in wave " + to_string(i + 1);
+		Math_output_cmds.push_back(temp);
+	}
+
+	vector<double> fitreg = obsObject.amplitudes[0].getFitInterval();
+
+	temp = "";
+
+	for(int i = 0; i < fitreg.size(); i++){
+		temp += to_string(sqrt(fitreg[i])) + " ";
+	}
+
+	temp += "! Fitted energy region";
+	Math_output_cmds.push_back(temp);
+
+	temp = "0 0 0 2 1 !Adler zero";//check
+	Math_output_cmds.push_back(temp);
+
+	for(int i = 0; i < obsObject.getNumAmps(); i++){
+		temp = "0.59999999999999998                1   0.0000000000000000      ! Scale parameter in CM for wave            " + to_string(i + 1);//check
+		Math_output_cmds.push_back(temp);
+	}
+
+	double cheb = 0;
+	double cheb_step = 0;
+
+	for(int k = 0; k < obsObject.numChans; k++){
+		for(int j = 0; j < obsObject.getNumAmps(); j++){
+			for(int i = 0; i < num_conform_params; i++){
+				//-2173.7290154401403                0   100.00000000000000      ! numerator parameter (channel            1 ,wave            1 ) n.            1
+		//cheb_vec = obsObject.amplitudes[amp_index].getChannels()[chan_index].getChebyCoeffs();
+		//cheb_vec_steps = obsObject.amplitudes[amp_index].getChannels()[chan_index].getChebySteps();
+				cheb = obsObject.amplitudes[j].getChannels()[k].getChebyCoeffs()[i];
+				temp = to_string(cheb) + "                ";
+				cheb_step = obsObject.amplitudes[j].getChannels()[k].getChebySteps()[i];
+				if(cheb_step != 0) temp += "0   ";
+				else temp += "1   ";
+				temp += to_string(cheb_step) + "      ";
+				temp += "! numerator parameter (channel            " + to_string(k + 1) + " ,wave            " + to_string(j + 1) + " ) n.            " + to_string(i + 1);
+				Math_output_cmds.push_back(temp);
+			}
+		}
+	}
+
+	// 1.0000000000000000                1   0.0000000000000000      ! scale in conf map (channel            1 ,wave            1 )
+
+	for(int k = 0; k < obsObject.numChans; k++){
+		for(int j = 0; j < obsObject.getNumAmps(); j++){
+			temp = " 1.0000000000000000                1   0.0000000000000000      ! scale in conf map (channel            " + to_string(k + 1) + " ,wave            " + to_string(j + 1) + " )";
+			Math_output_cmds.push_back(temp);
+		}
+	}
+
+	//-6.0584496703077093                0   1.0000000000000000      ! coupling (channel            1 ,wave            1 , res            1 )
+
+	vector<double> res = obsObject.amplitudes[0].getResMasses();
+
+	double coup = 0;
+	double coup_step = 0;	
+
+	for(int j = 0; j < res.size(); j++){
+		for(int i = 0; i < obsObject.getNumAmps(); i++){
+			for(int k = 0; k < obsObject.numChans; k++){
+				coup = obsObject.amplitudes[i].getChannels()[k].getCouplings()[j];
+				coup_step = obsObject.amplitudes[i].getChannels()[k].getCouplingSteps()[j];
+				temp = to_string(coup) + "                0   " + to_string(coup_step) + "      ! coupling (channel            " + to_string(k + 1) + " ,wave            " + to_string(i + 1) + " , res            " + to_string(j + 1) + " )";
+				Math_output_cmds.push_back(temp);
+			}
+		}
+	}
+
+	//6.31602747547477250E-003           0   1.0000000000000000      ! mass (res            1 ,wave            1 )
+
+	double resm = 0;
+	double res_step = 0;
+
+	for(int i = 0; i < obsObject.getNumAmps(); i++){
+		for(int j = 0; j < res.size(); j++){
+			resm = obsObject.amplitudes[i].getResMasses()[i];
+			res_step = obsObject.amplitudes[i].getResMassesSteps()[j]; 
+			temp = to_string(resm) + "           0   " + to_string(res_step) + "      ! mass (res            " + to_string(j + 1) + " ,wave            " + to_string(i + 1) + " )";
+			Math_output_cmds.push_back(temp);
+		}
+	}
+
+	for(int i = 0; i < 6; i++){
+		temp = " 1.0000000000000000                1   0.0000000000000000      ! xn";
+		Math_output_cmds.push_back(temp);
+	}
+
+	double kcoeff = 0;
+	double kcoeff_step = 0;
+
+	//16.190285088168821                0   10.000000000000000      ! c1  1   deg0   iw1
+	int count = 0;
+	for(int i = 0; i < obsObject.getNumAmps(); i++){
+		for(int j = 0; j < getKmatList().size(); j++){
+
+			vector<double> steps = obsObject.amplitudes[i].getKSteps(j);
+			MatrixXcd mat_steps = obsObject.amplitudes[i].getkParameters()[j];
+
+			for(int m = 0; m < obsObject.numChans; m++){
+				for(int n = 0; n < obsObject.numChans; n++){
+					if (m == 0 || n == 0) mat_steps(m,n) = steps[m + n]; 
+					else mat_steps(m,n) = steps[m + n + 1];
+				}
+			}
+
+			for(int l = 0; l < obsObject.numChans; l++){
+				for(int k = l; k < obsObject.numChans; k++){
+					kcoeff = (obsObject.amplitudes[i].getkParameters()[i](l,k)).real();
+					kcoeff_step = (mat_steps(j,k)).real();
+					temp = to_string(kcoeff);
+					if(kcoeff_step != 0) temp += "                0   ";
+					else temp += "                1   ";
+					temp += to_string(kcoeff_step) + "      ! c" + to_string(l + 1) + "  1   deg" + to_string(j) + "   iw" + to_string(i + 1);
+					Math_output_cmds.push_back(temp);
+				}
+			}
+		}
+	}
+
+	temp = "0.0000000000000000                1   0.0000000000000000      ! CM subtraction            1";
+	Math_output_cmds.push_back(temp);
+
+	temp = "0.0000000000000000                1   0.0000000000000000      ! CM subtraction            2";	
+	Math_output_cmds.push_back(temp);
+
+	temp = "           1 ! CM condition";
+	Math_output_cmds.push_back(temp);
+
+	temp = "           1 ! Bootstrap";
+	Math_output_cmds.push_back(temp);
+
+	for(string s: Math_output_cmds) letswrite << s << endl;
+
+	letswrite.close();
+
+}
+
 
 void filereader::RewriteAddPoleList(){
 	
