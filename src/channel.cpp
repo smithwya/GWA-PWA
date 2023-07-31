@@ -80,8 +80,11 @@ comp channel::getMomentum(comp s){
 	for(double m : masses){
 		masssq +=m;
 	}
-
 return 0.5*sqrt(s-pow(masssq,2));
+}
+
+comp channel::getTrueMomentum(comp s){
+	return 0.5 * (sqrt((s-pow(masses[0] + masses[1],2))*(s-pow(masses[0] - masses[1],2))))/s;
 }
 
 double channel::getThreshold(){

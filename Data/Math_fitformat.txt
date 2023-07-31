@@ -16,7 +16,7 @@
 0 0 0 2 1 !Adler zero
 0.59999999999999998                1   0.0000000000000000      ! Scale parameter in CM for wave            1
 100.000000                0   200.000000      ! numerator parameter (channel            1 ,wave            1 ) n.            1
-100.000000                0   200.000000      ! numerator parameter (channel            1 ,wave            1 ) n.            2
+200.000000                0   200.000000      ! numerator parameter (channel            1 ,wave            1 ) n.            2
 100.000000                0   200.000000      ! numerator parameter (channel            1 ,wave            1 ) n.            3
 100.000000                0   200.000000      ! numerator parameter (channel            2 ,wave            1 ) n.            1
 100.000000                0   200.000000      ! numerator parameter (channel            2 ,wave            1 ) n.            2

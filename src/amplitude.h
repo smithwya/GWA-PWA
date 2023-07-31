@@ -56,8 +56,10 @@ public:
 	MatrixXcd getDenominator(comp s);
 	MatrixXcd getKMatrix(comp s);
 	comp getMomentum(int particle, comp s);
+	comp getTrueMomentum(int particle, comp s);
 	friend ostream& operator<<(std::ostream& os, amplitude const& m);
 	comp getIntegral(comp s, int k);
+	comp getIntegral(double s, int k);
 	comp getIntegrand(double sp, comp s, int k);
 	void setChebyCoeffs(string channel_name, int type, double s0, vector<double> coeffs);
 	void setChebyCoeffs(string channel_name, int type, double s0, vector<double> coeffs,vector<double> csteps);

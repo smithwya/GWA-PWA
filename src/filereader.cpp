@@ -83,8 +83,8 @@ void filereader::setChebys(){
 				int type = 0;
 				string my_str = chd.poletype;
 				remove(my_str.begin(), my_str.end(), ' ');
-				if (my_str == "s") type = 1;
-				if (my_str == "p") type = 2;
+				if (my_str == "p") type = 1;
+				if (my_str == "s") type = 2;
 				if (my_str == "p+s") type = 3;
 				obsObject.amplitudes[i].setChebyCoeffs(chd.channame, type, chd.ss0, chd.coeffs,chd.coeffs_inc);
 			}
@@ -971,7 +971,7 @@ void filereader::writeMathematicaOutputFile(string outname){
 
 	for(int i = 0; i < obsObject.getNumAmps(); i++){
 		for(int j = 0; j < res.size(); j++){
-			resm = obsObject.amplitudes[i].getResMasses()[i];
+			resm = obsObject.amplitudes[i].getResMasses()[j];
 			res_step = obsObject.amplitudes[i].getResMassesSteps()[j]; 
 			temp = to_string(resm) + "           0   " + to_string(res_step) + "      ! mass (res            " + to_string(j + 1) + " ,wave            " + to_string(i + 1) + " )";
 			Math_output_cmds.push_back(temp);
@@ -1003,8 +1003,8 @@ void filereader::writeMathematicaOutputFile(string outname){
 
 			for(int l = 0; l < obsObject.numChans; l++){
 				for(int k = l; k < obsObject.numChans; k++){
-					kcoeff = (obsObject.amplitudes[i].getkParameters()[i](l,k)).real();
-					kcoeff_step = (mat_steps(j,k)).real();
+					kcoeff = (obsObject.amplitudes[i].getkParameters()[j](l,k)).real();
+					kcoeff_step = (mat_steps(l,k)).real();
 					temp = to_string(kcoeff);
 					if(kcoeff_step != 0) temp += "                0   ";
 					else temp += "                1   ";

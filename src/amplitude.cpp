@@ -108,10 +108,29 @@ VectorXcd amplitude::getValue(comp s) {
 	
 	MatrixXcd phsp = MatrixXcd::Identity(numChannels,numChannels);
 
+	//s = pow(10.7, 2);
 	for(int i = 0; i < numChannels; i++){
 		phsp(i,i)= pow(getMomentum(i,s),J+0.5)/pow(s,.25);
 	}
 
+	double test = 0;
+	//cout << channels[0].getMasses()[0] << channels[0].getMasses()[1]<<endl;exit(0);
+	cout << getKMatrix(pow(10.7, 2)) << endl; exit(0);
+	//test = omega_s(pow(10.7, 2)).real(); cout << test << endl;
+	//test = getNumerator(pow(10.7, 2), channels[0].getPoleType())[0].real(); cout << test << endl; 
+	//test = pow(2 * channels[0].getMomentum(pow(10.7, 2)).real(), 2 + 1); //cout << test << endl;
+	//test = getRhoN(pow(10.7, 2), 0).real(); cout << test << endl; 
+	/*test = getIntegral(pow(10.7, 2), 0).real(); cout << test << endl; 
+	test = getIntegral(pow(10.7, 2), 0).real(); cout << test << endl;
+	test = getIntegral(pow(10.7, 2), 0).imag(); cout << test << endl;
+	test = getIntegral(pow(10.7, 2), 0).imag(); cout << test << endl;
+	//test = phsp(0,0).real(); cout << test << endl; 
+	test = (getKMatrix(pow(10.7, 2)).inverse())(0,0).real(); cout << test << endl;
+	test = getDenominator(pow(10.7, 2))(0,0).real(); cout << test << endl;
+	test = getDenominator(pow(10.7, 2))(0,0).imag(); cout << test << endl;
+	test = ((getDenominator(pow(10.7, 2)).inverse())(0,0)).real(); cout << test << endl;
+	test = ((getDenominator(pow(10.7, 2)).inverse())(0,0)).imag(); cout << test << endl; //exit(0);*/
+	
 	MatrixXcd K = getKMatrix(s);
 	MatrixXcd I = MatrixXcd::Identity(numChannels,numChannels);
 
@@ -121,7 +140,8 @@ VectorXcd amplitude::getValue(comp s) {
 		DispRhoN(k,k) = getIntegral(s,k);
 	}
 
-	return (getNumerator(s, 3).transpose() * (I - K * DispRhoN).inverse() * K) * phsp;
+	return (getNumerator(s, channels[0].getPoleType()).transpose() * (I - K * DispRhoN).inverse() * K) * phsp;
+	//poletype is the same for every wave and every channel, so I take the 0th
 	
 
 }
@@ -164,8 +184,8 @@ comp amplitude::omega(comp s, int type){
 
 	switch (type)
 	{
-	case 1: return omega_s(s);
-	case 2: return omega_p(s);
+	case 1: return omega_p(s);
+	case 2: return omega_s(s);
 	case 3: return omega_ps(s);
 	}
 
@@ -198,6 +218,8 @@ comp amplitude::getRhoN(comp sprime,int k)
 	int dumbJ = J;
 	//if(k==2) dumbJ = 0;
 
+	//cout << "dumbJ = " << J << endl;
+
 	comp x = pow(2.0*channels[k].getMomentum(sprime),2.0*dumbJ+1.0)/pow(sprime + sL,dumbJ+alpha);
 
 	return x;
@@ -206,8 +228,9 @@ comp amplitude::getRhoN(comp sprime,int k)
 //overload later for other sheets
 comp amplitude::getIntegrand(double sp,comp s, int k){
 
-	return getRhoN(sp,k)*s/(sp*(sp-s-comp(0,1)*epsilon)*TMath::Pi());
-
+	comp z = getRhoN(sp,k)*s/(sp*(sp-s-comp(0,1)*epsilon)*TMath::Pi());
+	//return z.real() + comp(0,1)*getRhoN(s,k);
+	return z;
 }
 
 
@@ -217,6 +240,13 @@ comp amplitude::getIntegral(comp s,int k){
 	auto mapit = integralList.find(skpair);
 
 	if(mapit!=integralList.end()) return mapit->second;
+
+	if(abs(s.imag()) < 2 * epsilon){
+		double sreal = s.real();
+		comp result = getIntegral(sreal, k);
+		integralList[skpair] = result;
+		return result;
+	}
 
  	auto realIntegrand = [&](double sp)
     {
@@ -235,8 +265,8 @@ comp amplitude::getIntegral(comp s,int k){
 	
 	double threshold = channels[k].getThreshold();
 
-	double realpart = intRe.IntegralUp(threshold+.0001);
-	double imagpart = intIm.IntegralUp(threshold+.0001);
+	double realpart = intRe.IntegralUp(threshold+.001);
+	double imagpart = intIm.IntegralUp(threshold+.001);
 	
 	comp result = comp(realpart,imagpart);
 
@@ -244,6 +274,31 @@ comp amplitude::getIntegral(comp s,int k){
 	integralList[skpair]=result;
 
 	return result;
+}
+
+comp amplitude::getIntegral(double s,int k){
+
+	auto integrand = [&](double sp)
+	{
+		return (getRhoN(sp, k).real() - getRhoN(s, k).real())/(sp * (sp - s));
+	};
+
+	ROOT::Math::Functor1D integrand_fun(integrand);
+
+	ROOT::Math::Integrator integral(integrand_fun,ROOT::Math::IntegrationOneDim::kGAUSS,1.E-9,1.E-6);
+
+	double threshold = channels[k].getThreshold();
+
+	double integral_result = integral.IntegralUp(threshold);
+
+	double realpart = (s * integral_result + getRhoN(s,k).real() * log(threshold / (s - threshold))) / TMath::Pi();
+
+	double imagpart = 0;
+
+	if(s > threshold) imagpart = getRhoN(s,k).real();
+
+	return comp(realpart, imagpart);
+
 }
 
 
@@ -275,6 +330,11 @@ MatrixXcd amplitude::getDenominator(comp s)
 comp amplitude::getMomentum(int chan, comp s)
 {
 	return channels[chan].getMomentum(s);
+}
+
+comp amplitude::getTrueMomentum(int chan, comp s)
+{
+	return channels[chan].getTrueMomentum(s);
 }
 
 void amplitude::setResMasses(vector<double> rm){

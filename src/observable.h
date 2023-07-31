@@ -298,10 +298,13 @@ public:
 
 		}
 
+		double lb = data[totnumofchans * numamp + numchan].sqrts[0];
+
+		double ub = data[totnumofchans * numamp + numchan].sqrts[num_exp_pts - 1];
 
 		for (int i = 0; i < num_th_pts; i++){
 
-			x2[i] = lower_bound + (upper_bound - lower_bound) * i / ((double)num_th_pts - 1.);
+			x2[i] = lb + (ub - lb) * i / ((double)num_th_pts - 1.);
 
 		}
 
@@ -593,6 +596,7 @@ public:
 			else y1[i] = val;
 
 
+			val = 0;
 			val = pow(data[0].amp_expval_stat_err[i], 2); //this is WRONG because I should have evaluate the error on
 			// the sum, while this is referred to a single exclusive sigma only
 			val += pow(data[0].amp_expval_sist_err[i], 2);

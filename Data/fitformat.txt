@@ -18,7 +18,7 @@ AddChannel("B_sB_s", {5.36689, 5.36689})
 
 AddWave("P","kmat","nominal", 1, 0.6)
 
-ChebyCoeffs("P", "BB","s = 1", {100 \pm 200, 100 \pm 200,100 \pm 200}) 
+ChebyCoeffs("P", "BB","s = 1", {100 \pm 200, 200 \pm 200,100 \pm 200}) 
 ChebyCoeffs("P", "BBstar", "s = 1", {100 \pm 200, 100 \pm 200, 100 \pm 200})
 ChebyCoeffs("P", "BstarBstar", "s = 1", {100 \pm 200, 100 \pm 200, 100 \pm 200})
 ChebyCoeffs("P", "B_sstarB_sstar", "s = 1", {100 \pm 200, 100 \pm 200, 100 \pm 200})
