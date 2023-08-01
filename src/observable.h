@@ -125,6 +125,14 @@ public:
 
 		return;
 	};
+	
+	int getNumData(){
+		int sum = 0;
+		for(int i = 0; i < data.size(); i++){
+			sum+=data[i].amp_expval.size();
+		}
+		return sum;
+	}
 
 	void makePlot(string pdfname, function<double(double)> func, double lower_bound, double upper_bound, int num_bins){	
 
