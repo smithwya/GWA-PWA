@@ -127,9 +127,7 @@ int main(int argc, char ** argv)
 		return value;
 	};
 
-	comp test = testObs.amplitudes[0].getValue(pow(10.87,2))(0);
-
-	cout << "test " << (test*conj(test)).real() << endl;
+	cout << "test " << testObs.amplitudes[0].getValue(pow(10.7,2)) << endl;
 
 	testObs.makePlotGraph("P", "BB", "test2_ImagPartInt", ImagPartInt, 10.6322, 11.0208);
 	testObs.makePlotGraph("P", "BB", "test2_AlternImagPartInt", AlternImagPartInt, 10.6322, 11.0208);

@@ -114,22 +114,17 @@ VectorXcd amplitude::getValue(comp s) {
 	}
 
 	double test = 0;
-	//cout << channels[0].getMasses()[0] << channels[0].getMasses()[1]<<endl;exit(0);
-	cout << getKMatrix(pow(10.7, 2)) << endl; exit(0);
-	//test = omega_s(pow(10.7, 2)).real(); cout << test << endl;
-	//test = getNumerator(pow(10.7, 2), channels[0].getPoleType())[0].real(); cout << test << endl; 
-	//test = pow(2 * channels[0].getMomentum(pow(10.7, 2)).real(), 2 + 1); //cout << test << endl;
-	//test = getRhoN(pow(10.7, 2), 0).real(); cout << test << endl; 
-	/*test = getIntegral(pow(10.7, 2), 0).real(); cout << test << endl; 
-	test = getIntegral(pow(10.7, 2), 0).real(); cout << test << endl;
-	test = getIntegral(pow(10.7, 2), 0).imag(); cout << test << endl;
-	test = getIntegral(pow(10.7, 2), 0).imag(); cout << test << endl;
-	//test = phsp(0,0).real(); cout << test << endl; 
-	test = (getKMatrix(pow(10.7, 2)).inverse())(0,0).real(); cout << test << endl;
-	test = getDenominator(pow(10.7, 2))(0,0).real(); cout << test << endl;
-	test = getDenominator(pow(10.7, 2))(0,0).imag(); cout << test << endl;
-	test = ((getDenominator(pow(10.7, 2)).inverse())(0,0)).real(); cout << test << endl;
-	test = ((getDenominator(pow(10.7, 2)).inverse())(0,0)).imag(); cout << test << endl; //exit(0);*/
+	//cout << channels[2].getMasses()[0] << "	" << channels[2].getMasses()[1]<<endl;
+	//cout << getKMatrix(pow(10.7, 2)) << endl; exit(0);
+	//test = omega_s(pow(10.7, 2)).real(); cout << test << endl; exit(0);
+	//cout << getNumerator(pow(10.7, 2), channels[0].getPoleType()) << endl; exit(0);
+	//test = pow(2 * channels[2].getMomentum(pow(10.7, 2)).real(), 2 + 1); cout << test << endl; exit(0);
+	//test = getRhoN(pow(10.7, 2), 2).real(); cout << test << endl; exit(0);
+	/*cout << getIntegral(s, 2) << endl << endl; 
+	//cout << phsp << endl; exit(0);
+	//cout << (getKMatrix(s).inverse()) << endl; exit(0);
+	cout << getDenominator(s) << endl << endl;
+	cout << getDenominator(s).inverse() << endl; exit(0);*/
 	
 	MatrixXcd K = getKMatrix(s);
 	MatrixXcd I = MatrixXcd::Identity(numChannels,numChannels);
@@ -278,9 +273,11 @@ comp amplitude::getIntegral(comp s,int k){
 
 comp amplitude::getIntegral(double s,int k){
 
+	double tempRhoN = getRhoN(s, k).real();
+
 	auto integrand = [&](double sp)
 	{
-		return (getRhoN(sp, k).real() - getRhoN(s, k).real())/(sp * (sp - s));
+		return s * (getRhoN(sp, k).real() - tempRhoN)/(sp * (sp - s)) / TMath::Pi(); //if sp is real getRhoN(sp,k) is real too
 	};
 
 	ROOT::Math::Functor1D integrand_fun(integrand);
@@ -289,15 +286,17 @@ comp amplitude::getIntegral(double s,int k){
 
 	double threshold = channels[k].getThreshold();
 
-	double integral_result = integral.IntegralUp(threshold);
+	double integral_result = integral.IntegralUp(threshold + epsilon);
 
-	double realpart = (s * integral_result + getRhoN(s,k).real() * log(threshold / (s - threshold))) / TMath::Pi();
+	comp temp = integral_result + tempRhoN * log(threshold / abs(s - threshold)) / TMath::Pi();
 
-	double imagpart = 0;
+	if(s > threshold){
 
-	if(s > threshold) imagpart = getRhoN(s,k).real();
+		temp += comp(0,tempRhoN); 
 
-	return comp(realpart, imagpart);
+	} 
+
+	return temp;
 
 }
 
