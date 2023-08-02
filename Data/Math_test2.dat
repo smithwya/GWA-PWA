@@ -3,7 +3,7 @@
 5.279250 5.324710    ! masses of channel 2
 5.324710 5.324710    ! masses of channel 3
 5.415400 5.415400    ! masses of channel 4
-5.366890 5.366890    ! masses of channel 5
+5.366890 5.415400    ! masses of channel 5
 3 ! number of conformal parameters in channel 1
 3 ! number of conformal parameters in channel 2
 3 ! number of conformal parameters in channel 3
@@ -46,7 +46,7 @@
 100.000000                0   200.000000      ! coupling (channel            4 ,wave            1 , res            2 )
 100.000000                0   200.000000      ! coupling (channel            5 ,wave            1 , res            2 )
 115.000000           0   1.000000      ! mass (res            1 ,wave            1 )
-115.000000           0   1.000000      ! mass (res            2 ,wave            1 )
+120.000000           0   1.000000      ! mass (res            2 ,wave            1 )
  1.0000000000000000                1   0.0000000000000000      ! xn
  1.0000000000000000                1   0.0000000000000000      ! xn
  1.0000000000000000                1   0.0000000000000000      ! xn

@@ -23,6 +23,7 @@ public:
     channel(string cname, vector<double> particlemasses);
 
     comp getMomentum(comp s);
+    comp getTrueMomentum(comp s);
     vector<double> getCouplings();
     void setCouplings(vector<double> c);
     double getCoupling(int i);

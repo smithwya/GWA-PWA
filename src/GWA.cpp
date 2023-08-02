@@ -77,10 +77,10 @@ int main(int argc, char ** argv)
 
 	//saves the observable object outside of filereader object
 	testObs = testReader.getObs();
-/*
+
 	////tests and plots
 
-	testReader.writeMathematicaOutputFile("Data/Math_fitformat.txt");return 0;
+	testReader.writeMathematicaOutputFile("Data/Math_test2.dat");
 
 	double lower_bound = testObs.amplitudes[0].getFitInterval()[0];
 	double upper_bound = testObs.amplitudes[0].getFitInterval()[1];
@@ -107,12 +107,41 @@ int main(int argc, char ** argv)
 		return (value*conj(value)).real();
 	};
 
-	testObs.makePlotGraphWithExp("P", "BB", "test2BB", intensityP_BB, 10.6322,11.0208);
-	testObs.makePlotGraphWithExp("P", "BBstar", "test2BBstar", intensityP_BBstar, 10.6322,11.0208);
-	testObs.makePlotGraphWithExp("P", "BstarBstar", "test2BstarBstar", intensityP_BstarBstar, 10.6322,11.0208);
-	testObs.makePlotGraphWithExp("P", "B_sstarB_sstar", "test2B_sstarB_sstar", intensityP_B_sstarB_sstar, 10.6322,11.0208);
-*/
-  
+	auto ImagPartInt = [&](double x){
+		double value = (testObs.amplitudes[0].getIntegral(pow(x,2), 0)).imag();
+		return value;
+	};
+
+	auto RealPartInt = [&](double x){
+		double value = (testObs.amplitudes[0].getIntegral(pow(x,2), 0)).real();
+		return value;
+	};
+
+	auto AlternImagPartInt = [&](double x){
+		double value = (testObs.amplitudes[0].getIntegral(pow(x,2), 0)).imag();
+		return value;
+	};
+
+	auto AlternRealPartInt = [&](double x){
+		double value = (testObs.amplitudes[0].getIntegral(pow(x,2), 0)).real();
+		return value;
+	};
+
+	cout << "test " << testObs.amplitudes[0].getValue(pow(10.7,2)) << endl;
+
+	testObs.makePlotGraph("P", "BB", "test2_ImagPartInt", ImagPartInt, 10.6322, 11.0208);
+	testObs.makePlotGraph("P", "BB", "test2_AlternImagPartInt", AlternImagPartInt, 10.6322, 11.0208);
+	testObs.makePlotGraph("P", "BB", "test2_RealPartInt", RealPartInt, 10.6322, 11.0208);
+	testObs.makePlotGraph("P", "BB", "test2_AlternRealPartInt", AlternRealPartInt, 10.6322, 11.0208);
+	testObs.makePlotGraphWithExp("P", "BB", "test2_BB", intensityP_BB, 10.6322,11.0208);
+	testObs.makePlotGraphWithExp("P", "BBstar", "test2_BBstar", intensityP_BBstar, 10.6322,11.0208);
+	testObs.makePlotGraphWithExp("P", "BstarBstar", "test2_BstarBstar", intensityP_BstarBstar, 10.6322,11.0208);
+	testObs.makePlotGraphWithExp("P", "B_sstarB_sstar", "BottB_sstarB_sstar_Graph_WithExp", intensityP_B_sstarB_sstar, 10.6322,11.0208);
+
+	return 0;
+
+	////
+
 	//saves original starting parameters
 	vector<double> startparams = testObs.getFitParams();
 	vector<double> steps = testObs.getStepSizes();
