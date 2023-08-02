@@ -605,10 +605,8 @@ public:
 
 
 			val = 0;
-			val = pow(data[0].amp_expval_stat_err[i], 2); //this is WRONG because I should have evaluate the error on
-			// the sum, while this is referred to a single exclusive sigma only
-			val += pow(data[0].amp_expval_sist_err[i], 2);
-			val = pow(val, 0.5);
+			for(int j = 0; j < 3; j++) val += pow(data[j].amp_expval_stat_err[i], 2);
+			val = sqrt(val);
 			if(isnan(val)) ey1[i] = 0;
 			else ey1[i] = val;
 
@@ -618,7 +616,7 @@ public:
 
 			int index = getchanindex("P", "B_sstarB_sstar");
 
-			val = data[0].sqrts[i];
+			val = data[index].sqrts[i];
 			if(isnan(val)) x2[i] = 0;
 			else x2[i] = val;
 			//cout << val << endl;
