@@ -51,7 +51,6 @@ double minfunc_with_InclCrossSec(const double *xx){
 
 int main(int argc, char ** argv)
 {
-
 	int jobnum = atoi(argv[1]);
 	int fitnum = atoi(argv[2]);
 	string inputfile = (string) argv[3];
@@ -80,8 +79,9 @@ int main(int argc, char ** argv)
 
 	////tests and plots
 
-	testReader.writeMathematicaOutputFile("Data/Math_test2.dat");
-
+	//testReader.writeMathematicaOutputFile("Data/Math_test2.dat");
+	
+	/*
 	double lower_bound = testObs.amplitudes[0].getFitInterval()[0];
 	double upper_bound = testObs.amplitudes[0].getFitInterval()[1];
 	testObs.plotInclCrossSec("InclCrossSec", lower_bound, upper_bound);
@@ -137,10 +137,7 @@ int main(int argc, char ** argv)
 	testObs.makePlotGraphWithExp("P", "BBstar", "test2_BBstar", intensityP_BBstar, 10.6322,11.0208);
 	testObs.makePlotGraphWithExp("P", "BstarBstar", "test2_BstarBstar", intensityP_BstarBstar, 10.6322,11.0208);
 	testObs.makePlotGraphWithExp("P", "B_sstarB_sstar", "BottB_sstarB_sstar_Graph_WithExp", intensityP_B_sstarB_sstar, 10.6322,11.0208);
-
-	return 0;
-
-	////
+	*/
 
 	//saves original starting parameters
 	vector<double> startparams = testObs.getFitParams();

@@ -1,7 +1,7 @@
 #!/bin/bash
-nJobs=30
-nFits=10
-formatpath=Data/fitformat.txt
+nJobs=100
+nFits=30
+formatpath=Data/fitformat_exclusive.txt
 fitpath=Fits/
 
 make
