@@ -1,6 +1,6 @@
 #!/bin/bash
 nJobs=100
-nFits=200
+nFits=100
 formatpath=Data/fitformat_inclusive.txt
 fitpath=Fits/
 
