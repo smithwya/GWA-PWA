@@ -138,11 +138,10 @@ int main(int argc, char ** argv)
 	ps.setAmpIndex(ampname);
 	int ampindex = ps.getAmpIndex();
 	
-	int counter = 0;
 	TRandom3 gen;
 	ofstream letwrite("Data/poles.txt");
-	vector<double> grid_Re = linspace(113,121,2);
-	vector<double> grid_Im = linspace(-3, 3, 1);
+	vector<double> grid_Re = linspace(113, 121, 5);
+	vector<double> grid_Im = linspace(-3, 3, 5);
 	vector<double> fitparamspoles = {};
 	double steppoles[2] = {0.01,0.01};
 	for(int i = 0; i < grid_Re.size(); i++){
@@ -151,10 +150,11 @@ int main(int argc, char ** argv)
 			//vector<double> fitparamspoles = {testObs.amplitudes[ampindex].getResMasses()[0]+1, 1};
 			//vector<double> fitparamspoles = {grid_Re[i], grid_Im[j]};
 			fitparamspoles = {grid_Re[i], grid_Im[j]};//cout << grid_Re[i] << endl;
+			
 			//for {118,0} it finds the same pole two time
 			//for {121,0} it finds the \Upsilon(11020) maybe
-			//cout << fitparamspoles[0] << " " << fitparamspoles[1] << endl;
-			while(counter < testReader.getAddPoleList().size()){
+			cout << fitparamspoles[0] << " " << fitparamspoles[1] << endl;
+			for(int counter = 0; counter < testReader.getAddPoleList().size(); counter++){
 		
 				for(int l = 0; l < nParams; l++){
 					minpoles->SetVariable(l,to_string(l),fitparamspoles[l],steppoles[l]);
@@ -165,17 +165,23 @@ int main(int argc, char ** argv)
 				//extract the resulting fit parameters
 				comp finalParams = comp(minpoles->X()[0], minpoles->X()[1]);
 				temppoles.push_back(finalParams);
-				counter++;
 				minpoles->Clear();
 
 			}
 
 			for(int k = 0; k < temppoles.size(); k++){
-				letwrite << temppoles[k] << endl; 
-				cout << temppoles[k] << endl;
-			} 
+				letwrite << temppoles[k].real() << "	" << temppoles[k].imag() << endl; 
+				//cout << temppoles[k] << endl;
+			}
 		}
+		//minpoles->Clear();
 	}
+
+	TCanvas c1;
+	TGraph *gr = new TGraph("Data/poles.txt");
+	gr->SetMarkerStyle(21);
+	gr->Draw("AP");
+	c1.SaveAs("Plots/poles_graph.pdf");
 
 	//testReader.writeMathematicaOutputFile("Data/Math_test2.dat");
 	
