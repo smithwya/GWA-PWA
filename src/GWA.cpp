@@ -11,6 +11,7 @@
 #include "filereader.h"
 #include "observable.h"
 #include "bottomonium.h"
+#include "polesearcher.h"
 
 #include "Math/Minimizer.h"
 #include "Math/Factory.h"
@@ -24,8 +25,9 @@ using Eigen::MatrixXcd;
 using Eigen::VectorXcd;
 typedef std::complex<double> comp;
 observable testObs = observable();
+polesearcher ps;
 int nParams = 0;
-vector<comp> temppoles = {};
+vector<comp> temppoles = {}; //this vector hold the poles found by polesearcher
 
 double minfunc(const double *xx){
 
@@ -35,7 +37,7 @@ double minfunc(const double *xx){
 	}
 
 	testObs.setFitParams(params);
-	return testObs.chisq(params);
+	return testObs.chisq();
 }
 
 double minfunc_with_InclCrossSec(const double *xx){
@@ -46,7 +48,46 @@ double minfunc_with_InclCrossSec(const double *xx){
 	}
 
 	testObs.setFitParams(params);
-	return testObs.chisq_with_InclCrossSec(params);
+	return testObs.chisq_with_InclCrossSec();
+}
+
+double minfunc_for_poles(const double *xx){
+
+	vector<double> params = {};
+	for(int i = 0; i < nParams; i++){
+		params.push_back(xx[i]);
+	}
+	
+	return ps.minfuncforpoles(params);
+}
+
+template<typename T>
+vector<double> linspace(T start_in, T end_in, int num_in)
+{
+
+  	std::vector<double> linspaced;
+
+  	double start = static_cast<double>(start_in);
+  	double end = static_cast<double>(end_in);
+  	double num = static_cast<double>(num_in);
+
+  	if (num == 0) { return linspaced; }
+  	if (num == 1) 
+  	{
+  	  linspaced.push_back(start);
+  	  return linspaced;
+  	}
+
+  	double delta = (end - start) / (num - 1);
+
+  	for(int i=0; i < num-1; ++i)
+  	{
+  	  linspaced.push_back(start + delta * i);
+  	}
+  	linspaced.push_back(end); // I want to ensure that start and end
+  	                          // are exactly the same as the input
+  	return linspaced;
+
 }
 
 int main(int argc, char ** argv)
@@ -78,6 +119,63 @@ int main(int argc, char ** argv)
 	testObs = testReader.getObs();
 
 	////tests and plots
+
+	//make the minimzer
+	ps.settestObs(testObs);
+	ROOT::Math::Minimizer* minpoles = ROOT::Math::Factory::CreateMinimizer("Minuit2","");
+	//Set some criteria for the minimizer to stop
+	minpoles->SetMaxFunctionCalls(100000);
+	minpoles->SetMaxIterations(10000);
+	minpoles->SetTolerance(0.001);
+	minpoles->SetPrintLevel(1);
+	
+	nParams = 2;//real and imaginary part of the pole
+	//make a function wrapper to minimize the function minfuncforpoles
+	ROOT::Math::Functor f(&minfunc_for_poles,nParams);
+	minpoles->SetFunction(f);
+	//set the initial conditions and step sizes
+	string ampname = "P";
+	ps.setAmpIndex(ampname);
+	int ampindex = ps.getAmpIndex();
+	
+	int counter = 0;
+	TRandom3 gen;
+	ofstream letwrite("Data/poles.txt");
+	vector<double> grid_Re = linspace(113,121,2);
+	vector<double> grid_Im = linspace(-3, 3, 1);
+	vector<double> fitparamspoles = {};
+	double steppoles[2] = {0.01,0.01};
+	for(int i = 0; i < grid_Re.size(); i++){
+		for(int j = 0; j < grid_Im.size(); j++){
+			
+			//vector<double> fitparamspoles = {testObs.amplitudes[ampindex].getResMasses()[0]+1, 1};
+			//vector<double> fitparamspoles = {grid_Re[i], grid_Im[j]};
+			fitparamspoles = {grid_Re[i], grid_Im[j]};//cout << grid_Re[i] << endl;
+			//for {118,0} it finds the same pole two time
+			//for {121,0} it finds the \Upsilon(11020) maybe
+			//cout << fitparamspoles[0] << " " << fitparamspoles[1] << endl;
+			while(counter < testReader.getAddPoleList().size()){
+		
+				for(int l = 0; l < nParams; l++){
+					minpoles->SetVariable(l,to_string(l),fitparamspoles[l],steppoles[l]);
+				}
+				ps.setTemppoles(temppoles);
+				//run the minimization
+				minpoles->Minimize();
+				//extract the resulting fit parameters
+				comp finalParams = comp(minpoles->X()[0], minpoles->X()[1]);
+				temppoles.push_back(finalParams);
+				counter++;
+				minpoles->Clear();
+
+			}
+
+			for(int k = 0; k < temppoles.size(); k++){
+				letwrite << temppoles[k] << endl; 
+				cout << temppoles[k] << endl;
+			} 
+		}
+	}
 
 	//testReader.writeMathematicaOutputFile("Data/Math_test2.dat");
 	

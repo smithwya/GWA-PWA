@@ -4,7 +4,7 @@ FitRegion(10.6322,11.0208)
 
 ReducedChi2CutOff(3)
 
-DoFit(No)
+DoFit(Yes)
 FitAlsoToInclusiveCrossSection(Yes)
 DoRandomize(No)
 DoBootstrap(No)
