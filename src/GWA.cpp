@@ -127,7 +127,7 @@ int main(int argc, char ** argv)
 	minpoles->SetMaxFunctionCalls(100000);
 	minpoles->SetMaxIterations(10000);
 	minpoles->SetTolerance(0.001);
-	minpoles->SetPrintLevel(1);
+	minpoles->SetPrintLevel(0);
 	
 	nParams = 2;//real and imaginary part of the pole
 	//make a function wrapper to minimize the function minfuncforpoles
@@ -140,8 +140,8 @@ int main(int argc, char ** argv)
 	
 	TRandom3 gen;
 	ofstream letwrite("Data/poles.txt");
-	vector<double> grid_Re = linspace(113, 121, 5);
-	vector<double> grid_Im = linspace(-3, 3, 5);
+	vector<double> grid_Re = linspace(113, 121, 50);
+	vector<double> grid_Im = linspace(-1, 1, 10);
 	vector<double> fitparamspoles = {};
 	double steppoles[2] = {0.01,0.01};
 	for(int i = 0; i < grid_Re.size(); i++){
@@ -153,7 +153,7 @@ int main(int argc, char ** argv)
 			
 			//for {118,0} it finds the same pole two time
 			//for {121,0} it finds the \Upsilon(11020) maybe
-			cout << fitparamspoles[0] << " " << fitparamspoles[1] << endl;
+			//cout << fitparamspoles[0] << " " << fitparamspoles[1] << endl;
 			for(int counter = 0; counter < testReader.getAddPoleList().size(); counter++){
 		
 				for(int l = 0; l < nParams; l++){
@@ -173,6 +173,8 @@ int main(int argc, char ** argv)
 				letwrite << temppoles[k].real() << "	" << temppoles[k].imag() << endl; 
 				//cout << temppoles[k] << endl;
 			}
+
+			temppoles = {};
 		}
 		//minpoles->Clear();
 	}
