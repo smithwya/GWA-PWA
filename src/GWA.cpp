@@ -117,81 +117,9 @@ int main(int argc, char ** argv)
 
 	//saves the observable object outside of filereader object
 	testObs = testReader.getObs();
-
-	////tests and plots
-
-	//make the minimzer
-	ps.settestObs(testObs);
-	ROOT::Math::Minimizer* minpoles = ROOT::Math::Factory::CreateMinimizer("Minuit2","");
-	//Set some criteria for the minimizer to stop
-	minpoles->SetMaxFunctionCalls(100000);
-	minpoles->SetMaxIterations(10000);
-	minpoles->SetTolerance(0.001);
-	minpoles->SetPrintLevel(0);
 	
-	nParams = 2;//real and imaginary part of the pole
-	//make a function wrapper to minimize the function minfuncforpoles
-	ROOT::Math::Functor f(&minfunc_for_poles,nParams);
-	minpoles->SetFunction(f);
-	//set the initial conditions and step sizes
-	string ampname = "P";
-	ps.setAmpIndex(ampname);
-	int ampindex = ps.getAmpIndex();
-	
-	TRandom3 gen;
-	ofstream letwrite("Data/poles.txt");
-	vector<double> grid_Re = linspace(113, 121, 50);
-	vector<double> grid_Im = linspace(-1, 1, 10);
-	vector<double> fitparamspoles = {};
-	double steppoles[2] = {0.01,0.01};
-	for(int i = 0; i < grid_Re.size(); i++){
-		for(int j = 0; j < grid_Im.size(); j++){
-			
-			//vector<double> fitparamspoles = {testObs.amplitudes[ampindex].getResMasses()[0]+1, 1};
-			//vector<double> fitparamspoles = {grid_Re[i], grid_Im[j]};
-			fitparamspoles = {grid_Re[i], grid_Im[j]};//cout << grid_Re[i] << endl;
-			
-			//for {118,0} it finds the same pole two time
-			//for {121,0} it finds the \Upsilon(11020) maybe
-			//cout << fitparamspoles[0] << " " << fitparamspoles[1] << endl;
-			for(int counter = 0; counter < testReader.getAddPoleList().size(); counter++){
-		
-				for(int l = 0; l < nParams; l++){
-					minpoles->SetVariable(l,to_string(l),fitparamspoles[l],steppoles[l]);
-				}
-				ps.setTemppoles(temppoles);
-				//run the minimization
-				minpoles->Minimize();
-				//extract the resulting fit parameters
-				comp finalParams = comp(minpoles->X()[0], minpoles->X()[1]);
-				temppoles.push_back(finalParams);
-				minpoles->Clear();
-
-			}
-
-			for(int k = 0; k < temppoles.size(); k++){
-				letwrite << temppoles[k].real() << "	" << temppoles[k].imag() << endl; 
-				//cout << temppoles[k] << endl;
-			}
-
-			temppoles = {};
-		}
-		//minpoles->Clear();
-	}
-
-	TCanvas c1;
-	TGraph *gr = new TGraph("Data/poles.txt");
-	gr->SetMarkerStyle(21);
-	gr->Draw("AP");
-	c1.SaveAs("Plots/poles_graph.pdf");
-
-	//testReader.writeMathematicaOutputFile("Data/Math_test2.dat");
-	
-	/*
 	double lower_bound = testObs.amplitudes[0].getFitInterval()[0];
 	double upper_bound = testObs.amplitudes[0].getFitInterval()[1];
-	testObs.plotInclCrossSec("InclCrossSec", lower_bound, upper_bound);
-	testObs.plotInclCrossSecVsSumOfExcl("Diff", lower_bound, upper_bound);
 
 	auto intensityP_BB = [&](double x){
 		comp value = testObs.amplitudes[0].getValue(pow(x,2))(0);
@@ -207,44 +135,14 @@ int main(int argc, char ** argv)
 		comp value = testObs.amplitudes[0].getValue(pow(x,2))(2);
 		return (value*conj(value)).real();
 	};
+	
+	string fname = "fit58-61";
 
-	auto intensityP_B_sstarB_sstar = [&](double x){
-		comp value = testObs.amplitudes[0].getValue(pow(x,2))(3);
-		return (value*conj(value)).real();
-	};
-
-	auto ImagPartInt = [&](double x){
-		double value = (testObs.amplitudes[0].getIntegral(pow(x,2), 0)).imag();
-		return value;
-	};
-
-	auto RealPartInt = [&](double x){
-		double value = (testObs.amplitudes[0].getIntegral(pow(x,2), 0)).real();
-		return value;
-	};
-
-	auto AlternImagPartInt = [&](double x){
-		double value = (testObs.amplitudes[0].getIntegral(pow(x,2), 0)).imag();
-		return value;
-	};
-
-	auto AlternRealPartInt = [&](double x){
-		double value = (testObs.amplitudes[0].getIntegral(pow(x,2), 0)).real();
-		return value;
-	};
-
-	cout << "test " << testObs.amplitudes[0].getValue(pow(10.7,2)) << endl;
-
-	testObs.makePlotGraph("P", "BB", "test2_ImagPartInt", ImagPartInt, 10.6322, 11.0208);
-	testObs.makePlotGraph("P", "BB", "test2_AlternImagPartInt", AlternImagPartInt, 10.6322, 11.0208);
-	testObs.makePlotGraph("P", "BB", "test2_RealPartInt", RealPartInt, 10.6322, 11.0208);
-	testObs.makePlotGraph("P", "BB", "test2_AlternRealPartInt", AlternRealPartInt, 10.6322, 11.0208);
-	testObs.makePlotGraphWithExp("P", "BB", "test2_BB", intensityP_BB, 10.6322,11.0208);
-	testObs.makePlotGraphWithExp("P", "BBstar", "test2_BBstar", intensityP_BBstar, 10.6322,11.0208);
-	testObs.makePlotGraphWithExp("P", "BstarBstar", "test2_BstarBstar", intensityP_BstarBstar, 10.6322,11.0208);
-	testObs.makePlotGraphWithExp("P", "B_sstarB_sstar", "BottB_sstarB_sstar_Graph_WithExp", intensityP_B_sstarB_sstar, 10.6322,11.0208);
-	*/
-
+	testObs.makePlotGraphWithExp("P", "BB", fname+"_BB", intensityP_BB, 10.6322,11.0208);
+	testObs.makePlotGraphWithExp("P", "BBstar", fname+"_BBstar", intensityP_BBstar, 10.6322,11.0208);
+	testObs.makePlotGraphWithExp("P", "BstarBstar", fname+"_BstarBstar", intensityP_BstarBstar, 10.6322,11.0208);
+	
+	return 0;
 	//saves original starting parameters
 	vector<double> startparams = testObs.getFitParams();
 	vector<double> steps = testObs.getStepSizes();
