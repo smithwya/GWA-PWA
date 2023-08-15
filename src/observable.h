@@ -738,7 +738,8 @@ public:
 		return steps;
 	};
 
-	double chisq(vector<double> params){
+/*
+	double chisq(){
 		double result = 0;
 		//for every amplitude in the list
 		for(string ampname : getAmpNames()){
@@ -784,8 +785,63 @@ public:
 		}
 		return result;
 	}
+*/
 
-	double chisq_with_InclCrossSec(vector<double> params){
+	double chisq(){
+
+		double result = 0;
+
+		//for every amplitude in the list
+		for(string ampname : getAmpNames()){
+
+			//locate the amplitude
+			int amp_index = getampindex(ampname);
+			amplitude amp = amplitudes[amp_index];
+			//read out the start and end of the fit interval
+			double lower_bound = sqrt(amp.getFitInterval()[0]);
+			double upper_bound = sqrt(amp.getFitInterval()[1]);	
+
+			//for every channel
+			for(string channame : amp.getChanNames()){
+
+				int chan_index = getchanindex(ampname, channame);
+				double sum = 0;
+				vector<double> sqrts_vals = data[amp_index * numChans + chan_index].sqrts;
+
+				if(sqrts_vals.size() > 0){//i.e. if the j-th channel is NOT a dummy channel
+
+					for(int i = 0; i < sqrts_vals.size(); i++){
+
+						double x = sqrts_vals[i];
+
+						//for sqrts in the fitting range, calculate relevant quantities
+						if(x >= lower_bound && x <= upper_bound){
+
+							comp val = amp.getValue(pow(x, 2))(chan_index);
+							double y = (val*conj(val)).real();
+							double stat_err = data[numChans * amp_index + chan_index].amp_expval_stat_err[i];
+							double sist_err = data[numChans * amp_index + chan_index].amp_expval_sist_err[i];
+							double std = sqrt(pow(stat_err, 2) + pow(sist_err, 2));
+							sum += pow(((y - data[numChans * amp_index + chan_index].amp_expval[i])/std), 2);
+
+						}
+
+					}
+
+					result += sum;
+
+				}
+
+			}
+
+		}
+
+		return result;
+
+	}
+
+/*
+	double chisq_with_InclCrossSec(){
 		double result = 0;
 		//for every amplitude in the list
 		for(string ampname : getAmpNames()){
@@ -875,6 +931,50 @@ public:
 		result += sum2;
 
 		return result;
+	}
+*/
+
+	double chisq_with_InclCrossSec(){
+
+		double sum = chisq();
+		double lower_bound = sqrt(amplitudes[0].getFitInterval()[0]);
+		double upper_bound = sqrt(amplitudes[0].getFitInterval()[1]);
+		comp temp = 0;
+		double aux = 0;
+
+		for(int i = 0; i < data_InclCrossSec.sqrts.size(); i++){
+
+			double x = data_InclCrossSec.sqrts[i];
+
+			if(x >= lower_bound && x <= upper_bound){
+
+				for(string ampname : getAmpNames()){
+
+					int amp_index = getampindex(ampname);
+					amplitude amp = amplitudes[amp_index];
+
+					for(string channame : amp.getChanNames()){
+
+						int chan_index = getchanindex(ampname, channame);
+						temp = amp.getValue(pow(x,2))(chan_index);
+						aux += (temp*conj(temp)).real();
+
+					}
+
+				}
+
+				double y = data_InclCrossSec.amp_expval[i];
+				double stat_err = data_InclCrossSec.amp_expval_stat_err[i];
+				double sist_err = data_InclCrossSec.amp_expval_sist_err[i];
+				double std = sqrt(pow(stat_err, 2) + pow(sist_err, 2));
+				sum += pow(((aux - y)/std), 2);
+
+			}
+
+		}
+
+		return sum;
+
 	}
 
 	friend ostream& operator<<(std::ostream& os, observable const& m){
