@@ -135,9 +135,12 @@ int main(int argc, char ** argv)
 	vector<double> steps = testObs.getStepSizes();
 	
 	//gets degrees of freedom
+	string fittype = "excl";
 	int dof = testObs.getNumData()-steps.size();
-	if(testReader.getInclCrossSecFlag()) dof+=testObs.getNumInclData();
-	
+	if(testReader.getInclCrossSecFlag()){
+		dof+=testObs.getNumInclData();
+		fittype = "incl";
+	}
 
 	
 
@@ -172,7 +175,7 @@ int main(int argc, char ** argv)
 		double chisq = min->MinValue()/dof;
 
 		if(chisq<cutoff){
-			string fname = fitsfolder+"fit"+to_string(jobnum)+"-"+to_string(fitnum)+" "+timebuffer.str();
+			string fname = fitsfolder+"fit"+to_string(jobnum)+"-"+to_string(fitnum)+"-"+fittype+" "+timebuffer.str();
 			testObs.setFitParams(finalParams);
 			testReader.setObs(testObs);
 			testReader.writeOutputFile(fname);
