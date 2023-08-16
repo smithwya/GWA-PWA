@@ -6,6 +6,7 @@
 #include <fstream>
 #include <map>
 #include <chrono>
+#include <ctime>
 #include "amplitude.h"
 #include "channel.h"
 #include "filereader.h"
@@ -21,6 +22,7 @@
 
 
 using namespace std;
+typedef std::chrono::system_clock Clock;
 using Eigen::MatrixXcd;
 using Eigen::VectorXcd;
 typedef std::complex<double> comp;
@@ -107,8 +109,18 @@ int main(int argc, char ** argv)
 	testReader.setKmats();
 	testReader.loadExpData();
 	if(testReader.getInclCrossSecFlag()) testReader.loadExpInclCrossSec();
+	
+	//saves current time
+	std::chrono::system_clock::time_point now = std::chrono::system_clock::now();
+	time_t tt = std::chrono::system_clock::to_time_t(now);
+	tm local_tm = *localtime(&tt);
+	
+	std::stringstream timebuffer;
+	auto t = std::chrono::system_clock::now();
+	timebuffer << local_tm.tm_year + 1900 << '-'<< local_tm.tm_mon + 1 << '-'<< local_tm.tm_mday;
+	
 	//selects a seed based off clock + job number
-	int seed = std::chrono::system_clock::now().time_since_epoch().count()+jobnum+fitnum;
+	int seed = now.time_since_epoch().count()+jobnum+fitnum;
 	testReader.setSeed(seed);
 	if(testReader.getRandomizeFlag()) testReader.randomize(seed); 
 
@@ -125,6 +137,9 @@ int main(int argc, char ** argv)
 	//gets degrees of freedom
 	int dof = testObs.getNumData()-steps.size();
 	if(testReader.getInclCrossSecFlag()) dof+=testObs.getNumInclData();
+	
+
+	
 
 	if(testReader.getFitFlag()){
 		//make the minimzer
@@ -157,7 +172,7 @@ int main(int argc, char ** argv)
 		double chisq = min->MinValue()/dof;
 
 		if(chisq<cutoff){
-			string fname = fitsfolder+"fit"+to_string(jobnum)+"-"+to_string(fitnum);
+			string fname = fitsfolder+"fit"+to_string(jobnum)+"-"+to_string(fitnum)+" "+timebuffer.str();
 			testObs.setFitParams(finalParams);
 			testReader.setObs(testObs);
 			testReader.writeOutputFile(fname);
