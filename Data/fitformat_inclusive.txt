@@ -13,7 +13,7 @@ AddChannel("BB", {5.27925, 5.27925})
 AddChannel("BBstar", {5.27925, 5.32471})
 AddChannel("BstarBstar", {5.32471, 5.32471})
 AddChannel("B_sstarB_sstar", {5.4154, 5.4154})
-AddChannel("B_sB_sstar", {5.36689, 5.4154})
+AddChannel("Dummy", {5.36689, 5.4154})
 
 
 AddWave("P","kmat","nominal", 1, 0.6)
