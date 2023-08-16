@@ -4,11 +4,11 @@ FitRegion(10.6322,11.0208)
 
 ReducedChi2CutOff(3)
 
-DoFit(Yes)
+DoFit(No)
 
 FitAlsoToInclusiveCrossSection(No)
 
-DoRandomize(Yes)
+DoRandomize(No)
 
 AddChannel("BB", {5.27925, 5.27925})
 AddChannel("BBstar", {5.27925, 5.32471})
