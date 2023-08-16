@@ -123,12 +123,9 @@ int main(int argc, char ** argv)
 	vector<double> steps = testObs.getStepSizes();
 	
 	//gets degrees of freedom
-	//int dof = testObs.getNumData()-steps.size();
 	int dof = testObs.getNumData()-steps.size();
 	if(testReader.getInclCrossSecFlag()) dof+=testObs.getNumInclData();
 
-	cout<<dof<endl;
-	return 0;
 	if(testReader.getFitFlag()){
 		//make the minimzer
 		ROOT::Math::Minimizer* min = ROOT::Math::Factory::CreateMinimizer("Minuit2","");
