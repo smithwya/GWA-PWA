@@ -92,10 +92,8 @@ vector<double> linspace(T start_in, T end_in, int num_in)
 
 int main(int argc, char ** argv)
 {
-	int jobnum = atoi(argv[1]);
-	int fitnum = atoi(argv[2]);
-	string inputfile = (string) argv[3];
-	string plotname = (string) argv[4];
+	string inputfile = (string) argv[1];
+	string plotname = (string) argv[2];
 
 	//reads the file and creates an observable object with the information from the file
 	
