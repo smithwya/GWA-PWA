@@ -92,10 +92,8 @@ vector<double> linspace(T start_in, T end_in, int num_in)
 
 int main(int argc, char ** argv)
 {
-	int jobnum = atoi(argv[1]);
-	int fitnum = atoi(argv[2]);
-	string inputfile = (string) argv[3];
-	string fitsfolder = (string) argv[4];
+	string inputfile = (string) argv[1];
+	string plotname = (string) argv[2];
 
 	//reads the file and creates an observable object with the information from the file
 	
@@ -135,12 +133,10 @@ int main(int argc, char ** argv)
 		comp value = testObs.amplitudes[0].getValue(pow(x,2))(2);
 		return (value*conj(value)).real();
 	};
-	
-	string fname = fitsfolder;
 
-	testObs.makePlotGraphWithExp("P", "BB", fname+"_BB", intensityP_BB, 10.6322,11.0208);
-	testObs.makePlotGraphWithExp("P", "BBstar", fname+"_BBstar", intensityP_BBstar, 10.6322,11.0208);
-	testObs.makePlotGraphWithExp("P", "BstarBstar", fname+"_BstarBstar", intensityP_BstarBstar, 10.6322,11.0208);
+	testObs.makePlotGraphWithExp("P", "BB", plotname+"_BB", intensityP_BB, 10.6322,11.0208);
+	testObs.makePlotGraphWithExp("P", "BBstar", plotname+"_BBstar", intensityP_BBstar, 10.6322,11.0208);
+	testObs.makePlotGraphWithExp("P", "BstarBstar", plotname+"_BstarBstar", intensityP_BstarBstar, 10.6322,11.0208);
 
 	return 0;
 	
