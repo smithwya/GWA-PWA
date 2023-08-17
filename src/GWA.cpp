@@ -94,10 +94,9 @@ vector<double> linspace(T start_in, T end_in, int num_in)
 
 int main(int argc, char ** argv)
 {
-	int jobnum = atoi(argv[1]);
-	int fitnum = atoi(argv[2]);
-	string inputfile = (string) argv[3];
-	string fitsfolder = (string) argv[4];
+	string inputfile = (string) argv[1];
+	string polefile = (string) argv[2];
+	string pWave = (string) argv[3];
 
 	//reads the file and creates an observable object with the information from the file
 	
@@ -108,23 +107,14 @@ int main(int argc, char ** argv)
 	testReader.setPoles();
 	testReader.setKmats();
 	testReader.loadExpData();
-	if(testReader.getInclCrossSecFlag()) testReader.loadExpInclCrossSec();
-	//selects a seed based off clock + job number
-	int seed = std::chrono::system_clock::now().time_since_epoch().count()+jobnum+fitnum;
-	testReader.setSeed(seed);
-	if(testReader.getRandomizeFlag()) testReader.randomize(seed); 
-
-	//gets chisq cutoff
-	double cutoff = testReader.getChi2CutOff();
 
 	//saves the observable object outside of filereader object
-	testObs = testReader.getObs();
+	
 
-/*
-	////tests and plots
-
+	polesearcher ps;
+	
 	//make the minimzer
-	ps.settestObs(testObs);
+	ps.settestObs(testReader.getObs(););
 	ROOT::Math::Minimizer* minpoles = ROOT::Math::Factory::CreateMinimizer("Minuit2","");
 	//Set some criteria for the minimizer to stop
 	minpoles->SetMaxFunctionCalls(100000);
@@ -137,16 +127,22 @@ int main(int argc, char ** argv)
 	ROOT::Math::Functor f(&minfunc_for_poles,nParams);
 	minpoles->SetFunction(f);
 	//set the initial conditions and step sizes
-	string ampname = "P";
-	ps.setAmpIndex(ampname);
+	
+	
+	ps.setAmpIndex(pWave);
 	int ampindex = ps.getAmpIndex();
 	
 	TRandom3 gen;
-	ofstream letwrite("Data/poles.txt");
+	ofstream letwrite(polefile);
+	
+	
+	//change these numbers to parameters to pass into from command line
 	vector<double> grid_Re = linspace(113, 121, 5);
 	vector<double> grid_Im = linspace(-1, 1, 5);
 	vector<double> fitparamspoles = {};
 	double steppoles[2] = {0.01,0.01};
+	
+	
 	for(int i = 0; i < grid_Re.size(); i++){
 		for(int j = 0; j < grid_Im.size(); j++){
 			
@@ -187,6 +183,8 @@ int main(int argc, char ** argv)
 		return log(abs(temp.determinant())); 
 	};
 
+
+	//polefile instead of Data/poles.txt
 	TCanvas c1;
 	TGraph2D *gr = new TGraph2D("Data/poles.txt");
 	gr->SetMarkerStyle(21);
@@ -227,67 +225,6 @@ int main(int argc, char ** argv)
 	testObs.plotCompGraph("P", "BB", "fit47_32_DispIntCh0", IntCh0, 10.3, 11.0208);
 	testObs.plotCompGraph("P", "BBstar", "fit47_32_DispIntCh1", IntCh1, 10.3, 11.0208);
 	testObs.plotCompGraph("P", "BstarBstar", "fit47_32_DispIntCh2", IntCh2, 10.3, 11.0208);
-
-	//testReader.writeMathematicaOutputFile("Data/Math_test2.dat");
-	
-	/*
-	double lower_bound = testObs.amplitudes[0].getFitInterval()[0];
-	double upper_bound = testObs.amplitudes[0].getFitInterval()[1];
-	testObs.plotInclCrossSec("InclCrossSec", lower_bound, upper_bound);
-	testObs.plotInclCrossSecVsSumOfExcl("Diff", lower_bound, upper_bound);
-
-	auto intensityP_BB = [&](double x){
-		comp value = testObs.amplitudes[0].getValue(pow(x,2))(0);
-		return (value*conj(value)).real();
-	};
-
-	auto intensityP_BBstar = [&](double x){
-		comp value = testObs.amplitudes[0].getValue(pow(x,2))(1);
-		return (value*conj(value)).real();
-	};
-	
-	auto intensityP_BstarBstar = [&](double x){
-		comp value = testObs.amplitudes[0].getValue(pow(x,2))(2);
-		return (value*conj(value)).real();
-	};
-
-	auto intensityP_B_sstarB_sstar = [&](double x){
-		comp value = testObs.amplitudes[0].getValue(pow(x,2))(3);
-		return (value*conj(value)).real();
-	};
-
-	auto ImagPartInt = [&](double x){
-		double value = (testObs.amplitudes[0].getIntegral(pow(x,2), 0)).imag();
-		return value;
-	};
-
-	auto RealPartInt = [&](double x){
-		double value = (testObs.amplitudes[0].getIntegral(pow(x,2), 0)).real();
-		return value;
-	};
-
-	auto AlternImagPartInt = [&](double x){
-		double value = (testObs.amplitudes[0].getIntegral(pow(x,2), 0)).imag();
-		return value;
-	};
-
-	auto AlternRealPartInt = [&](double x){
-		double value = (testObs.amplitudes[0].getIntegral(pow(x,2), 0)).real();
-		return value;
-	};
-
-	cout << "test " << testObs.amplitudes[0].getValue(pow(10.7,2)) << endl;
-
-	testObs.makePlotGraph("P", "BB", "test2_ImagPartInt", ImagPartInt, 10.6322, 11.0208);
-	testObs.makePlotGraph("P", "BB", "test2_AlternImagPartInt", AlternImagPartInt, 10.6322, 11.0208);
-	testObs.makePlotGraph("P", "BB", "test2_RealPartInt", RealPartInt, 10.6322, 11.0208);
-	testObs.makePlotGraph("P", "BB", "test2_AlternRealPartInt", AlternRealPartInt, 10.6322, 11.0208);
-	testObs.makePlotGraphWithExp("P", "BB", "test2_BB", intensityP_BB, 10.6322,11.0208);
-	testObs.makePlotGraphWithExp("P", "BBstar", "test2_BBstar", intensityP_BBstar, 10.6322,11.0208);
-	testObs.makePlotGraphWithExp("P", "BstarBstar", "test2_BstarBstar", intensityP_BstarBstar, 10.6322,11.0208);
-	testObs.makePlotGraphWithExp("P", "B_sstarB_sstar", "BottB_sstarB_sstar_Graph_WithExp", intensityP_B_sstarB_sstar, 10.6322,11.0208);
-	*/
-
 
 	return 0;
 	
