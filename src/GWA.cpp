@@ -174,7 +174,7 @@ int main(int argc, char ** argv)
 
 		double chisq = min->MinValue()/dof;
 
-		if(chisq<cutoff){
+		//if(chisq<cutoff){
 			string fname = fitsfolder+"fit"+to_string(jobnum)+"-"+to_string(fitnum)+"-"+fittype+" "+timebuffer.str();
 			testObs.setFitParams(finalParams);
 			testReader.setObs(testObs);
@@ -182,9 +182,10 @@ int main(int argc, char ** argv)
 			ofstream outputfile(fname,ios::app);
 			outputfile<<"chisq = "<<chisq<<endl;
 			outputfile.close();
-		}
+		//}
 	}	
-
+	
+	
 	return 0;
 	
 }
