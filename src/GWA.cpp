@@ -120,6 +120,7 @@ int main(int argc, char ** argv)
 	//saves the observable object outside of filereader object
 	testObs = testReader.getObs();
 
+/*
 	////tests and plots
 
 	//make the minimzer
@@ -287,12 +288,14 @@ int main(int argc, char ** argv)
 	testObs.makePlotGraphWithExp("P", "B_sstarB_sstar", "BottB_sstarB_sstar_Graph_WithExp", intensityP_B_sstarB_sstar, 10.6322,11.0208);
 	*/
 
+*/
 	//saves original starting parameters
 	vector<double> startparams = testObs.getFitParams();
 	vector<double> steps = testObs.getStepSizes();
 	
 	//gets degrees of freedom
 	int dof = testObs.getNumData()-steps.size();
+	if(testReader.getInclCrossSecFlag()) dof+=testObs.getNumInclData();
 
 	if(testReader.getFitFlag()){
 		//make the minimzer

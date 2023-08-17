@@ -6,7 +6,7 @@ ReducedChi2CutOff(3)
 
 DoFit(Yes)
 FitAlsoToInclusiveCrossSection(Yes)
-DoRandomize(No)
+DoRandomize(Yes)
 DoBootstrap(No)
 
 AddChannel("BB", {5.27925, 5.27925})
@@ -22,7 +22,7 @@ ChebyCoeffs("P", "BB","s = 1", {100 \pm 200, 200 \pm 200,100 \pm 200})
 ChebyCoeffs("P", "BBstar", "s = 1", {100 \pm 200, 100 \pm 200, 100 \pm 200})
 ChebyCoeffs("P", "BstarBstar", "s = 1", {100 \pm 200, 100 \pm 200, 100 \pm 200})
 ChebyCoeffs("P", "B_sstarB_sstar", "s = 1", {100 \pm 200, 100 \pm 200, 100 \pm 200})
-ChebyCoeffs("P", "B_sB_sstar", "s = 1", {100 \pm 200, 100 \pm 200, 100 \pm 200})
+ChebyCoeffs("P", "Dummy", "s = 1", {100 \pm 200, 100 \pm 200, 100 \pm 200})
 
 
 
