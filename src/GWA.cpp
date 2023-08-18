@@ -94,13 +94,19 @@ vector<double> linspace(T start_in, T end_in, int num_in)
 
 int main(int argc, char ** argv)
 {
-	string inputfile = (string) argv[1];
+	string inputfile = (string) argv[1]; //just the core e.g. "fit73-36", without the path nor the extension
 	string polefile = (string) argv[2];
 	string pWave = (string) argv[3];
+	double grid_Re_sx = stod(argv[4]);
+	double grid_Re_dx = stod(argv[5]);
+	int grid_Re_numpts = atoi(argv[6]);
+	double grid_Im_sx = stod(argv[7]);
+	double grid_Im_dx = stod(argv[8]);
+	int grid_Im_numpts = atoi(argv[9]);
 
 	//reads the file and creates an observable object with the information from the file
 	
-	filereader testReader(inputfile);
+	filereader testReader("Data/" + inputfile + ".txt");
 	testReader.SetAllCommandLists();
 	testReader.ConstructBareAmps();
 	testReader.setChebys();
@@ -133,8 +139,8 @@ int main(int argc, char ** argv)
 	//set the initial conditions and step sizes
 
 	//change these numbers to parameters to pass into from command line
-	vector<double> grid_Re = linspace(110, 130, 5);
-	vector<double> grid_Im = linspace(-1, 1, 5);
+	vector<double> grid_Re = linspace(grid_Re_sx, grid_Re_dx, grid_Re_numpts);
+	vector<double> grid_Im = linspace(grid_Im_sx, grid_Im_dx, grid_Im_numpts);
 	vector<double> fitparamspoles = {};
 	double steppoles[2] = {0.01,0.01};
 	
@@ -184,27 +190,34 @@ int main(int argc, char ** argv)
 
 
 	//polefile instead of Data/poles.txt
+	string temp = "Plots/" + inputfile + "_poles_graph2D.pdf";
 	TCanvas c1;
-	TGraph2D *gr = new TGraph2D("Data/poles.txt");
+	TGraph2D *gr = new TGraph2D(polefile.c_str());
 	gr->SetMarkerStyle(21);
 	gr->Draw("pcol");
-	c1.SaveAs("Plots/fit73_36_poles_graph2D.pdf");
+	c1.SaveAs(temp.c_str());
+
+	temp = "Plots/" + inputfile + "_poles_graph.pdf";
 	TCanvas c2;
-	TGraph *gr2 = new TGraph("Data/poles.txt");
+	TGraph *gr2 = new TGraph(polefile.c_str());
 	gr2->SetMarkerStyle(21);
 	gr2->Draw("AP");
-	c2.SaveAs("Plots/fit73_36_poles_graph.pdf");
+	c2.SaveAs(temp.c_str());
+
+	temp = "Plots/" + inputfile + "_abs_det.pdf";
 	TCanvas c3;
 	//TF2 *tf = new TF2("tf", detD, 113, 121, -1, 1, 2);
 	//TF2 tf("tf", [](double* x, double* p) { return abs(testObs.amplitudes[0].getDenominator(comp(x[0], x[1])).determinant()); }, 113., 121., -1., 1.);
 	TF2 tf("tf", abs_det, 113., 121., -1., 1.,1);
 	tf.Draw("surf1");
-	c3.SaveAs("Plots/fit73_36_abs_det.pdf");
+	c3.SaveAs(temp.c_str());
+
+	temp = "Plots/" + inputfile + "_log_abs_det.pdf";
 	TCanvas c4;
 	//TF2 *tf = new TF2("tf", detD, 113, 121, -1, 1, 2);
 	TF2 tf2("tf2", log_abs_det, 113., 121., -1., 1.,1);
 	tf2.Draw("surf1");
-	c4.SaveAs("Plots/fit73_36_log_abs_det.pdf");
+	c4.SaveAs(temp.c_str());
 
 	return 0;
 	
