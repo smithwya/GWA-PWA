@@ -109,12 +109,16 @@ int main(int argc, char ** argv)
 	testReader.loadExpData();
 
 	//saves the observable object outside of filereader object
-	
+	testObs = testReader.getObs(); 
 
-	polesearcher ps;
+	//initialize the polesearcher object
+	ps.settestObs(testObs); 
+	ps.setAmpIndex(pWave); 
+	int ampindex = ps.getAmpIndex(); 
 	
-	//make the minimzer
-	ps.settestObs(testReader.getObs(););
+	ofstream letwrite(polefile);
+	
+	//make the minimizer
 	ROOT::Math::Minimizer* minpoles = ROOT::Math::Factory::CreateMinimizer("Minuit2","");
 	//Set some criteria for the minimizer to stop
 	minpoles->SetMaxFunctionCalls(100000);
@@ -127,17 +131,9 @@ int main(int argc, char ** argv)
 	ROOT::Math::Functor f(&minfunc_for_poles,nParams);
 	minpoles->SetFunction(f);
 	//set the initial conditions and step sizes
-	
-	
-	ps.setAmpIndex(pWave);
-	int ampindex = ps.getAmpIndex();
-	
-	TRandom3 gen;
-	ofstream letwrite(polefile);
-	
-	
+
 	//change these numbers to parameters to pass into from command line
-	vector<double> grid_Re = linspace(113, 121, 5);
+	vector<double> grid_Re = linspace(110, 130, 5);
 	vector<double> grid_Im = linspace(-1, 1, 5);
 	vector<double> fitparamspoles = {};
 	double steppoles[2] = {0.01,0.01};
@@ -153,9 +149,12 @@ int main(int argc, char ** argv)
 			for(int l = 0; l < nParams; l++){
 				minpoles->SetVariable(l,to_string(l),fitparamspoles[l],steppoles[l]);
 			}
+
 			ps.setPoles(poles);
+
 			//run the minimization
 			minpoles->Minimize();
+
 			//extract the resulting fit parameters
 			comp finalParams = comp(minpoles->X()[0], minpoles->X()[1]);
 			f_val_poles = minpoles->MinValue();
@@ -171,16 +170,16 @@ int main(int argc, char ** argv)
 		//cout << poles[k] << endl;
 	}
 
-	auto abs_det = [](double* x, double* p){
-		//return abs(testObs.amplitudes[0].getDenominator(comp(x[0], x[1])).determinant());
-		MatrixXcd temp = (comp(x[0], x[1]) - comp(115,0.5)) * (comp(x[0], x[1]) - comp(118,0.7)) * (comp(x[0], x[1]) - comp(115,-0.5)) * (comp(x[0], x[1]) - comp(118,-0.7)) * MatrixXcd({{1}});
-		return abs(temp.determinant());
+	auto abs_det = [&](double* x, double* p){
+		return abs(testObs.amplitudes[ampindex].getDenominator(comp(x[0], x[1])).determinant());
+		//MatrixXcd temp = (comp(x[0], x[1]) - comp(115,0.5)) * (comp(x[0], x[1]) - comp(118,0.7)) * (comp(x[0], x[1]) - comp(115,-0.5)) * (comp(x[0], x[1]) - comp(118,-0.7)) * MatrixXcd({{1}});
+		//return abs(temp.determinant());
 	};
 
-	auto log_abs_det = [](double* x, double* p){
-		//return log(abs(testObs.amplitudes[0].getDenominator(comp(x[0], x[1])).determinant()));
-		MatrixXcd temp = (comp(x[0], x[1]) - comp(115,0.5)) * (comp(x[0], x[1]) - comp(118,0.7)) * (comp(x[0], x[1]) - comp(115,-0.5)) * (comp(x[0], x[1]) - comp(118,-0.7)) * MatrixXcd({{1}});
-		return log(abs(temp.determinant())); 
+	auto log_abs_det = [&](double* x, double* p){
+		return log(abs(testObs.amplitudes[ampindex].getDenominator(comp(x[0], x[1])).determinant()));
+		//MatrixXcd temp = (comp(x[0], x[1]) - comp(115,0.5)) * (comp(x[0], x[1]) - comp(118,0.7)) * (comp(x[0], x[1]) - comp(115,-0.5)) * (comp(x[0], x[1]) - comp(118,-0.7)) * MatrixXcd({{1}});
+		//return log(abs(temp.determinant()));
 	};
 
 
@@ -189,42 +188,23 @@ int main(int argc, char ** argv)
 	TGraph2D *gr = new TGraph2D("Data/poles.txt");
 	gr->SetMarkerStyle(21);
 	gr->Draw("pcol");
-	c1.SaveAs("Plots/fit47_32_poles_graph2D.pdf");
+	c1.SaveAs("Plots/fit73_36_poles_graph2D.pdf");
 	TCanvas c2;
 	TGraph *gr2 = new TGraph("Data/poles.txt");
 	gr2->SetMarkerStyle(21);
 	gr2->Draw("AP");
-	c2.SaveAs("Plots/fit47_32_poles_graph.pdf");
+	c2.SaveAs("Plots/fit73_36_poles_graph.pdf");
 	TCanvas c3;
 	//TF2 *tf = new TF2("tf", detD, 113, 121, -1, 1, 2);
 	//TF2 tf("tf", [](double* x, double* p) { return abs(testObs.amplitudes[0].getDenominator(comp(x[0], x[1])).determinant()); }, 113., 121., -1., 1.);
-	TF2 tf("tf", abs_det, 113., 121., -1., 1.);
+	TF2 tf("tf", abs_det, 113., 121., -1., 1.,1);
 	tf.Draw("surf1");
-	c3.SaveAs("Plots/fit47_32_abs_det.pdf");
+	c3.SaveAs("Plots/fit73_36_abs_det.pdf");
 	TCanvas c4;
 	//TF2 *tf = new TF2("tf", detD, 113, 121, -1, 1, 2);
-	TF2 tf2("tf2", log_abs_det, 113., 121., -1., 1.);
+	TF2 tf2("tf2", log_abs_det, 113., 121., -1., 1.,1);
 	tf2.Draw("surf1");
-	c4.SaveAs("Plots/fit47_32_log_abs_det.pdf");
-
-	auto IntCh0 = [&](double x){
-		comp value = (testObs.amplitudes[0].getIntegral(pow(x,2), 0));
-		return value;
-	};
-
-	auto IntCh1 = [&](double x){
-		comp value = (testObs.amplitudes[0].getIntegral(pow(x,2), 1));
-		return value;
-	};
-
-	auto IntCh2 = [&](double x){
-		comp value = (testObs.amplitudes[0].getIntegral(pow(x,2), 2));
-		return value;
-	};
-
-	testObs.plotCompGraph("P", "BB", "fit47_32_DispIntCh0", IntCh0, 10.3, 11.0208);
-	testObs.plotCompGraph("P", "BBstar", "fit47_32_DispIntCh1", IntCh1, 10.3, 11.0208);
-	testObs.plotCompGraph("P", "BstarBstar", "fit47_32_DispIntCh2", IntCh2, 10.3, 11.0208);
+	c4.SaveAs("Plots/fit73_36_log_abs_det.pdf");
 
 	return 0;
 	
