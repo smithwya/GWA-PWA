@@ -26,8 +26,8 @@ ChebyCoeffs("P", "Dummy", "s = 1", {100 \pm 200, 100 \pm 200, 100 \pm 200})
 
 
 
-AddPole("P", 115 \pm 1, {"BB","BBstar","BstarBstar", "B_sstarB_sstar", "B_sB_sstar"}, {100 \pm 200, 100 \pm 200, 100 \pm 200, 100 \pm 200, 100 \pm 200})
-AddPole("P", 120 \pm 1, {"BB","BBstar","BstarBstar", "B_sstarB_sstar", "B_sB_sstar"}, {100 \pm 200, 100 \pm 200, 100 \pm 200, 100 \pm 200, 100 \pm 200})
+AddPole("P", 115 \pm 1, {"BB","BBstar","BstarBstar", "B_sstarB_sstar", "Dummy"}, {100 \pm 200, 100 \pm 200, 100 \pm 200, 100 \pm 200, 100 \pm 200})
+AddPole("P", 120 \pm 1, {"BB","BBstar","BstarBstar", "B_sstarB_sstar", "Dummy"}, {100 \pm 200, 100 \pm 200, 100 \pm 200, 100 \pm 200, 100 \pm 200})
 
 AddKmatBackground("P", 0, {{100 \pm 200, 100 \pm 200, 100 \pm 200, 100 \pm 200, 100 \pm 200}, {200 \pm 200, 200 \pm 200, 200 \pm 200, 200 \pm 200}, {300 \pm 200, 300 \pm 200, 300 \pm 200}, {400 \pm 200, 400 \pm 200}, {500 \pm 200 }})
 AddKmatBackground("P", 1, {{100 \pm 200, 100 \pm 200, 100 \pm 200, 100 \pm 200, 100 \pm 200}, {200 \pm 200, 200 \pm 200, 200 \pm 200, 200 \pm 200}, {300 \pm 200, 300 \pm 200, 300 \pm 200}, {400 \pm 200, 400 \pm 200}, {500 \pm 200 }})
