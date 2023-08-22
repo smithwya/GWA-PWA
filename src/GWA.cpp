@@ -106,8 +106,9 @@ int main(int argc, char ** argv)
 	testReader.loadExpData();
 	if(testReader.getInclCrossSecFlag()) testReader.loadExpInclCrossSec();
 	//selects a seed based off clock + job number
-	int seed = std::chrono::system_clock::now().time_since_epoch().count()+jobnum+fitnum;
-	testReader.setSeed(seed);
+	/*int seed = std::chrono::system_clock::now().time_since_epoch().count()+jobnum+fitnum;
+	testReader.setSeed(seed);*/
+	testReader.setSeed(testReader.getSeed());
 	//if(testReader.getRandomizeFlag()) testReader.randomize(seed); 
 
 	//gets chisq cutoff
@@ -148,7 +149,9 @@ int main(int argc, char ** argv)
 	testObs.makePlotGraphWithExp("P", "BBstar", plotname+"_BBstar", intensityP_BBstar, 10.6322,11.0208);
 	testObs.makePlotGraphWithExp("P", "BstarBstar", plotname+"_BstarBstar", intensityP_BstarBstar, 10.6322,11.0208);
 	testObs.makePlotGraphWithExp("P", "B_sstarB_sstar", plotname+"_B_sstarB_sstar", intensityP_B_sstarB_sstar, 10.6322,11.0208);
-	testObs.makePlotGraphWithExp("P", "Dummy", plotname+"_Dummy", intensityP_Dummy, 10.6322,11.0208);
+	testObs.makePlotGraphDummy(plotname+"_Dummy", intensityP_Dummy, 10.6322,11.0208);
+	testObs.plotInclCrossSec(plotname+"_InclCrossSec", 10.6322,11.0208);
+	testObs.plotInclCrossSecWithExp(plotname+"_InclCrossSecWithExp", 10.6322,11.0208);
 	
 	return 0;
 	

@@ -196,13 +196,14 @@ public:
 
 
 	}
+
 	void makePlotGraph(string ampname, string channame, string pdfname, function<double(double)> func, double lower_bound, double upper_bound){	
 		
 		int numamp = getampindex(ampname);
 		int totnumofchans = numChans; 
 		int numchan = getchanindex(ampname,channame);
 
-		int numpts = data[totnumofchans * numamp + numchan].amp_expval.size();
+		int numpts = data[totnumofchans * numamp + numchan].sqrts.size();
 
 		double delta = (upper_bound - lower_bound)/ numpts;
 
@@ -249,6 +250,51 @@ public:
 		return;
 
 	}; 
+
+
+	void makePlotGraphDummy(string pdfname, function<double(double)> func, double lower_bound, double upper_bound){
+
+		const int num_th_pts = 100;
+		double x[num_th_pts], y[num_th_pts], ex[num_th_pts], ey[num_th_pts];
+
+		double lb = lower_bound;
+		double ub = upper_bound;
+
+		for (int i = 0; i < num_th_pts; i++){
+
+			x[i] = lb + (ub - lb) * i / ((double)num_th_pts - 1.);
+
+		}
+
+		double val = 0;	
+
+		for(int i = 0; i < num_th_pts; i++){
+
+			val = func(x[i]);
+			if(isnan(val)) y[i] = 0;
+			else y[i] = val;
+
+		}
+
+		auto gr = new TGraph(num_th_pts,x,y);
+
+		//gr2->SetTitle("TGraphErrors Example");
+   		gr->SetMarkerSize(0);
+		gr->GetXaxis()->SetRangeUser(lb, ub);
+		//gr2->GetYaxis()->SetRangeUser(0, 0.2);
+		gr->SetLineWidth(1);
+		gr->SetLineColor(kBlue);
+
+		TFile file("pdf_folder.root", "recreate");
+		TCanvas canv;
+		gr->Write();
+		gr->Draw("AL");
+		canv.SaveAs(("Plots/"+pdfname+".pdf").c_str());
+		file.Close();
+		return;
+
+	}
+
 
 	void makePlotWithExp(string ampname, string channame, string pdfname, function<double(double)> func, double lower_bound, double upper_bound, int num_bins){
 
@@ -579,6 +625,111 @@ public:
 		return;
 
 	}
+
+
+	void plotInclCrossSecWithExp(string pdfname, double lower_bound, double upper_bound){
+		
+		int num_exp_pts = data_InclCrossSec.sqrts.size();
+
+		double x[num_exp_pts], y[num_exp_pts], ex[num_exp_pts], ey[num_exp_pts];
+
+		const int num_th_pts = 100;
+		double x2[num_th_pts], y2[num_th_pts], ex2[num_th_pts], ey2[num_th_pts];
+
+		for(int i = 0; i < num_exp_pts; i++){
+
+			x[i] = 0;
+			y[i] = 0;
+			ex[i] = 0;
+			ey[i] = 0;
+
+		}
+
+		double lb = data_InclCrossSec.sqrts[0];
+
+		double ub = data_InclCrossSec.sqrts[num_exp_pts - 1];
+
+		for (int i = 0; i < num_th_pts; i++){
+
+			x2[i] = lb + (ub - lb) * i / ((double)num_th_pts - 1.);
+
+		}
+
+		double val = 0; 
+
+		for(int i = 0; i < num_exp_pts; i++){
+
+			val = data_InclCrossSec.sqrts[i];
+			if(isnan(val)) x[i] = 0;
+			else x[i] = val;
+
+			val = data_InclCrossSec.amp_expval[i];
+			if(isnan(val)) y[i] = 0;
+			else y[i] = val;
+
+			ex[i] = 0;
+
+			val = data_InclCrossSec.amp_expval_stat_err[i];
+			if(isnan(val)) ey[i] = 0;
+			else ey[i] = val;
+
+		}
+
+		comp temp = 0;
+		double aux = 0;
+
+		for(int i = 0; i < num_th_pts; i++){
+
+			for(string ampname : getAmpNames()){
+
+				int amp_index = getampindex(ampname);
+				amplitude amp = amplitudes[amp_index];
+
+				for(string channame : amp.getChanNames()){
+
+					int chan_index = getchanindex(ampname, channame);
+					temp = amp.getValue(pow(x2[i],2))(chan_index);
+					aux += (temp*conj(temp)).real();
+
+				}
+
+			}
+
+			val = aux;
+			if(isnan(val)) y2[i] = 0;
+			else y2[i] = val;
+
+		}
+
+		auto gr = new TGraphErrors(num_exp_pts,x,y,ex,ey);
+		auto gr2 = new TGraph(num_th_pts,x2,y2);
+
+   		//gr->SetTitle("TGraphErrors Example");
+   		gr->SetMarkerColor(4);
+   		gr->SetMarkerStyle(21);
+		gr->GetXaxis()->SetRangeUser(lower_bound, upper_bound);
+		//gr->GetYaxis()->SetRangeUser(0, 15500);
+		gr->SetLineWidth(1);
+
+		//gr2->SetTitle("TGraphErrors Example");
+   		gr2->SetMarkerSize(0);
+		gr2->GetXaxis()->SetRangeUser(lower_bound, upper_bound);
+		//gr2->GetYaxis()->SetRangeUser(0, 0.2);
+		gr2->SetLineWidth(1);
+		gr2->SetLineColor(kRed);
+
+		TFile file("pdf_folder.root", "recreate");
+		TCanvas canv;
+		gr->Write();
+		gr2->Write();
+		gr->Draw("AP");
+		gr2->Draw("same");
+		canv.SaveAs(("Plots/"+pdfname+".pdf").c_str());
+		file.Close();
+		return;
+
+	}
+
 
 	void plotInclCrossSecVsSumOfExcl(string pdfname, double lower_bound, double upper_bound){
 
