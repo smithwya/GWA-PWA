@@ -164,7 +164,7 @@ int main(int argc, char ** argv)
 			//extract the resulting fit parameters
 			comp finalParams = comp(minpoles->X()[0], minpoles->X()[1]);
 			f_val_poles = minpoles->MinValue();
-			if(f_val_poles < -10.) poles.push_back(finalParams);
+			if(f_val_poles < -20.) poles.push_back(finalParams);
 			minpoles->Clear();
 
 		}
