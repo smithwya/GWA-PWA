@@ -2,7 +2,7 @@ SetSeed(3)
 
 FitRegion(10.6322,11.0208)
 
-ReducedChi2CutOff(3)
+ReducedChi2CutOff(15)
 
 DoFit(Yes)
 FitAlsoToInclusiveCrossSection(Yes)

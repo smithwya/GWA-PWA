@@ -738,54 +738,6 @@ public:
 		return steps;
 	};
 
-/*
-	double chisq(){
-		double result = 0;
-		//for every amplitude in the list
-		for(string ampname : getAmpNames()){
-			//locate the amplitude
-			int amp_index = getampindex(ampname);
-			amplitude amp = amplitudes[amp_index];
-			//read out the start and end of the fit interval
-			double lower_bound = sqrt(amp.getFitInterval()[0]);
-			double upper_bound = sqrt(amp.getFitInterval()[1]);
-
-			//if you don't have data for every energy point, the code breaks anyways
-			vector<double> sqrts_vals = data[0].sqrts;
-
-			//for every data point
-			for(int i = 0; i < sqrts_vals.size(); i++){
-				double x = sqrts_vals[i];
-				double sum = 0;
-				double std = 0;
-				double y = 0;
-				double stat_err = 0;
-				double sist_err = 0;
-				//for sqrts in the fitting range, calculate relevant quantities
-				if(x >= lower_bound && x <= upper_bound){
-					//calculate the value of the amplitude
-					VectorXcd val = amp.getValue(pow(x,2));
-
-					for(int j = 0; j < numChans; j++){
-						if(data[numChans * amp_index + j].sqrts.size() != 0){//i.e. if the j-th channel is NOT a dummy channel
-							//y = value of amplitude for channel j
-							y = (val(j)*conj(val(j))).real();
-							stat_err = data[numChans * amp_index + j].amp_expval_stat_err[i];
-							sist_err = data[numChans * amp_index + j].amp_expval_sist_err[i];
-							std = sqrt(pow(stat_err, 2) + pow(sist_err, 2));
-							sum += pow(((y - data[numChans * amp_index + j].amp_expval[i])/std), 2);
-						}
-					}
-
-				}
-
-				result +=sum;
-			}
-
-		}
-		return result;
-	}
-*/
 
 	double chisq(){
 
@@ -840,99 +792,6 @@ public:
 
 	}
 
-/*
-	double chisq_with_InclCrossSec(){
-		double result = 0;
-		//for every amplitude in the list
-		for(string ampname : getAmpNames()){
-			//locate the amplitude
-			int amp_index = getampindex(ampname);
-			amplitude amp = amplitudes[amp_index];
-			//read out the start and end of the fit interval
-			double lower_bound = sqrt(amp.getFitInterval()[0]);
-			double upper_bound = sqrt(amp.getFitInterval()[1]);
-
-			//if you don't have data for every energy point, the code breaks anyways
-			vector<double> sqrts_vals = data[0].sqrts;
-
-			//for every data point
-			for(int i = 0; i < sqrts_vals.size(); i++){
-				double x = sqrts_vals[i];
-				double sum = 0;
-				double std = 0;
-				double y = 0;
-				double stat_err = 0;
-				double sist_err = 0;
-				//for sqrts in the fitting range, calculate relevant quantities
-				if(x >= lower_bound && x <= upper_bound){
-					//calculate the value of the amplitude
-					VectorXcd val = amp.getValue(pow(x,2));
-
-					for(int j = 0; j < numChans; j++){
-						if(data[numChans * amp_index + j].sqrts.size() != 0){//i.e. if the j-th channel is NOT a dummy channel
-							//y = value of amplitude for channel j
-							y = (val(j)*conj(val(j))).real();
-							stat_err = data[numChans * amp_index + j].amp_expval_stat_err[i];
-							sist_err = data[numChans * amp_index + j].amp_expval_sist_err[i];
-							std = sqrt(pow(stat_err, 2) + pow(sist_err, 2));
-							sum += pow(((y - data[numChans * amp_index + j].amp_expval[i])/std), 2);
-						}
-					}
-
-				}
-
-				result +=sum;
-			}
-
-		}
-
-		double sum2 = 0;
-
-		for(int i = 0; i < data_InclCrossSec.sqrts.size(); i++){
-
-			double x = data_InclCrossSec.sqrts[i];
-			
-			VectorXcd temp = {};
-					
-			double aux = 0;
-			double stat_err2 = 0;
-			double sist_err2 = 0;
-			double std2 = 0;
-
-			double lower_bound = sqrt(amplitudes[0].getFitInterval()[0]);
-			double upper_bound = sqrt(amplitudes[0].getFitInterval()[1]);
-
-			if(x >= lower_bound && x <= upper_bound){
-
-				for(string ampname : getAmpNames()){
-
-					int amp_index = getampindex(ampname);
-					amplitude amp = amplitudes[amp_index];
-
-					for(string channame : amp.getChanNames()){
-
-						int chan_index = getchanindex(ampname, channame);
-						temp = amp.getValue(pow(x,2));
-						aux += (temp(chan_index)*conj(temp(chan_index))).real();
-
-					}
-
-				}
-
-				stat_err2 = data_InclCrossSec.amp_expval_stat_err[i];
-				sist_err2 = data_InclCrossSec.amp_expval_sist_err[i];
-				std2 = sqrt(pow(stat_err2, 2) + pow(sist_err2, 2));
-				sum2 += pow(((aux - data_InclCrossSec.amp_expval[i])/std2), 2);
-
-			}
-
-		}
-
-		result += sum2;
-
-		return result;
-	}
-*/
 
 	double chisq_with_InclCrossSec(){
 
@@ -966,7 +825,10 @@ public:
 				double y = data_InclCrossSec.amp_expval[i];
 				double stat_err = data_InclCrossSec.amp_expval_stat_err[i];
 				double sist_err = data_InclCrossSec.amp_expval_sist_err[i];
-				double std = sqrt(pow(stat_err, 2) + pow(sist_err, 2));
+				//uncorrelated inclusive data
+				double std = stat_err;
+				//correlated inclusive data
+				//double std = sqrt(pow(stat_err, 2) + pow(sist_err, 2));
 				sum += pow(((aux - y)/std), 2);
 
 			}
