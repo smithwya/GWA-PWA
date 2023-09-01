@@ -209,14 +209,14 @@ int main(int argc, char ** argv)
 	//TF2 *tf = new TF2("tf", detD, 113, 121, -1, 1, 2);
 	//TF2 tf("tf", [](double* x, double* p) { return abs(testObs.amplitudes[0].getDenominator(comp(x[0], x[1])).determinant()); }, 113., 121., -1., 1.);
 	TF2 tf("tf", abs_det, 113., 121., -1., 1.,1);
-	tf.Draw("surf1");
+	tf.Draw("COLZ");
 	c3.SaveAs(temp.c_str());
 
 	temp = "Plots/" + inputfile + "_log_abs_det.pdf";
 	TCanvas c4;
 	//TF2 *tf = new TF2("tf", detD, 113, 121, -1, 1, 2);
 	TF2 tf2("tf2", log_abs_det, 113., 121., -1., 1.,1);
-	tf2.Draw("surf1");
+	tf2.Draw("COLZ");
 	c4.SaveAs(temp.c_str());
 
 	return 0;
