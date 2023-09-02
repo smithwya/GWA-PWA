@@ -219,6 +219,10 @@ int main(int argc, char ** argv)
 	tf2.Draw("COLZ");
 	c4.SaveAs(temp.c_str());
 
+	vector<double> steps = testObs.getStepSizes();
+
+	cout << testObs.chisq() << "	" << testObs.chisq()/(testObs.getNumData() - steps.size() + testObs.getNumInclData()) << endl;
+
 	return 0;
 	
 }
