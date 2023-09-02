@@ -106,8 +106,9 @@ int main(int argc, char ** argv)
 	testReader.loadExpData();
 	if(testReader.getInclCrossSecFlag()) testReader.loadExpInclCrossSec();
 	//selects a seed based off clock + job number
-	int seed = std::chrono::system_clock::now().time_since_epoch().count()+jobnum+fitnum;
-	testReader.setSeed(seed);
+	/*int seed = std::chrono::system_clock::now().time_since_epoch().count()+jobnum+fitnum;
+	testReader.setSeed(seed);*/
+	testReader.setSeed(testReader.getSeed());
 	//if(testReader.getRandomizeFlag()) testReader.randomize(seed); 
 
 	//gets chisq cutoff
@@ -137,6 +138,11 @@ int main(int argc, char ** argv)
 	testObs.makePlotGraphWithExp("P", "BB", plotname+"_BB", intensityP_BB, 10.6322,11.0208);
 	testObs.makePlotGraphWithExp("P", "BBstar", plotname+"_BBstar", intensityP_BBstar, 10.6322,11.0208);
 	testObs.makePlotGraphWithExp("P", "BstarBstar", plotname+"_BstarBstar", intensityP_BstarBstar, 10.6322,11.0208);
+
+	vector<double> steps = testObs.getStepSizes();
+
+	cout << testObs.chisq() << "	" << testObs.chisq()/(testObs.getNumData() - steps.size() + testObs.getNumInclData()) << endl;
+
 
 	return 0;
 	
