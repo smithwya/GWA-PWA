@@ -108,23 +108,23 @@ VectorXcd amplitude::getValue(comp s) {
 	
 	MatrixXcd phsp = MatrixXcd::Identity(numChannels,numChannels);
 
-	//s = pow(10.7, 2);
+	//s = comp(118.5,0.8);
 	for(int i = 0; i < numChannels; i++){
 		phsp(i,i)= pow(getMomentum(i,s),J+0.5)/pow(s,.25);
 	}
 
-	double test = 0;
+	comp test = 0;
 	//cout << channels[2].getMasses()[0] << "	" << channels[2].getMasses()[1]<<endl;
-	//cout << getKMatrix(pow(10.7, 2)) << endl; exit(0);
-	//test = omega_s(pow(10.7, 2)).real(); cout << test << endl; exit(0);
-	//cout << getNumerator(pow(10.7, 2), channels[0].getPoleType()) << endl; exit(0);
-	//test = pow(2 * channels[2].getMomentum(pow(10.7, 2)).real(), 2 + 1); cout << test << endl; exit(0);
-	//test = getRhoN(pow(10.7, 2), 2).real(); cout << test << endl; exit(0);
-	/*cout << getIntegral(s, 2) << endl << endl; 
+	//cout << getKMatrix(comp(118.5,0.8)) << endl; exit(0);
+	//test = omega_s(comp(118.5,0.8)).imag(); cout << test << endl; exit(0);
+	//cout << getNumerator(comp(118.5,0.8), channels[0].getPoleType()) << endl; exit(0);
+	//test = pow(2. * channels[2].getMomentum(comp(118.5,0.8)), 2 + 1); cout << test.real() << "	" << test.imag() << endl; exit(0);
+	//test = getRhoN(comp(118.5,0.8), 2); cout << test.real() << "	" << test.imag() << endl; exit(0);
+	cout << getIntegral(comp(118.5,0.8), 2) << endl << endl;
 	//cout << phsp << endl; exit(0);
-	//cout << (getKMatrix(s).inverse()) << endl; exit(0);
-	cout << getDenominator(s) << endl << endl;
-	cout << getDenominator(s).inverse() << endl; exit(0);*/
+	//cout << (getKMatrix(comp(118.5,0.8)).inverse()) << endl; exit(0);
+	//cout << getDenominator(comp(118.5,0.8)) << endl; exit(0);
+	cout << getDenominator(comp(118.5,0.8)).inverse() << endl; 
 	
 	MatrixXcd K = getKMatrix(s);
 	MatrixXcd I = MatrixXcd::Identity(numChannels,numChannels);
@@ -365,7 +365,8 @@ MatrixXcd amplitude::getKMatrix(comp s) {
 
 	}
 
-	return kmat.real();
+	//return kmat.real();
+	return kmat;
 }
 
 void amplitude::setChebyCoeffs(string cname, int poletype, double s0, vector<double> coeffs){

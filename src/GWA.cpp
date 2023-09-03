@@ -117,6 +117,10 @@ int main(int argc, char ** argv)
 	//saves the observable object outside of filereader object
 	testObs = testReader.getObs(); 
 
+//vector<double> steps = testObs.getStepSizes();
+
+//cout << testObs.chisq() << "	" << testObs.chisq()/(testObs.getNumData() - steps.size() + testObs.getNumInclData()) << endl;
+
 	//initialize the polesearcher object
 	ps.settestObs(testObs); 
 	ps.setAmpIndex(pWave); 
@@ -218,10 +222,6 @@ int main(int argc, char ** argv)
 	TF2 tf2("tf2", log_abs_det, 113., 121., -1., 1.,1);
 	tf2.Draw("COLZ");
 	c4.SaveAs(temp.c_str());
-
-	vector<double> steps = testObs.getStepSizes();
-
-	cout << testObs.chisq() << "	" << testObs.chisq()/(testObs.getNumData() - steps.size() + testObs.getNumInclData()) << endl;
 
 	return 0;
 	
