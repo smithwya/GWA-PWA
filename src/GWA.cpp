@@ -105,6 +105,8 @@ int main(int argc, char ** argv)
 	testReader.setKmats();
 	testReader.loadExpData();
 	if(testReader.getInclCrossSecFlag()) testReader.loadExpInclCrossSec();
+	//testReader.writeMathematicaOutputFile("Data/Math_" + plotname + ".txt");
+
 	//selects a seed based off clock + job number
 	/*int seed = std::chrono::system_clock::now().time_since_epoch().count()+jobnum+fitnum;
 	testReader.setSeed(seed);*/
@@ -152,7 +154,13 @@ int main(int argc, char ** argv)
 	testObs.makePlotGraphDummy(plotname+"_Dummy", intensityP_Dummy, 10.6322,11.0208);
 	testObs.plotInclCrossSec(plotname+"_InclCrossSec", 10.6322,11.0208);
 	testObs.plotInclCrossSecWithExp(plotname+"_InclCrossSecWithExp", 10.6322,11.0208);
-	
+
+	vector<double> steps = testObs.getStepSizes();
+
+	cout << testObs.chisq_with_InclCrossSec() << "	" << testObs.chisq_with_InclCrossSec()/(testObs.getNumData() - steps.size() + testObs.getNumInclData()) << endl;
+
+	cout << testObs.chisq_with_InclCrossSec() - testObs.chisq() << endl;
+
 	return 0;
 	
 }

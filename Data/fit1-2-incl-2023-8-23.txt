@@ -1,0 +1,39 @@
+SetSeed(3)
+
+FitRegion(10.6322,11.0208)
+
+ReducedChi2CutOff(20)
+
+DoFit(No)
+
+FitAlsoToInclusiveCrossSection(Yes)
+
+DoRandomize(No)
+
+AddChannel("BB", {5.27925, 5.27925})
+AddChannel("BBstar", {5.27925, 5.32471})
+AddChannel("BstarBstar", {5.32471, 5.32471})
+AddChannel("B_sstarB_sstar", {5.4154, 5.4154})
+AddChannel("Dummy", {5.36689, 5.4154})
+
+AddWave("P","kmat","nominal", 1, 0.6)
+
+ChebyCoeffs("P", "BB","s = 1", {0.015885 \pm 200.000000, -0.024861 \pm 200.000000, 0.006837 \pm 200.000000})
+ChebyCoeffs("P", "BBstar", "s = 1", {0.011286 \pm 200.000000, -0.024088 \pm 200.000000, -0.001659 \pm 200.000000})
+ChebyCoeffs("P", "BstarBstar", "s = 1", {0.009068 \pm 200.000000, -0.005870 \pm 200.000000, 0.013320 \pm 200.000000})
+ChebyCoeffs("P", "B_sstarB_sstar", "s = 1", {-0.048890 \pm 200.000000, 0.008582 \pm 200.000000, -0.098949 \pm 200.000000})
+ChebyCoeffs("P", "Dummy", "s = 1", {-0.041301 \pm 200.000000, 0.047807 \pm 200.000000, -0.037342 \pm 200.000000})
+
+AddPole("P", 115.133129 \pm 1.000000, {"BB","BBstar","BstarBstar", "B_sstarB_sstar", "Dummy"}, {51.595057 \pm 200.000000, 204.126891 \pm 200.000000, 24.907797 \pm 200.000000, 206.894987 \pm 200.000000, 319.490639 \pm 200.000000})
+AddPole("P", 118.919327 \pm 1.000000, {"BB","BBstar","BstarBstar", "B_sstarB_sstar", "Dummy"}, {165.096647 \pm 200.000000, -95.805620 \pm 200.000000, 43.638556 \pm 200.000000, 161.140566 \pm 200.000000, 27.310356 \pm 200.000000})
+
+AddKmatBackground("P", 0, {{-346.627407 \pm 200.000000, -237.334613 \pm 200.000000, -242.529656 \pm 200.000000, 222.096010 \pm 200.000000, 2958.543231 \pm 200.000000}, {10668.841372 \pm 200.000000, -708.544562 \pm 200.000000, 3615.842309 \pm 200.000000, -614.866270 \pm 200.000000}, {383.267868 \pm 200.000000, 708.540900 \pm 200.000000, 3865.761378 \pm 200.000000}, {-10634.497682 \pm 200.000000, -19963.546086 \pm 200.000000}, {-83045.885943 \pm 200.000000}})
+AddKmatBackground("P", 1, {{-13.272949 \pm 200.000000, -43.020773 \pm 200.000000, -61.507556 \pm 200.000000, -38.622367 \pm 200.000000, 298.027999 \pm 200.000000}, {138.187784 \pm 200.000000, 107.086756 \pm 200.000000, 69.234271 \pm 200.000000, 376.737910 \pm 200.000000}, {296.778863 \pm 200.000000, 217.585412 \pm 200.000000, 213.566879 \pm 200.000000}, {393.752850 \pm 200.000000, 323.239154 \pm 200.000000}, {-9.887851 \pm 200.000000}})
+
+LoadExpData("P", "BB", "Data/BB-nominal.dat")
+LoadExpData("P", "BBstar", "Data/BBstar-nominal.dat")
+LoadExpData("P", "BstarBstar", "Data/BstarBstar-nominal.dat")
+LoadExpData("P", "B_sstarB_sstar", "Data/B_sstarB_sstar-nominal.dat")
+
+LoadExpInclusiveCrossSection("Data/inclusive-cross-section.dat")
+chisq = 19.9798
