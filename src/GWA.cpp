@@ -29,7 +29,7 @@ observable testObs = observable();
 polesearcher ps;
 int nParams = 0;
 vector<comp> poles = {}; //this vector holds the poles found by polesearcher
-double f_val_poles = 0; //this variable holds the value of the minization function for poles
+vector<double> f_val_poles = {}; //this variable holds the value of the minization function for poles
 
 double minfunc(const double *xx){
 
@@ -167,8 +167,11 @@ int main(int argc, char ** argv)
 
 			//extract the resulting fit parameters
 			comp finalParams = comp(minpoles->X()[0], minpoles->X()[1]);
-			f_val_poles = minpoles->MinValue();
-			if(f_val_poles < -16.) poles.push_back(finalParams);
+			double aux = minpoles->MinValue();
+			if(aux < -16.){
+				poles.push_back(finalParams);
+				f_val_poles.push_back(aux);
+			}
 			minpoles->Clear();
 
 		}
@@ -176,7 +179,7 @@ int main(int argc, char ** argv)
 	}
 
 	for(int k = 0; k < poles.size(); k++){
-		letwrite << poles[k].real() << "	" << poles[k].imag() << "	" << f_val_poles << endl; 
+		letwrite << poles[k].real() << "	" << poles[k].imag() << "	" << f_val_poles[k] << endl; 
 		//cout << poles[k] << endl;
 	}
 
