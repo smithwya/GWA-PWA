@@ -1097,6 +1097,8 @@ public:
 
 			double x = data_InclCrossSec.sqrts[i];
 
+			aux = 0;
+
 			if(x >= lower_bound && x <= upper_bound){
 
 				for(string ampname : getAmpNames()){
@@ -1117,7 +1119,8 @@ public:
 				double y = data_InclCrossSec.amp_expval[i];
 				double stat_err = data_InclCrossSec.amp_expval_stat_err[i];
 				double sist_err = data_InclCrossSec.amp_expval_sist_err[i];
-				double std = sqrt(pow(stat_err, 2) + pow(sist_err, 2));
+				//double std = sqrt(pow(stat_err, 2) + pow(sist_err, 2)); //correleted errors
+				double std = stat_err; //uncorr errors
 				sum += pow(((aux - y)/std), 2);
 
 			}
