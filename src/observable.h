@@ -799,12 +799,13 @@ public:
 		double lower_bound = sqrt(amplitudes[0].getFitInterval()[0]);
 		double upper_bound = sqrt(amplitudes[0].getFitInterval()[1]);
 		comp temp = 0;
-		double aux = 0;
 
 		for(int i = 0; i < data_InclCrossSec.sqrts.size(); i++){
 
 			double x = data_InclCrossSec.sqrts[i];
-
+			
+			double aux = 0;
+			
 			if(x >= lower_bound && x <= upper_bound){
 
 				for(string ampname : getAmpNames()){
