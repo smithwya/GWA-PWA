@@ -175,12 +175,14 @@ int main(int argc, char ** argv)
 		double chisq = min->MinValue()/dof;
 
 		if(chisq<cutoff){
-			string fname = fitsfolder+timebuffer.str()+"-"to_string(jobnum)+"-"+to_string(fitnum)+"-"+fittype+"-"chisq;
+			double excl_chisq = testObs.chisq()/(testObs.getNumData()-steps.size());
+			string fname = fitsfolder+timebuffer.str()+"-"+to_string(jobnum)+"-"+to_string(fitnum)+"-"+fittype+"-"+to_string(chisq)+"-"+to_string(excl_chisq);
 			testObs.setFitParams(finalParams);
 			testReader.setObs(testObs);
 			testReader.writeOutputFile(fname);
 			ofstream outputfile(fname,ios::app);
 			outputfile<<"chisq = "<<chisq<<endl;
+			outputfile<<"excl_chisq = "<<excl_chisq<<endl;
 			outputfile.close();
 		}
 	}	
