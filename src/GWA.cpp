@@ -168,7 +168,7 @@ int main(int argc, char ** argv)
 			//extract the resulting fit parameters
 			comp finalParams = comp(minpoles->X()[0], minpoles->X()[1]);
 			double aux = minpoles->MinValue();
-			if(aux < -16.){
+			if(aux < -24.){
 				poles.push_back(finalParams);
 				f_val_poles.push_back(aux);
 			}
@@ -215,14 +215,14 @@ int main(int argc, char ** argv)
 	TCanvas c3;
 	//TF2 *tf = new TF2("tf", detD, 113, 121, -1, 1, 2);
 	//TF2 tf("tf", [](double* x, double* p) { return abs(testObs.amplitudes[0].getDenominator(comp(x[0], x[1])).determinant()); }, 113., 121., -1., 1.);
-	TF2 tf("tf", abs_det, 113., 121., -1., 1.,1);
+	TF2 tf("tf", abs_det, grid_Re_sx, grid_Re_dx, grid_Im_sx, grid_Im_dx, 1);
 	tf.Draw("COLZ");
 	c3.SaveAs(temp.c_str());
 
 	temp = "Plots/" + inputfile + "_log_abs_det.pdf";
 	TCanvas c4;
 	//TF2 *tf = new TF2("tf", detD, 113, 121, -1, 1, 2);
-	TF2 tf2("tf2", log_abs_det, 113., 121., -1., 1.,1);
+	TF2 tf2("tf2", log_abs_det, grid_Re_sx, grid_Re_dx, grid_Im_sx, grid_Im_dx, 1);
 	tf2.Draw("COLZ");
 	c4.SaveAs(temp.c_str());
 
