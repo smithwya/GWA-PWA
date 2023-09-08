@@ -168,7 +168,7 @@ int main(int argc, char ** argv)
 			//extract the resulting fit parameters
 			comp finalParams = comp(minpoles->X()[0], minpoles->X()[1]);
 			double aux = minpoles->MinValue();
-			if(aux < -24.){
+			if(aux < -10.){
 				poles.push_back(finalParams);
 				f_val_poles.push_back(aux);
 			}
@@ -190,7 +190,7 @@ int main(int argc, char ** argv)
 	};
 
 	auto log_abs_det = [&](double* x, double* p){
-		return log(abs(testObs.amplitudes[ampindex].getDenominator(comp(x[0], x[1])).determinant()));
+		return log10(abs(testObs.amplitudes[ampindex].getDenominator(comp(x[0], x[1])).determinant()));
 		//MatrixXcd temp = (comp(x[0], x[1]) - comp(115,0.5)) * (comp(x[0], x[1]) - comp(118,0.7)) * (comp(x[0], x[1]) - comp(115,-0.5)) * (comp(x[0], x[1]) - comp(118,-0.7)) * MatrixXcd({{1}});
 		//return log(abs(temp.determinant()));
 	};

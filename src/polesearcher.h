@@ -62,10 +62,10 @@ class polesearcher {
         }//here we factor out the pole(s) from D^{-1}, i.e. from the amplitude.
 */
         if(pow(params[0] - 120., 2) + pow(params[1], 2) <= 40.){
-            val = log(abs(det));
+            val = log10(abs(det));
         }
         else{
-            val = log(abs(det)) + pow(params[0] - 120., 2) + pow(params[1], 2) - 40.;
+            val = log10(abs(det)) + pow(params[0] - 120., 2) + pow(params[1], 2) - 40.;
         }
 
             //cout << comp(params[0],params[1]) << ": val = " << val << endl;
