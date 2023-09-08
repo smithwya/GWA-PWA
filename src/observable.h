@@ -680,6 +680,8 @@ public:
 
 		for(int i = 0; i < num_th_pts; i++){
 
+			aux = 0;
+
 			for(string ampname : getAmpNames()){
 
 				int amp_index = getampindex(ampname);
