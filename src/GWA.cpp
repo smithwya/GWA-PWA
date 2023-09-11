@@ -103,6 +103,7 @@ int main(int argc, char ** argv)
 	double grid_Im_sx = stod(argv[7]);
 	double grid_Im_dx = stod(argv[8]);
 	int grid_Im_numpts = atoi(argv[9]);
+	double func_cutoff = stod(argv[10]);
 
 	//reads the file and creates an observable object with the information from the file
 	
@@ -129,11 +130,13 @@ int main(int argc, char ** argv)
 	ofstream letwrite(polefile);
 	
 	//make the minimizer
-	ROOT::Math::Minimizer* minpoles = ROOT::Math::Factory::CreateMinimizer("Minuit2","");
+	ROOT::Math::Minimizer* minpoles = ROOT::Math::Factory::CreateMinimizer("Minuit2","Simplex");
 	//Set some criteria for the minimizer to stop
-	minpoles->SetMaxFunctionCalls(100000);
-	minpoles->SetMaxIterations(10000);
-	minpoles->SetTolerance(0.001);
+	minpoles->SetMaxFunctionCalls(10000);
+	minpoles->SetMaxIterations(1000);
+	//minpoles->SetTolerance(0.001);
+	//minpoles->SetPrecision(1.e-7);
+	minpoles->SetStrategy(1);
 	minpoles->SetPrintLevel(0);
 	
 	nParams = 2;//real and imaginary part of the pole
@@ -146,13 +149,14 @@ int main(int argc, char ** argv)
 	vector<double> grid_Re = linspace(grid_Re_sx, grid_Re_dx, grid_Re_numpts);
 	vector<double> grid_Im = linspace(grid_Im_sx, grid_Im_dx, grid_Im_numpts);
 	vector<double> fitparamspoles = {};
-	double steppoles[2] = {0.01,0.01};
+	double steppoles[2] = {1.e-2, 1.e-2};
 	
 	
 	for(int i = 0; i < grid_Re.size(); i++){
 		for(int j = 0; j < grid_Im.size(); j++){
 			
 			fitparamspoles = {grid_Re[i], grid_Im[j]};//cout << grid_Re[i] << endl;
+			//fitparamspoles = {119.,0.8};
 			
 			//cout << fitparamspoles[0] << " " << fitparamspoles[1] << endl;
 		
@@ -164,11 +168,15 @@ int main(int argc, char ** argv)
 
 			//run the minimization
 			minpoles->Minimize();
+			//minpoles->Minimize();
+
+			//cout << "calls = " << ps.calls_counter_poles << endl;
 
 			//extract the resulting fit parameters
-			comp finalParams = comp(minpoles->X()[0], minpoles->X()[1]);
-			double aux = minpoles->MinValue();
-			if(aux < -10.){
+			comp finalParams = comp(minpoles->X()[0], -abs(minpoles->X()[1]));
+			long double aux = minpoles->MinValue();
+			for (int j=0; j < poles.size(); j++) aux += log(abs((finalParams - poles[j])*(finalParams - conj(poles[j]))));
+			if(aux < func_cutoff){
 				poles.push_back(finalParams);
 				f_val_poles.push_back(aux);
 			}
@@ -185,14 +193,14 @@ int main(int argc, char ** argv)
 
 	auto abs_det = [&](double* x, double* p){
 		return abs(testObs.amplitudes[ampindex].getDenominator(comp(x[0], x[1])).determinant());
-		//MatrixXcd temp = (comp(x[0], x[1]) - comp(115,0.5)) * (comp(x[0], x[1]) - comp(118,0.7)) * (comp(x[0], x[1]) - comp(115,-0.5)) * (comp(x[0], x[1]) - comp(118,-0.7)) * MatrixXcd({{1}});
-		//return abs(temp.determinant());
+		/*MatrixXcd temp = (comp(x[0], x[1]) - comp(115,0.5)) * (comp(x[0], x[1]) - comp(118,0.7)) * (comp(x[0], x[1]) - comp(115,-0.5)) * (comp(x[0], x[1]) - comp(118,-0.7)) * MatrixXcd({{1}});
+		return abs(temp.determinant());*/
 	};
 
 	auto log_abs_det = [&](double* x, double* p){
 		return log10(abs(testObs.amplitudes[ampindex].getDenominator(comp(x[0], x[1])).determinant()));
-		//MatrixXcd temp = (comp(x[0], x[1]) - comp(115,0.5)) * (comp(x[0], x[1]) - comp(118,0.7)) * (comp(x[0], x[1]) - comp(115,-0.5)) * (comp(x[0], x[1]) - comp(118,-0.7)) * MatrixXcd({{1}});
-		//return log(abs(temp.determinant()));
+		/*MatrixXcd temp = (comp(x[0], x[1]) - comp(115,0.5)) * (comp(x[0], x[1]) - comp(118,0.7)) * (comp(x[0], x[1]) - comp(115,-0.5)) * (comp(x[0], x[1]) - comp(118,-0.7)) * MatrixXcd({{1}});
+		return log(abs(temp.determinant()));*/
 	};
 
 

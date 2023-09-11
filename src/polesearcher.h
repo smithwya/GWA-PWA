@@ -25,7 +25,10 @@ class polesearcher {
     observable testObs;
     vector<comp> poles = {};
     int wvindex;
+
     public:
+
+    int calls_counter_poles = 0;
 
     void settestObs(observable obs){
         testObs = obs;
@@ -48,6 +51,8 @@ class polesearcher {
     }
 
     double minfuncforpoles(vector<double> params){
+
+        calls_counter_poles++;
     
         double val = 0; 
 
@@ -55,12 +60,12 @@ class polesearcher {
         //MatrixXcd cmat = (comp(params[0],params[1]) - comp(115,0.5)) * (comp(params[0],params[1]) - comp(118,0.7)) * (comp(params[0],params[1]) - comp(115,-0.5)) * (comp(params[0],params[1]) - comp(118,-0.7)) * MatrixXcd({{1}}); //mock example
 
         comp det = cmat.determinant();
-/*
+
         for(int i = 0; i < poles.size(); i++){
-            det = det/(comp(params[0],params[1])-poles[i]);
-            det = det/(comp(params[0],params[1])-conj(poles[i]));
-        }//here we factor out the pole(s) from D^{-1}, i.e. from the amplitude.
-*/
+            det /= (comp(params[0],params[1])-poles[i]);
+            det /= (comp(params[0],params[1])-conj(poles[i]));
+        }
+
         if(pow(params[0] - 120., 2) + pow(params[1], 2) <= 40.){
             val = log10(abs(det));
         }
