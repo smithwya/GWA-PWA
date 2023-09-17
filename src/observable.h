@@ -292,7 +292,7 @@ public:
 		return;
 	};
 
-	void makePlotGraphWithExp(string ampname, string channame, string pdfname, function<double(double)> func, double lower_bound, double upper_bound){
+	void makePlotGraphWithExp(string ampname, string channame, string pdfname, function<double(double)> func, double lower_bound, double upper_bound, string x_axis_title, string y_axis_title){
 
 		int numamp = getampindex(ampname);
 		int totnumofchans = numChans;
@@ -357,11 +357,48 @@ public:
 		auto gr1 = new TGraphErrors(num_exp_pts,x1,y1,ex1,ey1);
 		auto gr2 = new TGraph(num_th_pts,x2,y2);
 
+		int mymarkerstyle=20;
+  		float mymarkersize=1.;
+  		int mymarkercolor = 4;
+  		float mytextsize=0.05;
+  		int mytextfont=132; 
+
+		TCanvas *Box = new TCanvas("Box","Box",650,500); //costruttore 600pt x 550 pt
+  		//gStyle->SetOptStat(0); //non voglio che mi metti il riquadro con la statistica
+  		Box->SetFillColor(0);//il fondo del grafico con 0 è bianco...in teoria lo potete cambiare
+  		Box->SetBorderMode(0);//mette dei bordi attorno alla figura...0 nessun bordo
+  		Box->SetBorderSize(2); //spessore del bordo
+  		Box->SetLeftMargin(0.18); //spazio a sinistra della figura ...20% della larghezza
+  		Box->SetRightMargin(0.11);// 5% della larghezza a destra
+  		Box->SetTopMargin(0.07); //3% della altezza lato superiore
+  		Box->SetBottomMargin(0.14); //12% dell'altezza lato inferiore
+  		Box->SetTickx(1);
+  		Box->SetTicky(1);
+  		//Box->SetLogy();
+
    		//gr1->SetTitle("TGraphErrors Example");
-   		gr1->SetMarkerColor(4);
-   		gr1->SetMarkerStyle(21);
+		gr1->GetYaxis()->SetTitleSize(mytextsize); //controllo sulla dimension del titolo dell'asse
+  		gr1->GetXaxis()->SetTitleSize(mytextsize);
+  		gr1->GetXaxis()->SetLabelSize(mytextsize);//cotrollo sulla dimensione dei numeretti dell'asse
+  		gr1->GetYaxis()->SetLabelSize(mytextsize);
+  		gr1->GetXaxis()->SetTitleFont(mytextfont);//controllo sul carattere usato per il titolo dell'asse
+  		gr1->GetYaxis()->SetTitleFont(mytextfont);
+  		gr1->GetXaxis()->SetLabelFont(mytextfont);//controllo sul carattere usato per i numeretti dell'asse
+  		gr1->GetYaxis()->SetLabelFont(mytextfont);
+		gr1->GetXaxis()->SetNdivisions(908); //suddivisione dei numeri sull'asse x---es 0 a 10 a passo di 1, e ogni passo diviso in 5
+  		gr1->GetXaxis()->CenterTitle(1);//che il titolo dell'asse lo voglio quindi 1, se non lo volessi metterei 0
+  		gr1->GetYaxis()->CenterTitle(1);
+  		gr1->GetXaxis()->SetTitleOffset(1.12);//definisce la distanza del titolo dell'asse dall'asse stesso
+  		gr1->GetYaxis()->SetTitleOffset(1.12);
+  		gr1->SetTitle("");
+  		gr1->GetXaxis()->SetTitle((x_axis_title).c_str());
+  		gr1->GetYaxis()->SetTitle((y_axis_title).c_str());
+   		gr1->SetMarkerColor(mymarkercolor);
+		gr1->SetMarkerSize(mymarkersize);
+   		gr1->SetMarkerStyle(mymarkerstyle);
 		gr1->GetXaxis()->SetRangeUser(lower_bound, upper_bound);
 		//gr1->GetYaxis()->SetRangeUser(0, 0.2);
+		gr1->SetLineColor(1);
 		gr1->SetLineWidth(1);
 
 		//gr2->SetTitle("TGraphErrors Example");
@@ -372,12 +409,11 @@ public:
 		gr2->SetLineColor(kRed);
 
 		TFile file("pdf_folder.root", "recreate");
-		TCanvas canv;
 		gr1->Write();
 		gr2->Write();
 		gr1->Draw("AP");
 		gr2->Draw("same");
-		canv.SaveAs(("Plots/"+pdfname+".pdf").c_str());
+		Box->SaveAs(("Plots/"+pdfname+".pdf").c_str());
 		file.Close();
 		return;
 		
@@ -512,7 +548,7 @@ public:
 
 	};
 
-	void plotCompGraphWithExp(string ampname, string channame, string pdfname,function<comp(double)> func, double lower_bound, double upper_bound, int num_bins){
+	void plotCompGraphWithExp(string ampname, string channame, string pdfname,function<comp(double)> func, double lower_bound, double upper_bound, int num_bins, string x_axis_title, string y_axis_title){
 
 		auto realFunc = [&](double x){
 			return func(x).real();
@@ -521,8 +557,8 @@ public:
 			return func(x).imag();
 		};
 
-		makePlotGraphWithExp(ampname, channame, "Exp_plus_Re "+pdfname, realFunc, lower_bound, upper_bound);
-		makePlotGraphWithExp(ampname, channame, "Exp_plus_Im "+pdfname, imagFunc, lower_bound, upper_bound);
+		makePlotGraphWithExp(ampname, channame, "Exp_plus_Re "+pdfname, realFunc, lower_bound, upper_bound, x_axis_title, y_axis_title);
+		makePlotGraphWithExp(ampname, channame, "Exp_plus_Im "+pdfname, imagFunc, lower_bound, upper_bound, x_axis_title, y_axis_title);
 
 	};
 

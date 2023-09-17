@@ -135,9 +135,9 @@ int main(int argc, char ** argv)
 		return (value*conj(value)).real();
 	};
 
-	testObs.makePlotGraphWithExp("P", "BB", plotname+"_BB", intensityP_BB, 10.6322,11.0208);
-	testObs.makePlotGraphWithExp("P", "BBstar", plotname+"_BBstar", intensityP_BBstar, 10.6322,11.0208);
-	testObs.makePlotGraphWithExp("P", "BstarBstar", plotname+"_BstarBstar", intensityP_BstarBstar, 10.6322,11.0208);
+	testObs.makePlotGraphWithExp("P", "BB", plotname+"_BB", intensityP_BB, 10.6322, 11.0208, "#sqrt{s} (GeV)", "#sigma (pb)");
+	testObs.makePlotGraphWithExp("P", "BBstar", plotname+"_BBstar", intensityP_BBstar, 10.6322,11.0208, "#sqrt{s} (GeV)", "#sigma (pb)");
+	testObs.makePlotGraphWithExp("P", "BstarBstar", plotname+"_BstarBstar", intensityP_BstarBstar, 10.6322,  11.0208, "#sqrt{s} (GeV)", "#sigma (pb)");
 
 	vector<double> steps = testObs.getStepSizes();
 
