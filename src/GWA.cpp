@@ -203,36 +203,13 @@ int main(int argc, char ** argv)
 		return log(abs(temp.determinant()));*/
 	};
 
+	testObs.PolePlotGraph2D(inputfile, polefile);
 
-	//polefile instead of Data/poles.txt
-	string temp = "Plots/" + inputfile + "_poles_graph2D.pdf";
-	TCanvas c1;
-	TGraph2D *gr = new TGraph2D(polefile.c_str());
-	gr->SetMarkerStyle(21);
-	gr->Draw("pcol");
-	c1.SaveAs(temp.c_str());
+	testObs.PolePlotGraph1D(inputfile, polefile);
 
-	temp = "Plots/" + inputfile + "_poles_graph.pdf";
-	TCanvas c2;
-	TGraph *gr2 = new TGraph(polefile.c_str());
-	gr2->SetMarkerStyle(21);
-	gr2->Draw("AP");
-	c2.SaveAs(temp.c_str());
+	testObs.PoleColormapPlotFunc2D(inputfile, abs_det, "abs_det", grid_Re_sx, grid_Re_dx, grid_Im_sx, grid_Im_dx);
 
-	temp = "Plots/" + inputfile + "_abs_det.pdf";
-	TCanvas c3;
-	//TF2 *tf = new TF2("tf", detD, 113, 121, -1, 1, 2);
-	//TF2 tf("tf", [](double* x, double* p) { return abs(testObs.amplitudes[0].getDenominator(comp(x[0], x[1])).determinant()); }, 113., 121., -1., 1.);
-	TF2 tf("tf", abs_det, grid_Re_sx, grid_Re_dx, grid_Im_sx, grid_Im_dx, 1);
-	tf.Draw("COLZ");
-	c3.SaveAs(temp.c_str());
-
-	temp = "Plots/" + inputfile + "_log_abs_det.pdf";
-	TCanvas c4;
-	//TF2 *tf = new TF2("tf", detD, 113, 121, -1, 1, 2);
-	TF2 tf2("tf2", log_abs_det, grid_Re_sx, grid_Re_dx, grid_Im_sx, grid_Im_dx, 1);
-	tf2.Draw("COLZ");
-	c4.SaveAs(temp.c_str());
+	testObs.PoleColormapPlotFunc2D(inputfile, log_abs_det, "log_abs_det", grid_Re_sx, grid_Re_dx, grid_Im_sx, grid_Im_dx);
 
 	return 0;
 	
