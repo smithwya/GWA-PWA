@@ -139,6 +139,11 @@ int main(int argc, char ** argv)
 	testObs.makePlotGraphWithExp("P", "BBstar", plotname+"_BBstar", intensityP_BBstar, 10.6322,11.0208, "#sqrt{s} (GeV)", "#sigma (pb)");
 	testObs.makePlotGraphWithExp("P", "BstarBstar", plotname+"_BstarBstar", intensityP_BstarBstar, 10.6322,  11.0208, "#sqrt{s} (GeV)", "#sigma (pb)");
 
+	testObs.makePlotGraph_ExpOnly("P", "BB", plotname+"_BB_justpts", 10.6322,  11.0208, "#sqrt{s} (GeV)", "#sigma (pb)");
+	testObs.makePlotGraph_ExpOnly("P", "BBstar", plotname+"_BBstar_justpts", 10.6322,  11.0208, "#sqrt{s} (GeV)", "#sigma (pb)");
+	testObs.makePlotGraph_ExpOnly("P", "BstarBstar", plotname+"_BstarBstar_justpts", 10.6322,  11.0208, "#sqrt{s} (GeV)", "#sigma (pb)");
+	testObs.makePlotGraph_ExpOnly("P", "B_sstarB_sstar", plotname+"_B_sstarB_sstar_justpts", 10.6322,  11.0208, "#sqrt{s} (GeV)", "#sigma (pb)");
+
 	vector<double> steps = testObs.getStepSizes();
 
 	cout << testObs.chisq() << "	" << testObs.chisq()/(testObs.getNumData() - steps.size() + testObs.getNumInclData()) << endl;
