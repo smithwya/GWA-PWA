@@ -50,7 +50,8 @@ double minfunc_with_InclCrossSec(const double *xx){
 	}
 
 	testObs.setFitParams(params);
-	return testObs.chisq_with_InclCrossSec();
+	return testObs.chisq()+testObs.chisq_with_InclCrossSec();
+	
 }
 
 double minfunc_for_poles(const double *xx){
@@ -95,7 +96,7 @@ vector<double> linspace(T start_in, T end_in, int num_in)
 int main(int argc, char ** argv)
 {
 	int jobnum = atoi(argv[1]);
-	int fitnum = atoi(argv[2]);
+	int numfits = atoi(argv[2]);
 	string inputfile = (string) argv[3];
 	string fitsfolder = (string) argv[4];
 
@@ -120,9 +121,8 @@ int main(int argc, char ** argv)
 	timebuffer << local_tm.tm_year + 1900 << '-'<< local_tm.tm_mon + 1 << '-'<< local_tm.tm_mday;
 	
 	//selects a seed based off clock + job number
-	int seed = now.time_since_epoch().count()+jobnum+fitnum;
-	testReader.setSeed(seed);
-	if(testReader.getRandomizeFlag()) testReader.randomize(seed); 
+	int seed = now.time_since_epoch().count()+jobnum+numfits;
+	testReader.setSeed(seed); 
 
 	//gets chisq cutoff
 	double cutoff = testReader.getChi2CutOff();
@@ -131,19 +131,24 @@ int main(int argc, char ** argv)
 	testObs = testReader.getObs();
 
 	//saves original starting parameters
-	vector<double> startparams = testObs.getFitParams();
+	//vector<double> startparams = testObs.getFitParams();
 	vector<double> steps = testObs.getStepSizes();
 	
 	//gets degrees of freedom
 	string fittype = "excl";
 	int dof = testObs.getNumData()-steps.size();
+	
 	if(testReader.getInclCrossSecFlag()){
 		dof+=testObs.getNumInclData();
 		fittype = "incl";
 	}
 
-	
-
+	for (int j = 0; j < numfits; j++){
+		
+		if(testReader.getRandomizeFlag()) testReader.randomize(seed);
+		testObs = testReader.getObs();
+		
+		
 	if(testReader.getFitFlag()){
 		//make the minimzer
 		ROOT::Math::Minimizer* min = ROOT::Math::Factory::CreateMinimizer("Minuit2","");
@@ -176,7 +181,7 @@ int main(int argc, char ** argv)
 
 		if(chisq<cutoff){
 			double excl_chisq = testObs.chisq()/(testObs.getNumData()-steps.size());
-			string fname = fitsfolder+timebuffer.str()+"-"+to_string(jobnum)+"-"+to_string(fitnum)+"-"+fittype+"-"+to_string(chisq)+"-"+to_string(excl_chisq);
+			string fname = fitsfolder+timebuffer.str()+"-"+to_string(jobnum)+"-"+to_string(j)+"-"+fittype+"-"+to_string(chisq)+"-"+to_string(excl_chisq);
 			testObs.setFitParams(finalParams);
 			testReader.setObs(testObs);
 			testReader.writeOutputFile(fname);
@@ -185,9 +190,11 @@ int main(int argc, char ** argv)
 			outputfile<<"excl_chisq = "<<excl_chisq<<endl;
 			outputfile.close();
 		}
+		
+		testReader.setObs(testObs);
 	}	
 	
-	
+}
 	return 0;
 	
 }

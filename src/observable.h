@@ -795,7 +795,7 @@ public:
 
 	double chisq_with_InclCrossSec(){
 
-		double sum = chisq();
+		double sum = 0;
 		double lower_bound = sqrt(amplitudes[0].getFitInterval()[0]);
 		double upper_bound = sqrt(amplitudes[0].getFitInterval()[1]);
 		comp temp = 0;

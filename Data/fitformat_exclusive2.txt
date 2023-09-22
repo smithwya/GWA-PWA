@@ -2,7 +2,7 @@ SetSeed(3)
 
 FitRegion(10.6322,11.0208)
 
-ReducedChi2CutOff(10)
+ReducedChi2CutOff(3)
 
 DoFit(Yes)
 FitAlsoToInclusiveCrossSection(No)
@@ -12,7 +12,7 @@ DoBootstrap(No)
 AddChannel("BB", {5.27925, 5.27925})
 AddChannel("BBstar", {5.27925, 5.32471})
 AddChannel("BstarBstar", {5.32471, 5.32471})
-AddWave("P","kmat","nominal", 2, 0.6)
+AddWave("P","kmat","nominal", 1, 0.6)
 
 ChebyCoeffs("P", "BB","s = 1", {100 \pm 200, 100 \pm 200,100 \pm 200}) 
 ChebyCoeffs("P", "BBstar", "s = 1", {100 \pm 200, 100 \pm 200, 100 \pm 200})
@@ -20,7 +20,7 @@ ChebyCoeffs("P", "BstarBstar", "s = 1", {100 \pm 200, 100 \pm 200, 100 \pm 200})
 
 
 
-AddPole("P", 115 \pm 1, {"BB","BBstar","BstarBstar"}, {100 \pm 200, 100 \pm 200, 100 \pm 200})
+
 AddPole("P", 120 \pm 1, {"BB","BBstar","BstarBstar"}, {100 \pm 200, 100 \pm 200, 100 \pm 200})
 
 AddKmatBackground("P", 0, {{100 \pm 200, 100 \pm 200, 100 \pm 200}, {100 \pm 200, 100 \pm 200}, {100 \pm 200 }})
