@@ -462,7 +462,7 @@ public:
 		int totnumofchans = numChans;
 		int numchan = getchanindex(ampname,channame);
 
-		int num_exp_pts = data[totnumofchans * numamp + numchan].amp_expval.size();
+		int num_exp_pts = data[totnumofchans * numamp + numchan].amp_expval.size();cout << num_exp_pts << endl;
 
 		double delta = (upper_bound - lower_bound)/ num_exp_pts;
 
@@ -538,7 +538,7 @@ public:
    		gr1->SetMarkerColor(mymarkercolor);
 		gr1->SetMarkerSize(mymarkersize);
    		gr1->SetMarkerStyle(mymarkerstyle);
-		gr1->GetXaxis()->SetRangeUser(lower_bound, upper_bound);
+		//gr1->GetXaxis()->SetRangeUser(lower_bound, upper_bound);
 		//gr1->GetYaxis()->SetRangeUser(0, 0.2);
 		gr1->SetLineColor(1);
 		gr1->SetLineWidth(1);
@@ -546,7 +546,7 @@ public:
    		//gr->SetTitle("TGraphErrors Example");
    		//gr1->SetMarkerColor(4);
    		//gr1->SetMarkerStyle(21);
-		gr1->GetXaxis()->SetRangeUser(lower_bound, upper_bound);
+		//gr1->GetXaxis()->SetRangeUser(lower_bound, upper_bound);
 		//gr->GetYaxis()->SetRangeUser(0, 15500);
 		//gr1->SetLineWidth(1);
 
