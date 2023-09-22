@@ -10250,3 +10250,365 @@ Warning in <Minuit2>: VariableMetricBuilder No improvement in line search
 Warning in <Minuit2>: VariableMetricBuilder Iterations finish without convergence; Edm 1.26069e+13 Requested 2e-06
 Warning in <Minuit2>: VariableMetricBuilder FunctionMinimum is invalid after second try
 Warning in <Minuit2>: Minuit2Minimizer::Minimize Minimization did NOT converge, Edm is above max
+Warning in <Minuit2>: MnPosDef Matrix forced pos-def by adding to diagonal nan
+Warning in <Minuit2>: Minuit2Minimizer::Minimize Minimization did NOT converge, Edm is above max
+Warning in <Minuit2>: MnPosDef Matrix forced pos-def by adding to diagonal nan
+Warning in <Minuit2>: Minuit2Minimizer::Minimize Minimization did NOT converge, Edm is above max
+Warning in <Minuit2>: VariableMetricBuilder Edm is NaN; stop iterations
+Warning in <Minuit2>: VariableMetricBuilder Edm is NaN; stop iterations
+Warning in <Minuit2>: DavidonErrorUpdator delgam < 0 : first derivatives increasing along search line (details in info log)
+Warning in <Minuit2>: VariableMetricBuilder Matrix not pos.def, gdel = 18.5092 > 0
+Warning in <Minuit2>: MnPosDef non-positive diagonal element in covariance matrix[ 7 ] = -2.70089e-05
+Warning in <Minuit2>: MnPosDef non-positive diagonal element in covariance matrix[ 9 ] = -4.1155e-05
+Warning in <Minuit2>: MnPosDef Added to diagonal of Error matrix a value 0.500042
+Warning in <Minuit2>: VariableMetricBuilder gdel = -222125
+Warning in <Minuit2>: DavidonErrorUpdator delgam < 0 : first derivatives increasing along search line (details in info log)
+Warning in <Minuit2>: MnPosDef Matrix forced pos-def by adding to diagonal nan
+Warning in <Minuit2>: Minuit2Minimizer::Minimize Minimization did NOT converge, Edm is above max
+Warning in <Minuit2>: MnPosDef Matrix forced pos-def by adding to diagonal nan
+Warning in <Minuit2>: Minuit2Minimizer::Minimize Minimization did NOT converge, Edm is above max
+Warning in <Minuit2>: DavidonErrorUpdator delgam < 0 : first derivatives increasing along search line (details in info log)
+Warning in <Minuit2>: VariableMetricBuilder Matrix not pos.def, gdel = 3266.61 > 0
+Warning in <Minuit2>: MnPosDef non-positive diagonal element in covariance matrix[ 2 ] = -6.03029e-06
+Warning in <Minuit2>: MnPosDef non-positive diagonal element in covariance matrix[ 4 ] = -2.85078e-05
+Warning in <Minuit2>: MnPosDef Added to diagonal of Error matrix a value 0.50003
+Warning in <Minuit2>: MnPosDef Matrix forced pos-def by adding to diagonal 0.0748476
+Warning in <Minuit2>: VariableMetricBuilder gdel = -6.46492e+09
+Warning in <Minuit2>: DavidonErrorUpdator delgam < 0 : first derivatives increasing along search line (details in info log)
+Warning in <Minuit2>: VariableMetricBuilder Matrix not pos.def., try to make pos.def.
+Warning in <Minuit2>: MnPosDef non-positive diagonal element in covariance matrix[ 13 ] = -0.000220381
+Warning in <Minuit2>: MnPosDef Added to diagonal of Error matrix a value 0.500221
+Warning in <Minuit2>: MnPosDef Matrix forced pos-def by adding to diagonal 0.450755
+Warning in <Minuit2>: VariableMetricBuilder Edm is NaN; stop iterations
+Warning in <Minuit2>: VariableMetricBuilder Edm is NaN; stop iterations
+Warning in <Minuit2>: DavidonErrorUpdator delgam < 0 : first derivatives increasing along search line (details in info log)
+Warning in <Minuit2>: VariableMetricBuilder Matrix not pos.def, gdel = 7.30845 > 0
+Warning in <Minuit2>: MnPosDef non-positive diagonal element in covariance matrix[ 2 ] = -0.000478337
+Warning in <Minuit2>: MnPosDef non-positive diagonal element in covariance matrix[ 3 ] = -0.000717065
+Warning in <Minuit2>: MnPosDef non-positive diagonal element in covariance matrix[ 4 ] = -0.000322302
+Warning in <Minuit2>: MnPosDef non-positive diagonal element in covariance matrix[ 21 ] = -679.2
+Warning in <Minuit2>: MnPosDef non-positive diagonal element in covariance matrix[ 23 ] = -6181.14
+Warning in <Minuit2>: MnPosDef non-positive diagonal element in covariance matrix[ 26 ] = -21629.5
+Warning in <Minuit2>: MnPosDef Added to diagonal of Error matrix a value 21630
+Warning in <Minuit2>: MnPosDef Matrix forced pos-def by adding to diagonal 169.593
+Warning in <Minuit2>: VariableMetricBuilder gdel = -4.7328e+12
+Warning in <Minuit2>: MnPosDef Matrix forced pos-def by adding to diagonal nan
+Warning in <Minuit2>: Minuit2Minimizer::Minimize Minimization did NOT converge, Edm is above max
+Warning in <Minuit2>: MnPosDef Matrix forced pos-def by adding to diagonal nan
+Warning in <Minuit2>: Minuit2Minimizer::Minimize Minimization did NOT converge, Edm is above max
+Warning in <Minuit2>: VariableMetricBuilder Edm is NaN; stop iterations
+Warning in <Minuit2>: VariableMetricBuilder Edm is NaN; stop iterations
+Warning in <Minuit2>: VariableMetricBuilder No improvement in line search
+Warning in <Minuit2>: VariableMetricBuilder Iterations finish without convergence; Edm 456519 Requested 2e-06
+Warning in <Minuit2>: VariableMetricBuilder FunctionMinimum is invalid after second try
+Warning in <Minuit2>: Minuit2Minimizer::Minimize Minimization did NOT converge, Edm is above max
+Warning in <Minuit2>: MnPosDef Matrix forced pos-def by adding to diagonal nan
+Warning in <Minuit2>: Minuit2Minimizer::Minimize Minimization did NOT converge, Edm is above max
+Warning in <Minuit2>: MnPosDef Matrix forced pos-def by adding to diagonal nan
+Warning in <Minuit2>: Minuit2Minimizer::Minimize Minimization did NOT converge, Edm is above max
+Warning in <Minuit2>: MnPosDef Matrix forced pos-def by adding to diagonal 0.0720617
+Warning in <Minuit2>: VariableMetricBuilder Edm is NaN; stop iterations
+Warning in <Minuit2>: VariableMetricBuilder Edm is NaN; stop iterations
+Warning in <Minuit2>: DavidonErrorUpdator delgam < 0 : first derivatives increasing along search line (details in info log)
+Warning in <Minuit2>: VariableMetricBuilder Matrix not pos.def, gdel = 17.2965 > 0
+Warning in <Minuit2>: MnPosDef non-positive diagonal element in covariance matrix[ 0 ] = -663217
+Warning in <Minuit2>: MnPosDef non-positive diagonal element in covariance matrix[ 1 ] = -19543.4
+Warning in <Minuit2>: MnPosDef non-positive diagonal element in covariance matrix[ 5 ] = -344458
+Warning in <Minuit2>: MnPosDef non-positive diagonal element in covariance matrix[ 6 ] = -1771.41
+Warning in <Minuit2>: MnPosDef non-positive diagonal element in covariance matrix[ 10 ] = -4216.78
+Warning in <Minuit2>: MnPosDef non-positive diagonal element in covariance matrix[ 16 ] = -2.40479e+07
+Warning in <Minuit2>: MnPosDef non-positive diagonal element in covariance matrix[ 17 ] = -6.16445e+06
+Warning in <Minuit2>: MnPosDef non-positive diagonal element in covariance matrix[ 18 ] = -1.11535e+08
+Warning in <Minuit2>: MnPosDef non-positive diagonal element in covariance matrix[ 19 ] = -1.51301e+07
+Warning in <Minuit2>: MnPosDef non-positive diagonal element in covariance matrix[ 20 ] = -2.75051e+07
+Warning in <Minuit2>: MnPosDef non-positive diagonal element in covariance matrix[ 22 ] = -1549.57
+Warning in <Minuit2>: MnPosDef non-positive diagonal element in covariance matrix[ 23 ] = -349.929
+Warning in <Minuit2>: MnPosDef non-positive diagonal element in covariance matrix[ 24 ] = -7570.03
+Warning in <Minuit2>: MnPosDef non-positive diagonal element in covariance matrix[ 25 ] = -1014.29
+Warning in <Minuit2>: MnPosDef non-positive diagonal element in covariance matrix[ 26 ] = -1782.87
+Warning in <Minuit2>: MnPosDef non-positive diagonal element in covariance matrix[ 27 ] = -17325.2
+Warning in <Minuit2>: MnPosDef non-positive diagonal element in covariance matrix[ 28 ] = -14855.1
+Warning in <Minuit2>: MnPosDef Added to diagonal of Error matrix a value 1.11535e+08
+Warning in <Minuit2>: MnPosDef Matrix forced pos-def by adding to diagonal 14163.6
+Warning in <Minuit2>: VariableMetricBuilder gdel = -3.78125e+17
+Warning in <Minuit2>: VariableMetricBuilder No improvement in line search
+Warning in <Minuit2>: VariableMetricBuilder Iterations finish without convergence; Edm 57.3502 Requested 2e-06
+Warning in <Minuit2>: VariableMetricBuilder FunctionMinimum is invalid after second try
+Warning in <Minuit2>: Minuit2Minimizer::Minimize Minimization did NOT converge, Edm is above max
+Warning in <Minuit2>: MnPosDef Matrix forced pos-def by adding to diagonal nan
+Warning in <Minuit2>: Minuit2Minimizer::Minimize Minimization did NOT converge, Edm is above max
+Warning in <Minuit2>: MnPosDef Matrix forced pos-def by adding to diagonal nan
+Warning in <Minuit2>: Minuit2Minimizer::Minimize Minimization did NOT converge, Edm is above max
+Warning in <Minuit2>: MnPosDef Matrix forced pos-def by adding to diagonal 0.210599
+Warning in <Minuit2>: VariableMetricBuilder Edm is NaN; stop iterations
+Warning in <Minuit2>: VariableMetricBuilder Edm is NaN; stop iterations
+Warning in <Minuit2>: VariableMetricBuilder No improvement in line search
+Warning in <Minuit2>: VariableMetricBuilder Iterations finish without convergence; Edm 0.000489207 Requested 2e-06
+Warning in <Minuit2>: VariableMetricBuilder FunctionMinimum is invalid after second try
+Warning in <Minuit2>: Minuit2Minimizer::Minimize Minimization did NOT converge, Edm is above max
+Warning in <Minuit2>: MnPosDef Matrix forced pos-def by adding to diagonal nan
+Warning in <Minuit2>: Minuit2Minimizer::Minimize Minimization did NOT converge, Edm is above max
+Warning in <Minuit2>: MnPosDef Matrix forced pos-def by adding to diagonal nan
+Warning in <Minuit2>: Minuit2Minimizer::Minimize Minimization did NOT converge, Edm is above max
+Warning in <Minuit2>: VariableMetricBuilder Edm is NaN; stop iterations
+Warning in <Minuit2>: VariableMetricBuilder Edm is NaN; stop iterations
+Warning in <Minuit2>: VariableMetricBuilder No improvement in line search
+Warning in <Minuit2>: VariableMetricBuilder Iterations finish without convergence; Edm 0.00232859 Requested 2e-06
+Warning in <Minuit2>: VariableMetricBuilder FunctionMinimum is invalid after second try
+Warning in <Minuit2>: Minuit2Minimizer::Minimize Minimization did NOT converge, Edm is above max
+Warning in <Minuit2>: MnPosDef Matrix forced pos-def by adding to diagonal nan
+Warning in <Minuit2>: Minuit2Minimizer::Minimize Minimization did NOT converge, Edm is above max
+Warning in <Minuit2>: MnPosDef Matrix forced pos-def by adding to diagonal nan
+Warning in <Minuit2>: Minuit2Minimizer::Minimize Minimization did NOT converge, Edm is above max
+Warning in <Minuit2>: VariableMetricBuilder Edm is NaN; stop iterations
+Warning in <Minuit2>: VariableMetricBuilder Edm is NaN; stop iterations
+Warning in <Minuit2>: MnPosDef Matrix forced pos-def by adding to diagonal nan
+Warning in <Minuit2>: Minuit2Minimizer::Minimize Minimization did NOT converge, Edm is above max
+Warning in <Minuit2>: MnPosDef Matrix forced pos-def by adding to diagonal nan
+Warning in <Minuit2>: Minuit2Minimizer::Minimize Minimization did NOT converge, Edm is above max
+Warning in <Minuit2>: VariableMetricBuilder Edm is NaN; stop iterations
+Warning in <Minuit2>: VariableMetricBuilder No improvement in line search
+Warning in <Minuit2>: VariableMetricBuilder Edm is NaN; stop iterations
+Warning in <Minuit2>: DavidonErrorUpdator delgam < 0 : first derivatives increasing along search line (details in info log)
+Warning in <Minuit2>: VariableMetricBuilder Matrix not pos.def, gdel = 278.174 > 0
+Warning in <Minuit2>: MnPosDef non-positive diagonal element in covariance matrix[ 4 ] = -5.5091e-07
+Warning in <Minuit2>: MnPosDef non-positive diagonal element in covariance matrix[ 7 ] = -2.80228e-05
+Warning in <Minuit2>: MnPosDef non-positive diagonal element in covariance matrix[ 9 ] = -7.63275e-05
+Warning in <Minuit2>: MnPosDef Added to diagonal of Error matrix a value 0.500077
+Warning in <Minuit2>: VariableMetricBuilder gdel = -4.20072e+07
+Warning in <Minuit2>: MnPosDef non-positive diagonal element in covariance matrix[ 18 ] = -2.18725e-10
+Warning in <Minuit2>: MnPosDef non-positive diagonal element in covariance matrix[ 24 ] = -1.84406e-09
+Warning in <Minuit2>: MnPosDef Added to diagonal of Error matrix a value 0.500001
+Warning in <Minuit2>: MnPosDef Matrix forced pos-def by adding to diagonal 22740.6
+Warning in <Minuit2>: MnPosDef Matrix forced pos-def by adding to diagonal nan
+Warning in <Minuit2>: Minuit2Minimizer::Minimize Minimization did NOT converge, Edm is above max
+Warning in <Minuit2>: MnPosDef Matrix forced pos-def by adding to diagonal nan
+Warning in <Minuit2>: Minuit2Minimizer::Minimize Minimization did NOT converge, Edm is above max
+Warning in <Minuit2>: VariableMetricBuilder Edm is NaN; stop iterations
+Warning in <Minuit2>: VariableMetricBuilder Edm is NaN; stop iterations
+Warning in <Minuit2>: MnPosDef Matrix forced pos-def by adding to diagonal 0.0351068
+Warning in <Minuit2>: MnPosDef Matrix forced pos-def by adding to diagonal nan
+Warning in <Minuit2>: Minuit2Minimizer::Minimize Minimization did NOT converge, Edm is above max
+Warning in <Minuit2>: MnPosDef Matrix forced pos-def by adding to diagonal nan
+Warning in <Minuit2>: Minuit2Minimizer::Minimize Minimization did NOT converge, Edm is above max
+Warning in <Minuit2>: VariableMetricBuilder Edm is NaN; stop iterations
+Warning in <Minuit2>: MnPosDef Matrix forced pos-def by adding to diagonal 0.0265192
+Warning in <Minuit2>: VariableMetricBuilder Edm is NaN; stop iterations
+Warning in <Minuit2>: MnPosDef non-positive diagonal element in covariance matrix[ 18 ] = -3.85496e-12
+Warning in <Minuit2>: MnPosDef non-positive diagonal element in covariance matrix[ 24 ] = -5.0261e-11
+Warning in <Minuit2>: MnPosDef Added to diagonal of Error matrix a value 0.500001
+Warning in <Minuit2>: MnPosDef Matrix forced pos-def by adding to diagonal nan
+Warning in <Minuit2>: Minuit2Minimizer::Minimize Minimization did NOT converge, Edm is above max
+Warning in <Minuit2>: MnPosDef Matrix forced pos-def by adding to diagonal nan
+Warning in <Minuit2>: Minuit2Minimizer::Minimize Minimization did NOT converge, Edm is above max
+Warning in <Minuit2>: MnPosDef non-positive diagonal element in covariance matrix[ 5 ] = -1.08697e-14
+Warning in <Minuit2>: MnPosDef non-positive diagonal element in covariance matrix[ 10 ] = -9.05811e-15
+Warning in <Minuit2>: MnPosDef non-positive diagonal element in covariance matrix[ 16 ] = -6.78787e-16
+Warning in <Minuit2>: MnPosDef non-positive diagonal element in covariance matrix[ 18 ] = -7.20227e-16
+Warning in <Minuit2>: MnPosDef non-positive diagonal element in covariance matrix[ 20 ] = -3.68912e-15
+Warning in <Minuit2>: MnPosDef non-positive diagonal element in covariance matrix[ 24 ] = -1.04268e-15
+Warning in <Minuit2>: MnPosDef non-positive diagonal element in covariance matrix[ 25 ] = -3.55737e-15
+Warning in <Minuit2>: MnPosDef non-positive diagonal element in covariance matrix[ 26 ] = -2.10522e-15
+Warning in <Minuit2>: MnPosDef non-positive diagonal element in covariance matrix[ 27 ] = -2.70408e-17
+Warning in <Minuit2>: MnPosDef Added to diagonal of Error matrix a value 0.500001
+Warning in <Minuit2>: VariableMetricBuilder Edm is NaN; stop iterations
+Warning in <Minuit2>: VariableMetricBuilder No improvement in line search
+Warning in <Minuit2>: VariableMetricBuilder Iterations finish without convergence; Edm 3.62849e+16 Requested 2e-06
+Warning in <Minuit2>: VariableMetricBuilder No convergence; Edm 3.31726e+16 is above tolerance 2e-05
+Warning in <Minuit2>: Minuit2Minimizer::Minimize Minimization did NOT converge, Edm is above max
+Warning in <Minuit2>: VariableMetricBuilder Edm is NaN; stop iterations
+Warning in <Minuit2>: MnPosDef Matrix forced pos-def by adding to diagonal 1.99605
+Warning in <Minuit2>: MnPosDef Matrix forced pos-def by adding to diagonal nan
+Warning in <Minuit2>: Minuit2Minimizer::Minimize Minimization did NOT converge, Edm is above max
+Warning in <Minuit2>: VariableMetricBuilder No improvement in line search
+Warning in <Minuit2>: VariableMetricBuilder Iterations finish without convergence; Edm 0.0245169 Requested 2e-06
+Warning in <Minuit2>: VariableMetricBuilder FunctionMinimum is invalid after second try
+Warning in <Minuit2>: Minuit2Minimizer::Minimize Minimization did NOT converge, Edm is above max
+Warning in <Minuit2>: MnPosDef Matrix forced pos-def by adding to diagonal nan
+Warning in <Minuit2>: Minuit2Minimizer::Minimize Minimization did NOT converge, Edm is above max
+Warning in <Minuit2>: DavidonErrorUpdator delgam < 0 : first derivatives increasing along search line (details in info log)
+Warning in <Minuit2>: VariableMetricBuilder Matrix not pos.def, gdel = 22.4419 > 0
+Warning in <Minuit2>: MnPosDef Matrix forced pos-def by adding to diagonal 8.99201
+Warning in <Minuit2>: VariableMetricBuilder gdel = -4.32602
+Warning in <Minuit2>: VariableMetricBuilder Edm is NaN; stop iterations
+Warning in <Minuit2>: MnPosDef non-positive diagonal element in covariance matrix[ 0 ] = -1.26369e-16
+Warning in <Minuit2>: MnPosDef non-positive diagonal element in covariance matrix[ 10 ] = -1.26369e-16
+Warning in <Minuit2>: MnPosDef non-positive diagonal element in covariance matrix[ 11 ] = -1.37743e-24
+Warning in <Minuit2>: MnPosDef non-positive diagonal element in covariance matrix[ 15 ] = -2.57291e-16
+Warning in <Minuit2>: MnPosDef non-positive diagonal element in covariance matrix[ 19 ] = -1.26369e-16
+Warning in <Minuit2>: MnPosDef non-positive diagonal element in covariance matrix[ 20 ] = -2.00241e-22
+Warning in <Minuit2>: MnPosDef non-positive diagonal element in covariance matrix[ 25 ] = -6.31847e-17
+Warning in <Minuit2>: MnPosDef non-positive diagonal element in covariance matrix[ 28 ] = -3.69497e-16
+Warning in <Minuit2>: MnPosDef Added to diagonal of Error matrix a value 0.500001
+Warning in <Minuit2>: VariableMetricBuilder No improvement in line search
+Warning in <Minuit2>: VariableMetricBuilder Iterations finish without convergence; Edm 2.97878 Requested 2e-06
+Warning in <Minuit2>: VariableMetricBuilder FunctionMinimum is invalid after second try
+Warning in <Minuit2>: Minuit2Minimizer::Minimize Minimization did NOT converge, Edm is above max
+Warning in <Minuit2>: VariableMetricBuilder Edm is NaN; stop iterations
+Warning in <Minuit2>: MnPosDef Matrix forced pos-def by adding to diagonal nan
+Warning in <Minuit2>: Minuit2Minimizer::Minimize Minimization did NOT converge, Edm is above max
+Warning in <Minuit2>: MnPosDef Matrix forced pos-def by adding to diagonal nan
+Warning in <Minuit2>: Minuit2Minimizer::Minimize Minimization did NOT converge, Edm is above max
+Warning in <Minuit2>: VariableMetricBuilder Edm is NaN; stop iterations
+Warning in <Minuit2>: MnPosDef Matrix forced pos-def by adding to diagonal 3.30712
+Warning in <Minuit2>: VariableMetricBuilder Edm is NaN; stop iterations
+Warning in <Minuit2>: MnPosDef Matrix forced pos-def by adding to diagonal nan
+Warning in <Minuit2>: Minuit2Minimizer::Minimize Minimization did NOT converge, Edm is above max
+Warning in <Minuit2>: MnPosDef Matrix forced pos-def by adding to diagonal nan
+Warning in <Minuit2>: Minuit2Minimizer::Minimize Minimization did NOT converge, Edm is above max
+Warning in <Minuit2>: VariableMetricBuilder Edm is NaN; stop iterations
+Warning in <Minuit2>: VariableMetricBuilder Edm is NaN; stop iterations
+Warning in <Minuit2>: VariableMetricBuilder No improvement in line search
+Warning in <Minuit2>: VariableMetricBuilder Iterations finish without convergence; Edm 4.53837 Requested 2e-06
+Warning in <Minuit2>: VariableMetricBuilder FunctionMinimum is invalid after second try
+Warning in <Minuit2>: Minuit2Minimizer::Minimize Minimization did NOT converge, Edm is above max
+Warning in <Minuit2>: MnPosDef Matrix forced pos-def by adding to diagonal nan
+Warning in <Minuit2>: Minuit2Minimizer::Minimize Minimization did NOT converge, Edm is above max
+Warning in <Minuit2>: MnPosDef Matrix forced pos-def by adding to diagonal nan
+Warning in <Minuit2>: Minuit2Minimizer::Minimize Minimization did NOT converge, Edm is above max
+Warning in <Minuit2>: VariableMetricBuilder Edm is NaN; stop iterations
+Warning in <Minuit2>: VariableMetricBuilder Edm is NaN; stop iterations
+Warning in <Minuit2>: MnPosDef Matrix forced pos-def by adding to diagonal nan
+Warning in <Minuit2>: Minuit2Minimizer::Minimize Minimization did NOT converge, Edm is above max
+Warning in <Minuit2>: MnPosDef Matrix forced pos-def by adding to diagonal nan
+Warning in <Minuit2>: Minuit2Minimizer::Minimize Minimization did NOT converge, Edm is above max
+Warning in <Minuit2>: VariableMetricBuilder Edm is NaN; stop iterations
+Warning in <Minuit2>: VariableMetricBuilder Edm is NaN; stop iterations
+Warning in <Minuit2>: MnPosDef non-positive diagonal element in covariance matrix[ 18 ] = -1.16501e-13
+Warning in <Minuit2>: MnPosDef non-positive diagonal element in covariance matrix[ 19 ] = -8.54106e-14
+Warning in <Minuit2>: MnPosDef non-positive diagonal element in covariance matrix[ 20 ] = -5.26592e-15
+Warning in <Minuit2>: MnPosDef Added to diagonal of Error matrix a value 0.500001
+Warning in <Minuit2>: VariableMetricBuilder Reached machine accuracy limit; Edm 1.81285e-05 is smaller than machine limit 9.73672e-05 while 2e-06 was requested
+Warning in <Minuit2>: MnPosDef Matrix forced pos-def by adding to diagonal nan
+Warning in <Minuit2>: Minuit2Minimizer::Minimize Minimization did NOT converge, Edm is above max
+Warning in <Minuit2>: MnPosDef Matrix forced pos-def by adding to diagonal nan
+Warning in <Minuit2>: Minuit2Minimizer::Minimize Minimization did NOT converge, Edm is above max
+Warning in <Minuit2>: VariableMetricBuilder Edm is NaN; stop iterations
+Warning in <Minuit2>: VariableMetricBuilder Edm is NaN; stop iterations
+Warning in <Minuit2>: MnPosDef Matrix forced pos-def by adding to diagonal nan
+Warning in <Minuit2>: Minuit2Minimizer::Minimize Minimization did NOT converge, Edm is above max
+Warning in <Minuit2>: VariableMetricBuilder Edm is NaN; stop iterations
+Warning in <Minuit2>: MnPosDef Matrix forced pos-def by adding to diagonal nan
+Warning in <Minuit2>: Minuit2Minimizer::Minimize Minimization did NOT converge, Edm is above max
+Warning in <Minuit2>: DavidonErrorUpdator delgam < 0 : first derivatives increasing along search line (details in info log)
+Warning in <Minuit2>: VariableMetricBuilder Matrix not pos.def, gdel = 4.02351e+10 > 0
+Warning in <Minuit2>: MnPosDef non-positive diagonal element in covariance matrix[ 3 ] = -2.09792e-09
+Warning in <Minuit2>: MnPosDef non-positive diagonal element in covariance matrix[ 6 ] = -2.45544e-12
+Warning in <Minuit2>: MnPosDef non-positive diagonal element in covariance matrix[ 7 ] = -5.80336e-10
+Warning in <Minuit2>: MnPosDef Added to diagonal of Error matrix a value 0.500001
+Warning in <Minuit2>: VariableMetricBuilder gdel = -8.16217e+21
+Warning in <Minuit2>: VariableMetricBuilder Edm is NaN; stop iterations
+Warning in <Minuit2>: MnPosDef Matrix forced pos-def by adding to diagonal nan
+Warning in <Minuit2>: Minuit2Minimizer::Minimize Minimization did NOT converge, Edm is above max
+Warning in <Minuit2>: VariableMetricBuilder No improvement in line search
+Warning in <Minuit2>: VariableMetricBuilder Iterations finish without convergence; Edm 1.00783 Requested 2e-06
+Warning in <Minuit2>: VariableMetricBuilder FunctionMinimum is invalid after second try
+Warning in <Minuit2>: Minuit2Minimizer::Minimize Minimization did NOT converge, Edm is above max
+Warning in <Minuit2>: VariableMetricBuilder Edm is NaN; stop iterations
+Warning in <Minuit2>: MnPosDef Matrix forced pos-def by adding to diagonal nan
+Warning in <Minuit2>: Minuit2Minimizer::Minimize Minimization did NOT converge, Edm is above max
+Warning in <Minuit2>: DavidonErrorUpdator delgam < 0 : first derivatives increasing along search line (details in info log)
+Warning in <Minuit2>: VariableMetricBuilder Matrix not pos.def, gdel = 0.00211865 > 0
+Warning in <Minuit2>: MnPosDef non-positive diagonal element in covariance matrix[ 0 ] = -7.22276e-08
+Warning in <Minuit2>: MnPosDef non-positive diagonal element in covariance matrix[ 1 ] = -7.98989e-06
+Warning in <Minuit2>: MnPosDef non-positive diagonal element in covariance matrix[ 5 ] = -3.07367e-06
+Warning in <Minuit2>: MnPosDef non-positive diagonal element in covariance matrix[ 6 ] = -0.000242982
+Warning in <Minuit2>: MnPosDef non-positive diagonal element in covariance matrix[ 7 ] = -5.87123e-05
+Warning in <Minuit2>: MnPosDef non-positive diagonal element in covariance matrix[ 8 ] = -0.000134798
+Warning in <Minuit2>: MnPosDef non-positive diagonal element in covariance matrix[ 9 ] = -2.27855e-05
+Warning in <Minuit2>: MnPosDef non-positive diagonal element in covariance matrix[ 10 ] = -2.91479e-05
+Warning in <Minuit2>: MnPosDef non-positive diagonal element in covariance matrix[ 11 ] = -0.00322682
+Warning in <Minuit2>: MnPosDef non-positive diagonal element in covariance matrix[ 13 ] = -7.74428e-06
+Warning in <Minuit2>: MnPosDef non-positive diagonal element in covariance matrix[ 16 ] = -1.76155e-07
+Warning in <Minuit2>: MnPosDef non-positive diagonal element in covariance matrix[ 17 ] = -2.91271e-06
+Warning in <Minuit2>: MnPosDef non-positive diagonal element in covariance matrix[ 18 ] = -4.07292e-05
+Warning in <Minuit2>: MnPosDef non-positive diagonal element in covariance matrix[ 19 ] = -8.88787e-05
+Warning in <Minuit2>: MnPosDef non-positive diagonal element in covariance matrix[ 20 ] = -0.00497224
+Warning in <Minuit2>: MnPosDef non-positive diagonal element in covariance matrix[ 22 ] = -2.18255e-11
+Warning in <Minuit2>: MnPosDef non-positive diagonal element in covariance matrix[ 23 ] = -9.29271e-08
+Warning in <Minuit2>: MnPosDef non-positive diagonal element in covariance matrix[ 24 ] = -2.18194e-09
+Warning in <Minuit2>: MnPosDef non-positive diagonal element in covariance matrix[ 25 ] = -1.05175e-08
+Warning in <Minuit2>: MnPosDef non-positive diagonal element in covariance matrix[ 27 ] = -2.3342e-06
+Warning in <Minuit2>: MnPosDef non-positive diagonal element in covariance matrix[ 28 ] = -0.0352386
+Warning in <Minuit2>: MnPosDef Added to diagonal of Error matrix a value 0.53524
+Warning in <Minuit2>: VariableMetricBuilder gdel = -699793
+Warning in <Minuit2>: VariableMetricBuilder Edm is NaN; stop iterations
+Warning in <Minuit2>: MnPosDef Matrix forced pos-def by adding to diagonal nan
+Warning in <Minuit2>: Minuit2Minimizer::Minimize Minimization did NOT converge, Edm is above max
+Warning in <Minuit2>: VariableMetricBuilder Edm is NaN; stop iterations
+Warning in <Minuit2>: VariableMetricBuilder No improvement in line search
+Warning in <Minuit2>: VariableMetricBuilder Iterations finish without convergence; Edm 5.85064e+10 Requested 2e-06
+Warning in <Minuit2>: VariableMetricBuilder No convergence; Edm 5.7151e+10 is above tolerance 2e-05
+Warning in <Minuit2>: Minuit2Minimizer::Minimize Minimization did NOT converge, Edm is above max
+Warning in <Minuit2>: MnPosDef Matrix forced pos-def by adding to diagonal nan
+Warning in <Minuit2>: Minuit2Minimizer::Minimize Minimization did NOT converge, Edm is above max
+Warning in <Minuit2>: VariableMetricBuilder Edm is NaN; stop iterations
+Warning in <Minuit2>: DavidonErrorUpdator delgam < 0 : first derivatives increasing along search line (details in info log)
+Warning in <Minuit2>: VariableMetricBuilder Matrix not pos.def, gdel = 23.8783 > 0
+Warning in <Minuit2>: MnPosDef non-positive diagonal element in covariance matrix[ 0 ] = -1.26751
+Warning in <Minuit2>: MnPosDef non-positive diagonal element in covariance matrix[ 15 ] = -42.3824
+Warning in <Minuit2>: MnPosDef non-positive diagonal element in covariance matrix[ 16 ] = -0.0452119
+Warning in <Minuit2>: MnPosDef non-positive diagonal element in covariance matrix[ 21 ] = -25945.5
+Warning in <Minuit2>: MnPosDef non-positive diagonal element in covariance matrix[ 22 ] = -7530.36
+Warning in <Minuit2>: MnPosDef non-positive diagonal element in covariance matrix[ 23 ] = -243.295
+Warning in <Minuit2>: MnPosDef non-positive diagonal element in covariance matrix[ 24 ] = -66.0934
+Warning in <Minuit2>: MnPosDef non-positive diagonal element in covariance matrix[ 25 ] = -18.4165
+Warning in <Minuit2>: MnPosDef Added to diagonal of Error matrix a value 25946
+Warning in <Minuit2>: MnPosDef Matrix forced pos-def by adding to diagonal 147.404
+Warning in <Minuit2>: VariableMetricBuilder gdel = -1.0063e+12
+Warning in <Minuit2>: MnPosDef Matrix forced pos-def by adding to diagonal nan
+Warning in <Minuit2>: Minuit2Minimizer::Minimize Minimization did NOT converge, Edm is above max
+Warning in <Minuit2>: MnPosDef Matrix forced pos-def by adding to diagonal 0.0502065
+Warning in <Minuit2>: VariableMetricBuilder Edm is NaN; stop iterations
+Warning in <Minuit2>: MnPosDef Matrix forced pos-def by adding to diagonal nan
+Warning in <Minuit2>: Minuit2Minimizer::Minimize Minimization did NOT converge, Edm is above max
+Warning in <Minuit2>: VariableMetricBuilder No improvement in line search
+Warning in <Minuit2>: VariableMetricBuilder Iterations finish without convergence; Edm 0.93487 Requested 2e-06
+Warning in <Minuit2>: VariableMetricBuilder Edm is NaN; stop iterations
+Warning in <Minuit2>: MnPosDef Matrix forced pos-def by adding to diagonal 0.0282061
+Warning in <Minuit2>: MnPosDef non-positive diagonal element in covariance matrix[ 28 ] = -1.42395e-11
+Warning in <Minuit2>: MnPosDef Added to diagonal of Error matrix a value 0.500001
+Warning in <Minuit2>: MnPosDef Matrix forced pos-def by adding to diagonal nan
+Warning in <Minuit2>: Minuit2Minimizer::Minimize Minimization did NOT converge, Edm is above max
+Warning in <Minuit2>: DavidonErrorUpdator delgam < 0 : first derivatives increasing along search line (details in info log)
+Warning in <Minuit2>: VariableMetricBuilder Matrix not pos.def, gdel = 1460.66 > 0
+Warning in <Minuit2>: MnPosDef Matrix forced pos-def by adding to diagonal 0.00893902
+Warning in <Minuit2>: VariableMetricBuilder gdel = -1078.01
+Warning in <Minuit2>: VariableMetricBuilder No improvement in line search
+Warning in <Minuit2>: VariableMetricBuilder Iterations finish without convergence; Edm 1.71025e+13 Requested 2e-06
+Warning in <Minuit2>: VariableMetricBuilder No improvement in line search
+Warning in <Minuit2>: VariableMetricBuilder Edm is NaN; stop iterations
+Warning in <Minuit2>: MnPosDef Matrix forced pos-def by adding to diagonal nan
+Warning in <Minuit2>: Minuit2Minimizer::Minimize Minimization did NOT converge, Edm is above max
+Warning in <Minuit2>: MnPosDef non-positive diagonal element in covariance matrix[ 18 ] = -3.89265
+Warning in <Minuit2>: MnPosDef non-positive diagonal element in covariance matrix[ 28 ] = -5.82028
+Warning in <Minuit2>: MnPosDef Added to diagonal of Error matrix a value 6.32028
+Warning in <Minuit2>: MnPosDef Matrix forced pos-def by adding to diagonal 15.7107
+Warning in <Minuit2>: VariableMetricBuilder Edm is NaN; stop iterations
+Warning in <Minuit2>: MnPosDef Matrix forced pos-def by adding to diagonal 1.30562
+Warning in <Minuit2>: DavidonErrorUpdator delgam < 0 : first derivatives increasing along search line (details in info log)
+Warning in <Minuit2>: VariableMetricBuilder Matrix not pos.def, gdel = 0.000280252 > 0
+Warning in <Minuit2>: MnPosDef Matrix forced pos-def by adding to diagonal 0.496328
+Warning in <Minuit2>: VariableMetricBuilder gdel = -0.000121879
+Warning in <Minuit2>: MnPosDef Matrix forced pos-def by adding to diagonal nan
+Warning in <Minuit2>: Minuit2Minimizer::Minimize Minimization did NOT converge, Edm is above max
+Warning in <Minuit2>: VariableMetricBuilder No improvement in line search
+Warning in <Minuit2>: VariableMetricBuilder Iterations finish without convergence; Edm 0.000777054 Requested 2e-06
+Warning in <Minuit2>: VariableMetricBuilder FunctionMinimum is invalid after second try
+Warning in <Minuit2>: Minuit2Minimizer::Minimize Minimization did NOT converge, Edm is above max
+Warning in <Minuit2>: VariableMetricBuilder Edm is NaN; stop iterations
+Warning in <Minuit2>: MnPosDef Matrix forced pos-def by adding to diagonal nan
+Warning in <Minuit2>: Minuit2Minimizer::Minimize Minimization did NOT converge, Edm is above max
+Warning in <Minuit2>: VariableMetricBuilder Edm is NaN; stop iterations
+Warning in <Minuit2>: MnPosDef Matrix forced pos-def by adding to diagonal nan
+Warning in <Minuit2>: Minuit2Minimizer::Minimize Minimization did NOT converge, Edm is above max
+Warning in <Minuit2>: VariableMetricBuilder Edm is NaN; stop iterations
+Warning in <Minuit2>: MnPosDef Matrix forced pos-def by adding to diagonal nan
+Warning in <Minuit2>: Minuit2Minimizer::Minimize Minimization did NOT converge, Edm is above max
+Warning in <Minuit2>: VariableMetricBuilder Edm is NaN; stop iterations
+Warning in <Minuit2>: MnPosDef Matrix forced pos-def by adding to diagonal nan
+Warning in <Minuit2>: Minuit2Minimizer::Minimize Minimization did NOT converge, Edm is above max
+Warning in <Minuit2>: VariableMetricBuilder Edm is NaN; stop iterations
+Warning in <Minuit2>: MnPosDef Matrix forced pos-def by adding to diagonal nan
+Warning in <Minuit2>: Minuit2Minimizer::Minimize Minimization did NOT converge, Edm is above max
+Warning in <Minuit2>: VariableMetricBuilder Edm is NaN; stop iterations
