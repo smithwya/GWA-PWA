@@ -152,14 +152,14 @@ int main(int argc, char ** argv)
 	testObs.makePlotGraphWithExp("P", "BstarBstar", plotname+"_BstarBstar", intensityP_BstarBstar, 10.6322,11.0208);
 	testObs.makePlotGraphWithExp("P", "B_sstarB_sstar", plotname+"_B_sstarB_sstar", intensityP_B_sstarB_sstar, 10.6322,11.0208);
 	testObs.makePlotGraphDummy(plotname+"_Dummy", intensityP_Dummy, 10.6322,11.0208);
-	testObs.plotInclCrossSec(plotname+"_InclCrossSec", 10.6322,11.0208);
+	testObs.plotInclCrossSecVsSumOfExcl(plotname+"_InclCrossSecVsSumOfExcl", 10.6322,11.0208);
 	testObs.plotInclCrossSecWithExp(plotname+"_InclCrossSecWithExp", 10.6322,11.0208);
 
 	vector<double> steps = testObs.getStepSizes();
 
-	cout << testObs.chisq_with_InclCrossSec() << "	" << testObs.chisq_with_InclCrossSec()/(testObs.getNumData() - steps.size() + testObs.getNumInclData()) << endl;
+	//cout << testObs.chisq_with_InclCrossSec() << "	" << testObs.chisq_with_InclCrossSec()/(testObs.getNumData() - steps.size() + testObs.getNumInclData()) << endl;
 
-	cout << testObs.chisq_with_InclCrossSec() - testObs.chisq() << endl;
+	//cout << testObs.chisq_with_InclCrossSec() - testObs.chisq() << endl;
 
 	return 0;
 	
