@@ -39,40 +39,31 @@ class polesearcher {
         return wvindex;
     }
 
-    void setTemppoles(vector<comp> xx){
+    void setPoles(vector<comp> xx){
         poles = xx;
     }
 
     double minfuncforpoles(vector<double> params){
     
-        double val = 0;
+        double val = 0; 
 
-        /*
         MatrixXcd cmat = testObs.amplitudes.at(wvindex).getDenominator(comp(params[0], params[1]));
+        //MatrixXcd cmat = (comp(params[0],params[1]) - comp(115,0.5)) * (comp(params[0],params[1]) - comp(118,0.7)) * (comp(params[0],params[1]) - comp(115,-0.5)) * (comp(params[0],params[1]) - comp(118,-0.7)) * MatrixXcd({{1}}); //mock example
 
-        //comp cmat = 1 / (comp(params[0],params[1]) - 120);
+        comp det = cmat.determinant();
 
-        
         for(int i = 0; i < poles.size(); i++){
-            cmat = cmat*(comp(params[0],params[1])-poles[i]);
-            cmat = cmat*(comp(params[0],params[1])-conj(poles[i]));
-        }
-        */
-
-        MatrixXcd cmat = testObs.amplitudes.at(wvindex).getDenominator(comp(params[0], params[1])).inverse();
-        for(int i = 0; i < poles.size(); i++){
-            cmat = cmat*(comp(params[0],params[1])-poles[i]);
-            cmat = cmat*(comp(params[0],params[1])-conj(poles[i]));
+            det = det*(comp(params[0],params[1])-poles[i]);
+            det = det*(comp(params[0],params[1])-conj(poles[i]));
         }//here we factor out the pole(s) from D^{-1}, i.e. from the amplitude.
 
-        cmat = cmat.inverse();//here we have the new D which we want to search the zero(s) of.
-
         if(pow(params[0] - 120., 2) + pow(params[1], 2) <= 40.){
-            val = log(abs(cmat.determinant()));
+            val = log(abs(det));
         }
         else{
-            val = log(abs(cmat.determinant())) + pow(params[0] - 120., 2) + pow(params[1], 2) - 40.;
+            val = log(abs(det)) + pow(params[0] - 120., 2) + pow(params[1], 2) - 40.;
         }
+
             //cout << comp(params[0],params[1]) << ": val = " << val << endl;
         return val;
 
