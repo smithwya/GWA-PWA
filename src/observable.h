@@ -710,7 +710,7 @@ public:
    		gr->SetMarkerColor(4);
    		gr->SetMarkerStyle(21);
 		gr->GetXaxis()->SetRangeUser(lower_bound, upper_bound);
-		//gr->GetYaxis()->SetRangeUser(0, 15500);
+		gr->GetYaxis()->SetRangeUser(0, 600);
 		gr->SetLineWidth(1);
 
 		//gr2->SetTitle("TGraphErrors Example");
