@@ -2,7 +2,7 @@ SetSeed(3)
 
 FitRegion(10.6322,11.0208)
 
-ReducedChi2CutOff(10)
+ReducedChi2CutOff(3)
 
 DoFit(Yes)
 FitAlsoToInclusiveCrossSection(No)
@@ -20,7 +20,7 @@ ChebyCoeffs("P", "BstarBstar", "s = 1", {100 \pm 200, 100 \pm 200, 100 \pm 200})
 
 
 
-AddPole("P", 115 \pm 1, {"BB","BBstar","BstarBstar"}, {100 \pm 200, 100 \pm 200, 100 \pm 200})
+
 AddPole("P", 120 \pm 1, {"BB","BBstar","BstarBstar"}, {100 \pm 200, 100 \pm 200, 100 \pm 200})
 
 AddKmatBackground("P", 0, {{100 \pm 200, 100 \pm 200, 100 \pm 200}, {100 \pm 200, 100 \pm 200}, {100 \pm 200 }})

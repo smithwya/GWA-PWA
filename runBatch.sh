@@ -4,9 +4,6 @@
 # $3 fit format file path
 # $4 path to save valid fits
 
-#compiles code
-make
-
 #runs jobs
 for ((i=1; i<= $2; i++))
 do
