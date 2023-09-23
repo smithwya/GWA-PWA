@@ -58,7 +58,8 @@
     "sstream": "cpp",
     "stdexcept": "cpp",
     "cinttypes": "cpp",
-    "regex": "cpp"
+    "regex": "cpp",
+    "graficante.C": "cpp"
   },
   "C_Cpp_Runner.msvcBatchPath": "",
   "C_Cpp_Runner.cCompilerPath": "gcc",
