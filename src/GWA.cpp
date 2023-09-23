@@ -108,7 +108,9 @@ int main(int argc, char ** argv)
 	testReader.loadExpData();
 	if(testReader.getInclCrossSecFlag()) testReader.loadExpInclCrossSec();
 	//selects a seed based off clock + job number
-	
+
+	/*int seed = std::chrono::system_clock::now().time_since_epoch().count()+jobnum+fitnum;
+	testReader.setSeed(seed);*/
 	//if(testReader.getRandomizeFlag()) testReader.randomize(seed); 
 
 	//gets chisq cutoff
@@ -116,8 +118,6 @@ int main(int argc, char ** argv)
 
 	//saves the observable object outside of filereader object
 	testObs = testReader.getObs();
-<<<<<<< HEAD
-=======
 
 /*
 	////tests and plots
@@ -249,6 +249,7 @@ int main(int argc, char ** argv)
 	};
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 	testObs.makePlotGraphWithExp("P", "BB", plotname+"_BB", intensityP_BB, 10.6322,11.0208);
 	testObs.makePlotGraphWithExp("P", "BBstar", plotname+"_BBstar", intensityP_BBstar, 10.6322,11.0208);
 	testObs.makePlotGraphWithExp("P", "BstarBstar", plotname+"_BstarBstar", intensityP_BstarBstar, 10.6322,11.0208);
@@ -340,6 +341,21 @@ int main(int argc, char ** argv)
 		}
 	}	
 >>>>>>> cb04014c47b79a9dc237043bddc42029a1662364
+=======
+	testObs.makePlotGraphWithExp("P", "BB", plotname+"_BB", intensityP_BB, 10.6322, 11.0208, "#sqrt{s} (GeV)", "#sigma (pb)");
+	testObs.makePlotGraphWithExp("P", "BBstar", plotname+"_BBstar", intensityP_BBstar, 10.6322,11.0208, "#sqrt{s} (GeV)", "#sigma (pb)");
+	testObs.makePlotGraphWithExp("P", "BstarBstar", plotname+"_BstarBstar", intensityP_BstarBstar, 10.6322,  11.0208, "#sqrt{s} (GeV)", "#sigma (pb)");
+
+	testObs.makePlotGraph_ExpOnly("P", "BB", plotname+"_BB_justpts", 10.6322,  11.0208, "#sqrt{s} (GeV)", "#sigma (pb)");
+	testObs.makePlotGraph_ExpOnly("P", "BBstar", plotname+"_BBstar_justpts", 10.6322,  11.0208, "#sqrt{s} (GeV)", "#sigma (pb)");
+	testObs.makePlotGraph_ExpOnly("P", "BstarBstar", plotname+"_BstarBstar_justpts", 10.6322,  11.0208, "#sqrt{s} (GeV)", "#sigma (pb)");
+	testObs.makePlotGraph_ExpOnly("P", "B_sstarB_sstar", plotname+"_B_sstarB_sstar_justpts", 10.6322,  11.0208, "#sqrt{s} (GeV)", "#sigma (pb)");
+
+	vector<double> steps = testObs.getStepSizes();
+
+	cout << testObs.chisq() << "	" << testObs.chisq()/(testObs.getNumData() - steps.size() + testObs.getNumInclData()) << endl;
+
+>>>>>>> edc505bda22bdc9d2d5463ce8da88f4f5bc972e4
 
 	return 0;
 	
