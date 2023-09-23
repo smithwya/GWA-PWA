@@ -1,8 +1,10 @@
 #!/bin/bash
-nJobs=100
-nFits=100
-formatpath=Data/fitformat_inclusive.txt
+nJobs=400
+nFits=500
+formatpath=Data/fitformat_exclusive.txt
 fitpath=Fits/
+
+mkdir -p Fits
 
 make
 

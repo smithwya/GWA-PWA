@@ -6,6 +6,7 @@
 #include <fstream>
 #include <map>
 #include <chrono>
+#include <ctime>
 #include "amplitude.h"
 #include "channel.h"
 #include "filereader.h"
@@ -22,6 +23,7 @@
 #include <TF2.h>
 
 using namespace std;
+typedef std::chrono::system_clock Clock;
 using Eigen::MatrixXcd;
 using Eigen::VectorXcd;
 typedef std::complex<double> comp;
@@ -50,7 +52,8 @@ double minfunc_with_InclCrossSec(const double *xx){
 	}
 
 	testObs.setFitParams(params);
-	return testObs.chisq_with_InclCrossSec();
+	return testObs.chisq()+testObs.chisq_with_InclCrossSec();
+	
 }
 
 double minfunc_for_poles(const double *xx){
@@ -95,7 +98,7 @@ vector<double> linspace(T start_in, T end_in, int num_in)
 int main(int argc, char ** argv)
 {
 	int jobnum = atoi(argv[1]);
-	int fitnum = atoi(argv[2]);
+	int numfits = atoi(argv[2]);
 	string inputfile = (string) argv[3];
 	string fitsfolder = (string) argv[4];
 
@@ -109,10 +112,19 @@ int main(int argc, char ** argv)
 	testReader.setKmats();
 	testReader.loadExpData();
 	if(testReader.getInclCrossSecFlag()) testReader.loadExpInclCrossSec();
+	
+	//saves current time
+	std::chrono::system_clock::time_point now = std::chrono::system_clock::now();
+	time_t tt = std::chrono::system_clock::to_time_t(now);
+	tm local_tm = *localtime(&tt);
+	
+	std::stringstream timebuffer;
+	auto t = std::chrono::system_clock::now();
+	timebuffer << local_tm.tm_year + 1900 << '-'<< local_tm.tm_mon + 1 << '-'<< local_tm.tm_mday;
+	
 	//selects a seed based off clock + job number
-	int seed = std::chrono::system_clock::now().time_since_epoch().count()+jobnum+fitnum;
-	testReader.setSeed(seed);
-	if(testReader.getRandomizeFlag()) testReader.randomize(seed); 
+	int seed = now.time_since_epoch().count()+jobnum+numfits;
+	testReader.setSeed(seed); 
 
 	//gets chisq cutoff
 	double cutoff = testReader.getChi2CutOff();
@@ -290,13 +302,24 @@ int main(int argc, char ** argv)
 
 */
 	//saves original starting parameters
-	vector<double> startparams = testObs.getFitParams();
+	//vector<double> startparams = testObs.getFitParams();
 	vector<double> steps = testObs.getStepSizes();
 	
 	//gets degrees of freedom
+	string fittype = "excl";
 	int dof = testObs.getNumData()-steps.size();
-	if(testReader.getInclCrossSecFlag()) dof+=testObs.getNumInclData();
+	
+	if(testReader.getInclCrossSecFlag()){
+		dof+=testObs.getNumInclData();
+		fittype = "incl";
+	}
 
+	for (int j = 0; j < numfits; j++){
+		
+		if(testReader.getRandomizeFlag()) testReader.randomize(seed);
+		testObs = testReader.getObs();
+		
+		
 	if(testReader.getFitFlag()){
 		//make the minimzer
 		ROOT::Math::Minimizer* min = ROOT::Math::Factory::CreateMinimizer("Minuit2","");
@@ -328,16 +351,21 @@ int main(int argc, char ** argv)
 		double chisq = min->MinValue()/dof;
 
 		if(chisq<cutoff){
-			string fname = fitsfolder+"fit"+to_string(jobnum)+"-"+to_string(fitnum);
+			double excl_chisq = testObs.chisq()/(testObs.getNumData()-steps.size());
+			string fname = fitsfolder+timebuffer.str()+"-"+to_string(jobnum)+"-"+to_string(j)+"-"+fittype+"-"+to_string(chisq)+"-"+to_string(excl_chisq);
 			testObs.setFitParams(finalParams);
 			testReader.setObs(testObs);
 			testReader.writeOutputFile(fname);
 			ofstream outputfile(fname,ios::app);
 			outputfile<<"chisq = "<<chisq<<endl;
+			outputfile<<"excl_chisq = "<<excl_chisq<<endl;
 			outputfile.close();
 		}
+		
+		testReader.setObs(testObs);
 	}	
-
+	
+}
 	return 0;
 	
 }
