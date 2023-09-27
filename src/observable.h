@@ -710,9 +710,10 @@ public:
 	}
 
 
-	void PolePlotGraph2D(string inputfile, string polefile){
+	void PolePlotGraph2D(string inputfile, string polefile, string sheet, double Re_sx, double Re_dx, double Im_sx, double Im_dx){
 
 		string temp = "Plots/" + inputfile + "_poles_graph2D.pdf";
+		if (sheet == "true") temp = "Plots/" + inputfile + "_poles_graph2D_II.pdf";
 
 		TCanvas *box = new TCanvas("box","box",600,500); //costruttore 600pt x 550 pt
   		//gStyle->SetOptStat(0); //non voglio che mi metti il riquadro con la statistica
@@ -757,7 +758,9 @@ public:
 		gr->SetTitle("");
   		gr->GetXaxis()->SetTitle("Re(s) (GeV)");
   		gr->GetYaxis()->SetTitle("Im(s) (GeV)");
-  		gr->GetZaxis()->SetTitle("log(abs(det(D_{l}(s))))");
+  		gr->GetZaxis()->SetTitle("log|det(D_{l}(s))|");
+		gr->GetXaxis()->SetRangeUser(Re_sx, Re_dx);
+		gr->GetYaxis()->SetRangeUser(Im_sx, Im_dx);
 		gr->SetMarkerColor(mymarkercolor);
   		gr->SetMarkerSize(mymarkersize);
   		gr->SetMarkerStyle(mymarkerstyle);
@@ -769,9 +772,10 @@ public:
 		
 	};
 
-	void PolePlotGraph1D(string inputfile, string polefile){
+	void PolePlotGraph1D(string inputfile, string polefile, string sheet, double Re_sx, double Re_dx, double Im_sx, double Im_dx){
 
 		string temp = "Plots/" + inputfile + "_poles_graph.pdf";
+		if (sheet == "true") temp = "Plots/" + inputfile + "_poles_graph_II.pdf";
 
 		TCanvas *box = new TCanvas("box","box",600,500); //costruttore 600pt x 550 pt
   		//gStyle->SetOptStat(0); //non voglio che mi metti il riquadro con la statistica
@@ -811,6 +815,8 @@ public:
 		gr->SetTitle("");
   		gr->GetXaxis()->SetTitle("Re(s) (GeV)");
   		gr->GetYaxis()->SetTitle("Im(s) (GeV)");
+		gr->GetXaxis()->SetRangeUser(Re_sx, Re_dx);
+		gr->GetYaxis()->SetRangeUser(Im_sx, Im_dx);
 		gr->SetMarkerColor(mymarkercolor);
   		gr->SetMarkerSize(mymarkersize);
   		gr->SetMarkerStyle(mymarkerstyle);

@@ -98,7 +98,7 @@ vector<double> linspace(T start_in, T end_in, int num_in)
 int main(int argc, char ** argv)
 {
 //polesearch
-  /*
+  
 	string inputfile = (string) argv[1]; //just the core e.g. "fit73-36", without the path nor the extension
 	string polefile = (string) argv[2];
 	string pWave = (string) argv[3];
@@ -109,11 +109,12 @@ int main(int argc, char ** argv)
 	double grid_Im_dx = stod(argv[8]);
 	int grid_Im_numpts = atoi(argv[9]);
 	double func_cutoff = stod(argv[10]);
-	int jobnum = atoi(argv[1]);
-	int numfits = atoi(argv[2]);
-	string inputfile = (string) argv[3];
-	string fitsfolder = (string) argv[4];
-*/
+	string sheet = (string) argv[11]; // NB: "false" = physical sheet; "true" = first unphysical sheet;
+	int jobnum = atoi(argv[12]);
+	int numfits = atoi(argv[13]);
+	//string inputfile = (string) argv[14];
+	//string fitsfolder = (string) argv[15];
+
 
 	//reads the file and creates an observable object with the information from the file
 	
@@ -126,7 +127,7 @@ int main(int argc, char ** argv)
 	testReader.loadExpData();
 
 	if(testReader.getInclCrossSecFlag()) testReader.loadExpInclCrossSec();
-	
+/*	
 	//saves current time
 	std::chrono::system_clock::time_point now = std::chrono::system_clock::now();
 	time_t tt = std::chrono::system_clock::to_time_t(now);
@@ -142,7 +143,7 @@ int main(int argc, char ** argv)
 
 	//gets chisq cutoff
 	double cutoff = testReader.getChi2CutOff();
-
+*/
 	//saves the observable object outside of filereader object
 	testObs = testReader.getObs(); 
 
@@ -154,6 +155,8 @@ int main(int argc, char ** argv)
 	ps.settestObs(testObs); 
 	ps.setAmpIndex(pWave); 
 	int ampindex = ps.getAmpIndex(); 
+	ps.SetSheet(false);
+	if(sheet == "true") ps.SetSheet(true);
 	
 	ofstream letwrite(polefile);
 	
@@ -178,7 +181,50 @@ int main(int argc, char ** argv)
 	vector<double> grid_Im = linspace(grid_Im_sx, grid_Im_dx, grid_Im_numpts);
 	vector<double> fitparamspoles = {};
 	double steppoles[2] = {1.e-2, 1.e-2};
+
+	/*cout << testObs.amplitudes[0].getChannels()[0].getMomentum(comp(118,0.5)) << endl;
+	cout << testObs.amplitudes[0].getChannels()[0].getComplexMomentum(comp(118,0.5)) << endl << endl; 
+
+	cout << testObs.amplitudes[0].getRhoN(comp(118,0.5),0,false) << endl;
+	cout << testObs.amplitudes[0].getRhoN(comp(118,0.5),0,true) << endl << endl;*/
+
+	//cout << testObs.amplitudes[0].getIntegrand(118.,comp(118,0.5),0) << endl << endl; 
+
+	/*cout << testObs.amplitudes[0].getIntegral(comp(118.,.5),0,false) << endl; 
+	cout << testObs.amplitudes[0].getIntegral(comp(118.,.5),0,true) << endl << endl; */
+
+	//testReader.writeMathematicaOutputFile("Data/Math_fit47-32.txt");exit(0);
+
+	auto imagpartintcomplex = [&](double x){
+		return testObs.amplitudes[0].getIntegral(comp(x*x,pow(10,-2)),0,false).imag();
+	};
+
+	auto imagpartintcomplexII = [&](double x){
+		return testObs.amplitudes[0].getIntegral(comp(x*x,-pow(10,-2)),0,true).imag();
+	};
+
+	auto repartintcomplex = [&](double x){
+		return testObs.amplitudes[0].getIntegral(comp(x*x,pow(10,-2)),0,false).real();
+	};
+
+	auto repartintcomplexII = [&](double x){
+		return testObs.amplitudes[0].getIntegral(comp(x*x,-pow(10,-2)),0,true).real();
+	};
+
+	testObs.makePlotGraph("P", "BB", "imagpartintcomplex", imagpartintcomplex, 10.6322, 11.0208);
+	testObs.makePlotGraph("P", "BB", "imagpartintcomplexII", imagpartintcomplexII, 10.6322, 11.0208);
+	testObs.makePlotGraph("P", "BB", "repartintcomplex", repartintcomplex, 10.6322, 11.0208);
+	testObs.makePlotGraph("P", "BB", "repartintcomplexII", repartintcomplexII, 10.6322, 11.0208);
+
+	//cout << testObs.amplitudes[0].getKMatrix(comp(118,0.5)) << endl;
+
+	/*cout << testObs.amplitudes[0].getDenominator(comp(118,0.5),false) << endl << endl;
+	cout << testObs.amplitudes[0].getDenominator(comp(118,0.5),true) << endl; exit(0);*/
 	
+	/*cout << testObs.amplitudes[0].getDenominator(comp(118,5.5),false) << endl << endl;
+	cout << testObs.amplitudes[0].getDenominator(comp(118,5.5),true) << endl; exit(0);*/
+
+	//cout << log10(abs(testObs.amplitudes[0].getDenominator(comp(113.676, -0.00807683),true).determinant())) << endl; exit(0);
 	
 	for(int i = 0; i < grid_Re.size(); i++){
 		for(int j = 0; j < grid_Im.size(); j++){
@@ -220,17 +266,52 @@ int main(int argc, char ** argv)
 	}
 
 	auto abs_det = [&](double* x, double* p){
-		return abs(testObs.amplitudes[ampindex].getDenominator(comp(x[0], x[1])).determinant());
+		return abs(testObs.amplitudes[ampindex].getDenominator(comp(x[0], x[1]),false).determinant());
 		/*MatrixXcd temp = (comp(x[0], x[1]) - comp(115,0.5)) * (comp(x[0], x[1]) - comp(118,0.7)) * (comp(x[0], x[1]) - comp(115,-0.5)) * (comp(x[0], x[1]) - comp(118,-0.7)) * MatrixXcd({{1}});
 		return abs(temp.determinant());*/
 	};
 
 	auto log_abs_det = [&](double* x, double* p){
-		return log10(abs(testObs.amplitudes[ampindex].getDenominator(comp(x[0], x[1])).determinant()));
+		return log10(abs(testObs.amplitudes[ampindex].getDenominator(comp(x[0], x[1]),false).determinant()));
 		/*MatrixXcd temp = (comp(x[0], x[1]) - comp(115,0.5)) * (comp(x[0], x[1]) - comp(118,0.7)) * (comp(x[0], x[1]) - comp(115,-0.5)) * (comp(x[0], x[1]) - comp(118,-0.7)) * MatrixXcd({{1}});
 		return log(abs(temp.determinant()));*/
 	};
 
+	auto abs_det_II = [&](double* x, double* p){
+		return abs(testObs.amplitudes[ampindex].getDenominator(comp(x[0], x[1]),true).determinant());
+		/*MatrixXcd temp = (comp(x[0], x[1]) - comp(115,0.5)) * (comp(x[0], x[1]) - comp(118,0.7)) * (comp(x[0], x[1]) - comp(115,-0.5)) * (comp(x[0], x[1]) - comp(118,-0.7)) * MatrixXcd({{1}});
+		return abs(temp.determinant());*/
+	};
+
+	auto log_abs_det_II = [&](double* x, double* p){
+		return log10(abs(testObs.amplitudes[ampindex].getDenominator(comp(x[0], x[1]),true).determinant()));
+		/*MatrixXcd temp = (comp(x[0], x[1]) - comp(115,0.5)) * (comp(x[0], x[1]) - comp(118,0.7)) * (comp(x[0], x[1]) - comp(115,-0.5)) * (comp(x[0], x[1]) - comp(118,-0.7)) * MatrixXcd({{1}});
+		return log(abs(temp.determinant()));*/
+	};
+
+	if(ps.GetSheet()){
+
+		testObs.PolePlotGraph2D(inputfile, polefile, sheet, grid_Re_sx, grid_Re_dx, grid_Im_sx, grid_Im_dx);
+
+		testObs.PolePlotGraph1D(inputfile, polefile, sheet, grid_Re_sx, grid_Re_dx, grid_Im_sx, grid_Im_dx);
+
+		testObs.PoleColormapPlotFunc2D(inputfile, abs_det_II, "abs_det_II", grid_Re_sx, grid_Re_dx, grid_Im_sx, grid_Im_dx);
+
+		testObs.PoleColormapPlotFunc2D(inputfile, log_abs_det_II, "log_abs_det_II", grid_Re_sx, grid_Re_dx, grid_Im_sx, grid_Im_dx);
+
+	}else{
+
+		testObs.PolePlotGraph2D(inputfile, polefile, sheet, grid_Re_sx, grid_Re_dx, grid_Im_sx, grid_Im_dx);
+
+		testObs.PolePlotGraph1D(inputfile, polefile, sheet, grid_Re_sx, grid_Re_dx, grid_Im_sx, grid_Im_dx);
+
+		testObs.PoleColormapPlotFunc2D(inputfile, abs_det, "abs_det", grid_Re_sx, grid_Re_dx, grid_Im_sx, grid_Im_dx);
+
+		testObs.PoleColormapPlotFunc2D(inputfile, log_abs_det, "log_abs_det", grid_Re_sx, grid_Re_dx, grid_Im_sx, grid_Im_dx);
+
+	}
+
+/*
 	cout << "test " << testObs.amplitudes[0].getValue(pow(10.7,2)) << endl;
 
 	testObs.makePlotGraph("P", "BB", "test2_ImagPartInt", ImagPartInt, 10.6322, 11.0208);
@@ -241,9 +322,9 @@ int main(int argc, char ** argv)
 	testObs.makePlotGraphWithExp("P", "BBstar", "test2_BBstar", intensityP_BBstar, 10.6322,11.0208);
 	testObs.makePlotGraphWithExp("P", "BstarBstar", "test2_BstarBstar", intensityP_BstarBstar, 10.6322,11.0208);
 	testObs.makePlotGraphWithExp("P", "B_sstarB_sstar", "BottB_sstarB_sstar_Graph_WithExp", intensityP_B_sstarB_sstar, 10.6322,11.0208);
-	*/
+	
 
-*/
+
 	//saves original starting parameters
 	//vector<double> startparams = testObs.getFitParams();
 	vector<double> steps = testObs.getStepSizes();
@@ -307,6 +388,7 @@ int main(int argc, char ** argv)
 	}	
 	
 }
+*/
 	return 0;
 	
 }

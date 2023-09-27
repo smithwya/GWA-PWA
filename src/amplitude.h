@@ -17,10 +17,12 @@ struct intKey{
 
 	comp s;
 	int k;
+	bool sheet;
 
-	intKey(comp x, int y){
+	intKey(comp x, int y, bool sh){
 		s = x;
 		k = y;
+		sheet = sh;
 	}
 
 	bool operator<(intKey const& other) const{
@@ -32,6 +34,8 @@ struct intKey{
 		if(s.real()!=other.s.real()) return s.real()<other.s.real();
 
 		return s.imag() < other.s.imag();
+
+		if(sheet!=other.sheet) return sheet<other.sheet;
 		
 	}
 };
@@ -52,13 +56,14 @@ public:
 	VectorXcd getValue(comp s);
     comp omega(comp s, int type);
     VectorXcd getNumerator(comp s, int type);
-    comp getRhoN(comp s, int k);
-	MatrixXcd getDenominator(comp s);
+    comp getRhoN(comp s, int k, bool sheet);
+	MatrixXcd getDenominator(comp s, bool sheet);
 	MatrixXcd getKMatrix(comp s);
 	comp getMomentum(int particle, comp s);
+	comp getComplexMomentum(int particle, comp s);
 	comp getTrueMomentum(int particle, comp s);
 	friend ostream& operator<<(std::ostream& os, amplitude const& m);
-	comp getIntegral(comp s, int k);
+	comp getIntegral(comp s, int k, bool sh);
 	comp getIntegral(double s, int k);
 	comp getIntegrand(double sp, comp s, int k);
 	void setChebyCoeffs(string channel_name, int type, double s0, vector<double> coeffs);
@@ -69,7 +74,7 @@ public:
 	void addPole(double mass,double mass_step,vector<string> chan_names, vector<double> couplings, vector<double> steps);
 	vector<string> getChanNames();
 	int getNumOfChans();
-	void calcIntegrals(vector<comp> slist,int k);
+	void calcIntegrals(vector<comp> slist,int k,bool sheet);
 	vector<double> getParamList();
 	void setParamList(vector<double> params);
 	void setResMasses(vector<double> rm);

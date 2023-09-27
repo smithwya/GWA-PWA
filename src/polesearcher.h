@@ -25,6 +25,7 @@ class polesearcher {
     observable testObs;
     vector<comp> poles = {};
     int wvindex;
+    bool sh = false;
 
     public:
 
@@ -50,13 +51,21 @@ class polesearcher {
         poles = xx;
     }
 
+    void SetSheet(bool sheet){
+        sh = sheet;
+    }
+
+    bool GetSheet(){
+        return sh;
+    }
+
     double minfuncforpoles(vector<double> params){
 
         calls_counter_poles++;
     
         double val = 0; 
 
-        MatrixXcd cmat = testObs.amplitudes.at(wvindex).getDenominator(comp(params[0], params[1])); 
+        MatrixXcd cmat = testObs.amplitudes.at(wvindex).getDenominator(comp(params[0], params[1]), sh); 
         //MatrixXcd cmat = (comp(params[0],params[1]) - comp(115,0.5)) * (comp(params[0],params[1]) - comp(118,0.7)) * (comp(params[0],params[1]) - comp(115,-0.5)) * (comp(params[0],params[1]) - comp(118,-0.7)) * MatrixXcd({{1}}); //mock example
 
         comp det = cmat.determinant();
