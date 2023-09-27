@@ -247,7 +247,7 @@ comp amplitude::getIntegral(comp s,int k,bool sh){
 	intKey skpair = intKey(s,k,sh);
 	auto mapit = integralList.find(skpair);
 
-	if(mapit!=integralList.end()) return mapit->second; //anyway for the polesearch there's no need to store the result 
+	//if(mapit!=integralList.end()) return mapit->second; //anyway for the polesearch there's no need to store the result 
 
 	if(abs(s.imag()) < 2 * epsilon){
 		double sreal = s.real();
