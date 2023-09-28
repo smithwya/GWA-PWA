@@ -8,7 +8,6 @@
 #SBATCH --mail-user=smithwya@iu.edu
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=1
-#SBATCH --time=24:00:00
 #SBATCH -A r00215
 
 ./bin/GWA $1 $2 $3 $4
