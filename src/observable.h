@@ -816,7 +816,7 @@ public:
   		gr->GetXaxis()->SetTitle("Re(s) (GeV)");
   		gr->GetYaxis()->SetTitle("Im(s) (GeV)");
 		gr->GetXaxis()->SetRangeUser(Re_sx, Re_dx);
-		gr->GetYaxis()->SetRangeUser(Im_sx, Im_dx);
+		gr->GetYaxis()->SetRangeUser(Im_sx, 0);
 		gr->SetMarkerColor(mymarkercolor);
   		gr->SetMarkerSize(mymarkersize);
   		gr->SetMarkerStyle(mymarkerstyle);
