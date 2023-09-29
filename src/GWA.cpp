@@ -211,10 +211,10 @@ int main(int argc, char ** argv)
 		return testObs.amplitudes[0].getIntegral(comp(x*x,-pow(10,-2)),0,true).real();
 	};
 
-	testObs.makePlotGraph("P", "BB", "imagpartintcomplex", imagpartintcomplex, 10.6322, 11.0208);
+	/*testObs.makePlotGraph("P", "BB", "imagpartintcomplex", imagpartintcomplex, 10.6322, 11.0208);
 	testObs.makePlotGraph("P", "BB", "imagpartintcomplexII", imagpartintcomplexII, 10.6322, 11.0208);
 	testObs.makePlotGraph("P", "BB", "repartintcomplex", repartintcomplex, 10.6322, 11.0208);
-	testObs.makePlotGraph("P", "BB", "repartintcomplexII", repartintcomplexII, 10.6322, 11.0208);
+	testObs.makePlotGraph("P", "BB", "repartintcomplexII", repartintcomplexII, 10.6322, 11.0208);*/
 
 	//cout << testObs.amplitudes[0].getKMatrix(comp(118,0.5)) << endl;
 
