@@ -21,6 +21,7 @@
 #include "TError.h"
 #include <TGraph2D.h>
 #include <TF2.h>
+#include "TTree.h"
 
 using namespace std;
 typedef std::chrono::system_clock Clock;
@@ -144,7 +145,7 @@ int main(int argc, char ** argv)
 		dof+=testObs.getNumInclData();
 		fittype = "incl";
 	}
-
+	/*
 	for (int j = 0; j < numfits; j++){
 		
 		if(testReader.getRandomizeFlag()) testReader.randomize(seed);
@@ -197,6 +198,13 @@ int main(int argc, char ** argv)
 	}	
 	
 }
+	
+	
+	*/
+	
+	for(string sss : testReader.getOutputCmds()) cout<<sss<<endl;
+	
+	
 	return 0;
 	
 }

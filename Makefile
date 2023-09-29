@@ -16,10 +16,11 @@ BINDIR = bin
 
 SOURCES := $(wildcard $(SRCDIR)/*.cpp)
 INCLUDES := $(wildcard $(SRCDIR)/*.h)
+HEADERS := $(filter-out src/Linkdef.h,$(INCLUDES))
 OBJECTS := $(SOURCES:$(SRCDIR)/%.cpp=$(OBJDIR)/%.o)
 rm = rm -f
 
-all: $(BINDIR)/$(TARGET)
+all:  libGWA.so $(BINDIR)/$(TARGET)
 
 $(BINDIR)/$(TARGET): $(OBJECTS)
 	@if [ ! -d $(BINDIR) ]; then mkdir $(BINDIR); fi
@@ -33,3 +34,10 @@ $(OBJECTS): $(OBJDIR)/%.o : $(SRCDIR)/%.cpp
 clean:
 	$(rm) $(OBJECTS)
 	@echo "Cleanup complete"
+
+GWADict.cxx: $(HEADERS) src/Linkdef.h
+	rootcling -f $@ -c -p $^
+
+libGWA.so: GWADict.cxx $(SOURCES)
+	g++ -shared -o$@ $(CPPFLAGS) -fPIC -I$(ROOTSYS)/include $^ `root-config --ldflags --libs`
+
