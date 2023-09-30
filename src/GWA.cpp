@@ -166,6 +166,16 @@ int main(int argc, char ** argv)
 
 	//cout << testObs.chisq_with_InclCrossSec() - testObs.chisq() << endl;
 
+	//cout << (testObs.chisq_with_InclCrossSec() + testObs.chisq()) / (testObs.getNumData() - steps.size() + testObs.getNumInclData()) << endl;
+
+	double totabs = 1.7 * (testObs.getNumData() - steps.size() + testObs.getNumInclData());
+
+	double exclabs = 24.6 * (testObs.getNumData() - steps.size());
+
+	double ratio = exclabs/totabs;
+
+	cout << totabs << "	" << exclabs << "	" << ratio << endl;
+	
 	return 0;
 	
 }

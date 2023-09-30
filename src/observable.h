@@ -462,7 +462,7 @@ public:
 		int totnumofchans = numChans;
 		int numchan = getchanindex(ampname,channame);
 
-		int num_exp_pts = data[totnumofchans * numamp + numchan].amp_expval.size();cout << num_exp_pts << endl;
+		int num_exp_pts = data[totnumofchans * numamp + numchan].amp_expval.size();//cout << num_exp_pts << endl;
 
 		double delta = (upper_bound - lower_bound)/ num_exp_pts;
 
@@ -859,14 +859,14 @@ public:
 			val = data[index].sqrts[i];
 			if(isnan(val)) x2[i] = 0;
 			else x2[i] = val;
-			cout << val << endl;
+			//cout << val << endl;
 			ex2[i] = 0;
-			cout << val << " ";
+			//cout << val << " ";
 
 			val = data[index].amp_expval[i];
 			if(isnan(val)) y2[i] = 0;
 			else y2[i] = val;
-			cout << val << " ";
+			//cout << val << " ";
 
 
 			val = pow(data[index].amp_expval_stat_err[i], 2);
@@ -874,7 +874,7 @@ public:
 			val = pow(val, 0.5);
 			if(isnan(val)) ey2[i] = 0;
 			else ey2[i] = val;
-			cout << val << endl;
+			//cout << val << endl;
 
 		}
 
