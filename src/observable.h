@@ -765,7 +765,7 @@ public:
 		
   		gr->GetXaxis()->SetTitle("Re(s) (GeV)");
   		gr->GetYaxis()->SetTitle("Im(s) (GeV)");
-  		gr->GetZaxis()->SetTitle("log|det(D_{l}(s))|");
+  		gr->GetZaxis()->SetTitle("log_{10}|det(D_{l}(s))|");
 		
 		gr->GetXaxis()->SetLimits(Re_sx, Re_dx);
 		gr->GetYaxis()->SetLimits(Im_sx, 0);
