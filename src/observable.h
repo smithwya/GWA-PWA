@@ -735,6 +735,13 @@ public:
   		float mytextsize=0.05;
   		int mytextfont=132;
 
+		gr->SetTitle("");
+		gr->SetMarkerColor(mymarkercolor);
+  		gr->SetMarkerSize(mymarkersize);
+  		gr->SetMarkerStyle(mymarkerstyle);
+  		gr->SetLineColor(1);
+  		gr->SetLineWidth(0);
+
 		gr->GetYaxis()->SetTitleSize(mytextsize); //controllo sulla dimension del titolo dell'asse
   		gr->GetXaxis()->SetTitleSize(mytextsize);
 		gr->GetZaxis()->SetTitleSize(mytextsize);
@@ -755,18 +762,15 @@ public:
 		gr->GetXaxis()->SetTitleOffset(1.20);//definisce la distanza del titolo dell'asse dall'asse stesso
   		gr->GetYaxis()->SetTitleOffset(1.70);
   		gr->GetZaxis()->SetTitleOffset(1.15);
-		gr->SetTitle("");
+		
   		gr->GetXaxis()->SetTitle("Re(s) (GeV)");
   		gr->GetYaxis()->SetTitle("Im(s) (GeV)");
   		gr->GetZaxis()->SetTitle("log|det(D_{l}(s))|");
-		gr->GetXaxis()->SetRangeUser(Re_sx, Re_dx);
-		gr->GetYaxis()->SetRangeUser(Im_sx, Im_dx);
-		gr->SetMarkerColor(mymarkercolor);
-  		gr->SetMarkerSize(mymarkersize);
-  		gr->SetMarkerStyle(mymarkerstyle);
-  		gr->SetLineColor(1);
-  		gr->SetLineWidth(0);
-		gr->Draw("pcol");
+		
+		gr->GetXaxis()->SetLimits(Re_sx, Re_dx);
+		gr->GetYaxis()->SetLimits(Im_sx, 0);
+
+		gr->Draw("p");
 
 		box->SaveAs(temp.c_str());
 		
