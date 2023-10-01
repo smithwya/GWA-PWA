@@ -763,8 +763,8 @@ public:
   		gr->GetYaxis()->SetTitleOffset(1.70);
   		gr->GetZaxis()->SetTitleOffset(1.15);
 		
-  		gr->GetXaxis()->SetTitle("Re(s) (GeV)");
-  		gr->GetYaxis()->SetTitle("Im(s) (GeV)");
+  		gr->GetXaxis()->SetTitle("Re(s) (GeV^{2})");
+  		gr->GetYaxis()->SetTitle("Im(s) (GeV^{2})");
   		gr->GetZaxis()->SetTitle("log_{10}|det(D_{l}(s))|");
 		
 		gr->GetXaxis()->SetLimits(Re_sx, Re_dx);
@@ -817,8 +817,8 @@ public:
 		gr->GetXaxis()->SetTitleOffset(1.15);//definisce la distanza del titolo dell'asse dall'asse stesso
   		gr->GetYaxis()->SetTitleOffset(1.15);
 		gr->SetTitle("");
-  		gr->GetXaxis()->SetTitle("Re(s) (GeV)");
-  		gr->GetYaxis()->SetTitle("Im(s) (GeV)");
+  		gr->GetXaxis()->SetTitle("Re(s) (GeV^{2})");
+  		gr->GetYaxis()->SetTitle("Im(s) (GeV^{2})");
 		gr->GetXaxis()->SetRangeUser(Re_sx, Re_dx);
 		gr->GetYaxis()->SetRangeUser(Im_sx, 0);
 		gr->SetMarkerColor(mymarkercolor);
@@ -872,8 +872,8 @@ public:
 		tf.GetXaxis()->SetTitleOffset(1.15);//definisce la distanza del titolo dell'asse dall'asse stesso
   		tf.GetYaxis()->SetTitleOffset(1.15);
 		tf.SetTitle("");
-  		tf.GetXaxis()->SetTitle("Re(s) (GeV)");
-  		tf.GetYaxis()->SetTitle("Im(s) (GeV)");
+  		tf.GetXaxis()->SetTitle("Re(s) (GeV^{2})");
+  		tf.GetYaxis()->SetTitle("Im(s) (GeV^{2})");
 		tf.SetMarkerColor(mymarkercolor);
   		tf.SetMarkerSize(mymarkersize);
   		tf.SetMarkerStyle(mymarkerstyle);
