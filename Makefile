@@ -8,7 +8,7 @@ CPPFLAGS := $(shell root-config --cflags) $(STDINCDIR) -I/usr/include/eigen3
 CPPFLAGS += -O3
 
 #linking flags
-LDFLAGS := -Xlinker -rpath . $(shell root-config --glibs) $(STDLIBDIR)
+LDFLAGS := -Xlinker -rpath . $(shell root-config --glibs ) $(STDLIBDIR)
 
 SRCDIR = src
 OBJDIR = obj
@@ -16,11 +16,11 @@ BINDIR = bin
 
 SOURCES := $(wildcard $(SRCDIR)/*.cpp)
 INCLUDES := $(wildcard $(SRCDIR)/*.h)
-HEADERS := $(filter-out src/Linkdef.h,$(INCLUDES))
 OBJECTS := $(SOURCES:$(SRCDIR)/%.cpp=$(OBJDIR)/%.o)
+
 rm = rm -f
 
-all:  libGWA.so $(BINDIR)/$(TARGET)
+all: $(BINDIR)/$(TARGET)
 
 $(BINDIR)/$(TARGET): $(OBJECTS)
 	@if [ ! -d $(BINDIR) ]; then mkdir $(BINDIR); fi
@@ -33,11 +33,6 @@ $(OBJECTS): $(OBJDIR)/%.o : $(SRCDIR)/%.cpp
 	@echo "Compiled "$<" successfully"
 clean:
 	$(rm) $(OBJECTS)
+	$(rm) libGWA.so  GWADict.cxx GWADict_rdict.pcm
 	@echo "Cleanup complete"
-
-GWADict.cxx: $(HEADERS) src/Linkdef.h
-	rootcling -f $@ -c -p $^
-
-libGWA.so: GWADict.cxx $(SOURCES)
-	g++ -shared -o$@ $(CPPFLAGS) -fPIC -I$(ROOTSYS)/include $^ `root-config --ldflags --libs`
 
