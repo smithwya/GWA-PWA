@@ -149,14 +149,14 @@ int main(int argc, char ** argv)
 	//if the file exists, update the ttree on file. otherwise, make it.
 	if(!(gSystem->AccessPathName(fname.c_str(),kFileExists))){
 		f=TFile::Open(fname.c_str(),"update");
-		t1 = (TTree*)f->Get(("run"+to_string(jobnum)).c_str());
+		t1 = (TTree*)f->Get("fits");
 		t1->SetBranchAddress("Commands", &tree_cmds);
 		t1->SetBranchAddress("Inclusive_chi", &chi_squared_incl);
 		t1->SetBranchAddress("Exclusive_chi", &chi_squared_excl);
 		
 	} else {
 		f = TFile::Open(fname.c_str(),"recreate");
-		t1 = new TTree(("run"+to_string(jobnum)).c_str(), ("Fits from code instance "+to_string(jobnum)).c_str());
+		t1 = new TTree("fits", ("Fits from code instance "+to_string(jobnum)).c_str());
 		t1->Branch("Commands", &cmds);
 		t1->Branch("Inclusive_chi", &chi_squared_incl);
 		t1->Branch("Exclusive_chi", &chi_squared_excl);
