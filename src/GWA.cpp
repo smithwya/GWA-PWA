@@ -182,9 +182,9 @@ int main(int argc, char ** argv)
 		double chisq = min->MinValue()/dof;
 
 		if(chisq<cutoff){
+			testObs.setFitParams(finalParams);
 			double excl_chisq = testObs.chisq()/(testObs.getNumData()-steps.size());
 			string fname = fitsfolder+timebuffer.str()+"-"+to_string(jobnum)+"-"+to_string(j)+"-"+fittype+"-"+to_string(chisq)+"-"+to_string(excl_chisq);
-			testObs.setFitParams(finalParams);
 			testReader.setObs(testObs);
 			testReader.writeOutputFile(fname);
 			ofstream outputfile(fname,ios::app);
@@ -193,7 +193,6 @@ int main(int argc, char ** argv)
 			outputfile.close();
 		}
 		
-		testReader.setObs(testObs);
 	}	
 	
 }
