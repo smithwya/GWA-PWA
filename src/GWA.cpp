@@ -151,51 +151,52 @@ int main(int argc, char ** argv)
 		testObs = testReader.getObs();
 		
 		
-	if(testReader.getFitFlag()){
-		//make the minimzer
-		ROOT::Math::Minimizer* min = ROOT::Math::Factory::CreateMinimizer("Minuit2","");
-		//Set some criteria for the minimzer to stop
-		min->SetMaxFunctionCalls(100000);
-		min->SetMaxIterations(10000);
-		min->SetTolerance(0.001);
-		min->SetPrintLevel(1);
-		//get the initial parameters and steps from the constructed observable object
-		vector<double> fitparams = testObs.getFitParams();
-		nParams = fitparams.size();
-		//make a function wrapper to minimize the function minfunc (=chisquared)
-		ROOT::Math::Functor f(&minfunc,nParams);
-		ROOT::Math::Functor g(&minfunc_with_InclCrossSec,nParams);
-		if(testReader.getInclCrossSecFlag()) min->SetFunction(g);
-		else min->SetFunction(f);
-		//set the initial conditions and step sizes
-		for(int i = 0; i < nParams; i++){
-			min->SetVariable(i,to_string(i),fitparams[i],steps[i]);
-		}
-		//run the minimization
-		min->Minimize();
-		//extract the resulting fit parameters
-		vector<double> finalParams = {};
-		for(int i = 0; i < nParams; i ++){
-			finalParams.push_back(min->X()[i]);
-		}
+		if(testReader.getFitFlag()){
+			//make the minimzer
+			ROOT::Math::Minimizer* min = ROOT::Math::Factory::CreateMinimizer("Minuit2","");
+			//Set some criteria for the minimzer to stop
+			min->SetMaxFunctionCalls(100000);
+			min->SetMaxIterations(10000);
+			min->SetTolerance(0.001);
+			min->SetPrintLevel(1);
+			//get the initial parameters and steps from the constructed observable object
+			vector<double> fitparams = testObs.getFitParams();
+			nParams = fitparams.size();
+			//make a function wrapper to minimize the function minfunc (=chisquared)
+			ROOT::Math::Functor f(&minfunc,nParams);
+			ROOT::Math::Functor g(&minfunc_with_InclCrossSec,nParams);
+			if(testReader.getInclCrossSecFlag()) min->SetFunction(g);
+			else min->SetFunction(f);
+			//set the initial conditions and step sizes
+			for(int i = 0; i < nParams; i++){
+				min->SetVariable(i,to_string(i),fitparams[i],steps[i]);
+			}
+			//run the minimization
+			min->Minimize();
+			//extract the resulting fit parameters
+			vector<double> finalParams = {};
+			for(int i = 0; i < nParams; i ++){
+				finalParams.push_back(min->X()[i]);
+			}
 
-		double chisq = min->MinValue()/dof;
+			double chisq = min->MinValue()/dof;
 
-		if(chisq<cutoff){
-			testObs.setFitParams(finalParams);
-			double excl_chisq = testObs.chisq()/(testObs.getNumData()-steps.size());
-			string fname = fitsfolder+timebuffer.str()+"-"+to_string(jobnum)+"-"+to_string(j)+"-"+fittype+"-"+to_string(chisq)+"-"+to_string(excl_chisq);
-			testReader.setObs(testObs);
-			testReader.writeOutputFile(fname);
-			ofstream outputfile(fname,ios::app);
-			outputfile<<"chisq = "<<chisq<<endl;
-			outputfile<<"excl_chisq = "<<excl_chisq<<endl;
-			outputfile.close();
-		}
+			if(chisq<cutoff){
+				testObs.setFitParams(finalParams);
+				double excl_chisq = testObs.chisq()/(testObs.getNumData()-steps.size());
+				string fname = fitsfolder+timebuffer.str()+"-"+to_string(jobnum)+"-"+to_string(j)+"-"+fittype+"-"+to_string(chisq)+"-"+to_string(excl_chisq);
+				testReader.setObs(testObs);
+				testReader.writeOutputFile(fname);
+				ofstream outputfile(fname,ios::app);
+				outputfile<<"chisq = "<<chisq<<endl;
+				outputfile<<"excl_chisq = "<<excl_chisq<<endl;
+				outputfile.close();
+			}
+			
+		}	
 		
-	}	
+	}
 	
-}
 	return 0;
 	
 }
