@@ -840,7 +840,7 @@ public:
 
 
 			val = 0;
-			for(int j = 0; j < 3; j++) val += sqrt(pow(data[j].amp_expval_stat_err[i], 2) + pow(data[j].amp_expval_sist_err[i], 2));
+			for(int j = 0; j < 3; j++) val += pow(data[j].amp_expval_stat_err[i], 2) + pow(data[j].amp_expval_sist_err[i], 2);
 			val = sqrt(val);
 			if(isnan(val)) ey1[i] = 0;
 			else ey1[i] = val;
@@ -871,7 +871,7 @@ public:
 
 			val = pow(data[index].amp_expval_stat_err[i], 2);
 			val += pow(data[index].amp_expval_sist_err[i], 2);
-			val = pow(val, 0.5);
+			val = sqrt(val);
 			if(isnan(val)) ey2[i] = 0;
 			else ey2[i] = val;
 			//cout << val << endl;
@@ -887,7 +887,8 @@ public:
 			for(int j = 0; j < num_Bsstar_pts; j++){
 				if(abs(x1[i] - x2[j]) <= 0.001){
 					y4[i] += y2[j];
-					ey4[i] += ey2[j]; 
+					//ey4[i] += ey2[j]; 
+					ey4[i] = sqrt(pow(ey1[i], 2) + pow(ey2[j], 2));
 				}
 			}
 
