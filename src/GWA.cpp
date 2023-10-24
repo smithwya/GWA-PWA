@@ -158,7 +158,7 @@ int main(int argc, char ** argv)
 	//testObs.makePlotGraph_ExpOnly("P", "BB", plotname+"_BB_justpts", 10.6322,  11.0208, "#sqrt{s} (GeV)", "#sigma (pb)");
 	//testObs.makePlotGraph_ExpOnly("P", "BBstar", plotname+"_BBstar_justpts", 10.6322,  11.0208, "#sqrt{s} (GeV)", "#sigma (pb)");
 	//testObs.makePlotGraph_ExpOnly("P", "BstarBstar", plotname+"_BstarBstar_justpts", 10.6322,  11.0208, "#sqrt{s} (GeV)", "#sigma (pb)");
-	testObs.makePlotGraph_ExpOnly("P", "B_sstarB_sstar", plotname+"_B_sstarB_sstar_justpts", 10.84,  11.0208, "#sqrt{s} (GeV)", "#sigma (pb)");
+	//testObs.makePlotGraph_ExpOnly("P", "B_sstarB_sstar", plotname+"_B_sstarB_sstar_justpts", 10.84,  11.0208, "#sqrt{s} (GeV)", "#sigma (pb)");
 
 	vector<double> steps = testObs.getStepSizes();
 
@@ -168,6 +168,8 @@ int main(int argc, char ** argv)
 
 	//cout << (testObs.chisq_with_InclCrossSec() + testObs.chisq()) / (testObs.getNumData() - steps.size() + testObs.getNumInclData()) << endl;
 
+	/*
+	
 	double totabs = 1.7 * (testObs.getNumData() - steps.size() + testObs.getNumInclData());
 
 	double exclabs = 24.6 * (testObs.getNumData() - steps.size());
@@ -175,6 +177,16 @@ int main(int argc, char ** argv)
 	double ratio = exclabs/totabs;
 
 	cout << totabs << "	" << exclabs << "	" << ratio << endl;
+
+	*/
+
+	cout << testObs.chisq() << endl;
+
+	cout << testObs.chisq() / (testObs.getNumData() - steps.size()) << endl;
+
+	cout << testObs.chisq_with_InclCrossSec() << endl;
+
+	cout << testObs.chisq_with_InclCrossSec() / (testObs.getNumData() + testObs.getNumInclData() - steps.size()) << endl;
 	
 	return 0;
 	
