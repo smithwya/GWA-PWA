@@ -1,6 +1,6 @@
 #!/bin/bash
-nJobs=100
-nFits=100
+nJobs=400
+nFits=25
 formatpath=Data/fitformat_inclusive.txt
 fitpath=Fits/
 runtime=24:00:00

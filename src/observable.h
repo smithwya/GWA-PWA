@@ -5,7 +5,6 @@
 #include <Eigen/Dense>
 #include "amplitude.h"
 #include "channel.h"
-#include "filereader.h"
 #include "TCanvas.h"
 #include "TF1.h"
 #include "TH1D.h"
