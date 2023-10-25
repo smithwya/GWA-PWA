@@ -173,7 +173,6 @@ int main(int argc, char ** argv)
 		if(formatReader.getRandomizeFlag()) formatReader.randomize(seed);
 		testObs = formatReader.getObs();
 		
-		
 	if(formatReader.getFitFlag()){
 		//make the minimzer
 		ROOT::Math::Minimizer* min = ROOT::Math::Factory::CreateMinimizer("Minuit2","");
@@ -206,6 +205,7 @@ int main(int argc, char ** argv)
 		
 		//if the chisquared is less than the cutoff, add it as a leaf to the ttree
 		if(chisq<cutoff){
+      testObs.setFitParams(finalParams);
 			chi_squared_excl= testObs.chisq()/(testObs.getNumData()-steps.size());
 			chi_squared_incl=chisq;
 			
@@ -220,6 +220,7 @@ int main(int argc, char ** argv)
 	
 	t1->Write(0,TObject::kWriteDelete,0);
 	f->Close("R");
+  
 	return 0;
 	
 }
