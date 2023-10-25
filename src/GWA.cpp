@@ -205,11 +205,9 @@ int main(int argc, char ** argv)
 		
 		//if the chisquared is less than the cutoff, add it as a leaf to the ttree
 		if(chisq<cutoff){
-      testObs.setFitParams(finalParams);
+      			testObs.setFitParams(finalParams);
 			chi_squared_excl= testObs.chisq()/(testObs.getNumData()-steps.size());
 			chi_squared_incl=chisq;
-			
-			testObs.setFitParams(finalParams);
 			formatReader.setObs(testObs);
 			cmds = formatReader.getOutputCmds();
 			t1->Fill();
