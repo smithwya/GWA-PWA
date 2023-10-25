@@ -747,10 +747,10 @@ void filereader::randomize(){
 	return;
 }
 
-void filereader::randomize(int seed){
+void filereader::randomize(int new_seed){
 	vector<double> params = obsObject.getFitParams();
 	vector<double> stepsizes = obsObject.getStepSizes();
-
+	seed = new_seed;
 	TRandom3 gen(seed);
 
 	//might need to make sure pole masses are positive somehow
@@ -805,7 +805,7 @@ void filereader::writeOutputFile(string outname){
 vector<string> filereader::getOutputCmds(){
 	vector<string> output_cmds = {};
 
-	output_cmds.push_back(SeedCmd);
+	output_cmds.push_back("SetSeed("+to_string(seed)+")");
 
 	output_cmds.push_back(FitRegion);
 
