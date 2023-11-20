@@ -99,6 +99,32 @@ vector<double> linspace(T start_in, T end_in, int num_in)
 
 }
 
+vector<observable> MakeParamsDistributions(vector <string> filenames, int distr_to_plot){
+	
+	for(int i = 0; i < filenames.size(); i++){
+		filereader formatReader(filenames.at(i));
+		formatReader.SetAllCommandLists();
+		formatReader.ConstructBareAmps();
+		formatReader.setChebys();
+		formatReader.setPoles();
+		formatReader.setKmats();
+		formatReader.loadExpData();
+		if(formatReader.getInclCrossSecFlag()) formatReader.loadExpInclCrossSec();
+		
+		//gets chisq cutoff
+		double cutoff = formatReader.getChi2CutOff();
+
+		//saves the observable object outside of filereader object
+		testObs = formatReader.getObs();
+	}
+
+	//make a legend
+
+	//testObs.PlotPolesDistributions()
+	//testObs.PlotChebyDistributions()
+
+}
+
 int main(int argc, char ** argv)
 {
 	int jobnum = atoi(argv[1]);

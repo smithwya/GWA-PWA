@@ -737,12 +737,6 @@ public:
 		return steps;
 	};
 
-	void MakeParamsDistributions(){
-
-		
-
-	}
-
 
 	double chisq(){
 
