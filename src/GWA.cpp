@@ -121,15 +121,13 @@ void MakeParamsDistributions(vector <string> filenames, int distr_to_plot){
 		//saves the observable object outside of filereader object
 		temp.push_back(formatReader.getObs());
 
-		polgrade = formatReader.getChebyList().size();
-
 	}
 
 	//make a legend
 
 	testObs.PlotPolesDistributions(temp, filenames);
 	testObs.PlotCouplingsDistributions(temp, filenames);
-	testObs.PlotChebyDistributions(temp, filenames, polgrade); 
+	testObs.PlotChebyDistributions(temp, filenames); 
 
 }
 

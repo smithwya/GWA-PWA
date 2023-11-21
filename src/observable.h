@@ -796,11 +796,13 @@ public:
 	}
 
 
-	void PlotChebyDistributions(vector <observable> observables, vector <string> filenames, int polgrade){
+	void PlotChebyDistributions(vector <observable> observables, vector <string> filenames){
 
 		int namp = observables[0].amplitudes.size();
 
 		int nchs = observables[0].amplitudes[0].getChanNames().size();
+
+		int polgrade = observables[0].amplitudes[0].getChannels()[0].getChebyCoeffs().size();
 
 		vector<double> cheby[namp][nchs][polgrade];
 
