@@ -5,6 +5,7 @@
 #include <Eigen/Dense>
 #include "amplitude.h"
 #include "channel.h"
+#include "filereader.h"
 #include "TCanvas.h"
 #include "TF1.h"
 #include "TH1D.h"
@@ -703,6 +704,145 @@ public:
 		canv.SaveAs(("Plots/"+pdfname+".pdf").c_str());
 		file.Close();
 		return;
+
+	}
+
+
+	void PlotPolesDistributions(vector <observable> observables, vector <string> filenames){
+
+		int namp = observables[0].amplitudes.size();
+
+		vector<double> resmasses[namp];
+
+		TH1D *istograms[namp];
+
+		for(int j = 0; j < namp; j++){
+			
+			for(int i = 0; i < observables.size(); i++){
+
+				for(int k = 0; k < observables[i].amplitudes[j].getResMasses().size(); k++){
+
+					resmasses[j].push_back(observables[i].amplitudes[j].getResMasses()[k]);
+
+				}
+
+			}
+
+		}
+
+		for(int j = 0; j < namp; j++){
+
+			istograms[j] = new TH1D("", "", 50, 0, 0);
+			for(double x: resmasses[j]) istograms[j]->Fill(x);
+			TCanvas canv;
+			istograms[j]->Draw();
+			canv.SaveAs(("poles_in_" + to_string(j) + "th_wave.pdf").c_str());
+
+		}
+
+	}
+
+
+	void PlotCouplingsDistributions(vector <observable> observables, vector <string> filenames){
+
+		int namp = observables[0].amplitudes.size();
+
+		int nchs = observables[0].amplitudes[0].getChanNames().size();
+
+		int npole = observables[0].amplitudes[0].getResMasses().size();
+
+		vector<double> couplings[namp][nchs][npole];
+
+		TH1D *istograms[namp][nchs][npole];
+
+		for(int j = 0; j < namp; j++){
+
+			for(int l = 0; l < nchs; l++){
+			
+				for(int k = 0; k < npole; k++){
+
+					for(int i = 0; i < observables.size(); i++){
+
+						couplings[j][l][k].push_back(observables[i].amplitudes[j].getChannels()[l].getCoupling(k));
+
+					}
+
+				}
+
+			}
+
+		}
+
+		for(int j = 0; j < namp; j++){
+
+			for(int l = 0; l < nchs; l++){
+
+				for(int k = 0; k < npole; k++){
+
+					istograms[j][l][k] = new TH1D("", "", 50, 0, 0);
+					for(double x: couplings[j][l][k]){
+						istograms[j][l][k]->Fill(x);
+					}
+					TCanvas canv;
+					istograms[j][l][k]->Draw();
+					canv.SaveAs(("coupling_of_" + to_string(l) + "th_channel_of_" + to_string(j) + "th_wave_to_" + to_string(k) + "th_pole.pdf").c_str());
+
+				}
+
+			}
+
+		}
+
+	}
+
+
+	void PlotChebyDistributions(vector <observable> observables, vector <string> filenames, int polgrade){
+
+		int namp = observables[0].amplitudes.size();
+
+		int nchs = observables[0].amplitudes[0].getChanNames().size();
+
+		vector<double> cheby[namp][nchs][polgrade];
+
+		TH1D *istograms[namp][nchs][polgrade];
+
+		for(int j = 0; j < namp; j++){
+
+			for(int l = 0; l < nchs; l++){
+			
+				for(int k = 0; k < polgrade; k++){
+
+					for(int i = 0; i < observables.size(); i++){
+
+						cheby[j][l][k].push_back(observables[i].amplitudes[j].getChannels()[l].getChebyCoeffs()[k]);
+
+					}
+
+				}
+
+			}
+
+		}
+
+		for(int j = 0; j < namp; j++){
+
+			for(int l = 0; l < nchs; l++){
+
+				for(int k = 0; k < polgrade; k++){
+
+					istograms[j][l][k] = new TH1D("", "", 50, 0, 0);
+					for(double x: cheby[j][l][k]){
+						istograms[j][l][k]->Fill(x);
+					}
+					TCanvas canv;
+					istograms[j][l][k]->Draw();
+					canv.SaveAs(("grade" + to_string(k) + "-coeff_of_numerator_of_" + to_string(l) + "th_channel_of_" + to_string(j) + "th_wave.pdf").c_str());
+
+				}
+
+			}
+
+		}
 
 	}
 

@@ -99,7 +99,11 @@ vector<double> linspace(T start_in, T end_in, int num_in)
 
 }
 
-vector<observable> MakeParamsDistributions(vector <string> filenames, int distr_to_plot){
+void MakeParamsDistributions(vector <string> filenames, int distr_to_plot){
+
+	vector<observable> temp = {};
+
+	int polgrade = 0;
 	
 	for(int i = 0; i < filenames.size(); i++){
 		filereader formatReader(filenames.at(i));
@@ -115,18 +119,23 @@ vector<observable> MakeParamsDistributions(vector <string> filenames, int distr_
 		double cutoff = formatReader.getChi2CutOff();
 
 		//saves the observable object outside of filereader object
-		testObs = formatReader.getObs();
+		temp.push_back(formatReader.getObs());
+
+		polgrade = formatReader.getChebyList().size();
+
 	}
 
 	//make a legend
 
-	//testObs.PlotPolesDistributions()
-	//testObs.PlotChebyDistributions()
+	testObs.PlotPolesDistributions(temp, filenames);
+	testObs.PlotCouplingsDistributions(temp, filenames);
+	testObs.PlotChebyDistributions(temp, filenames, polgrade); 
 
 }
 
 int main(int argc, char ** argv)
 {
+MakeParamsDistributions({"Data/fit467.txt", "Data/fit922.txt", "Data/fit1064.txt", "Data/fit1552.txt"}, 0);return 0;
 	int jobnum = atoi(argv[1]);
 	int numfits = atoi(argv[2]);
 	string inputfile = (string) argv[3];
