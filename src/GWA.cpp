@@ -133,7 +133,7 @@ void MakeParamsDistributions(vector <string> filenames, int distr_to_plot){
 
 int main(int argc, char ** argv)
 {
-MakeParamsDistributions({"Data/fit467.txt", "Data/fit922.txt", "Data/fit1064.txt", "Data/fit1552.txt"}, 0);return 0;
+MakeParamsDistributions({"Data/fit165.txt",   "Data/fit245.txt",   "Data/fit274.txt",   "Data/fit320.txt",   "Data/fit366.txt",   "Data/fit387.txt",   "Data/fit467.txt",   "Data/fit469.txt",   "Data/fit487.txt",   "Data/fit493.txt",   "Data/fit496.txt",   "Data/fit749.txt",   "Data/fit822.txt",   "Data/fit884.txt",   "Data/fit916.txt",   "Data/fit922.txt",   "Data/fit1064.txt",   "Data/fit1270.txt",   "Data/fit1291.txt",   "Data/fit1363.txt",   "Data/fit1410.txt",   "Data/fit1445.txt",   "Data/fit1552.txt",   "Data/fit1585.txt",   "Data/fit1588.txt"} , 0);return 0;
 	int jobnum = atoi(argv[1]);
 	int numfits = atoi(argv[2]);
 	string inputfile = (string) argv[3];
