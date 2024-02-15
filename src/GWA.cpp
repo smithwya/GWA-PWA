@@ -21,6 +21,10 @@
 #include "TError.h"
 #include <TGraph2D.h>
 #include <TF2.h>
+#include "TTree.h"
+#include "TBranch.h"
+#include "TObject.h"
+#include "TSystem.h"
 
 using namespace std;
 typedef std::chrono::system_clock Clock;
@@ -31,6 +35,8 @@ observable testObs = observable();
 polesearcher ps;
 int nParams = 0;
 vector<comp> poles = {}; //this vector holds the poles found by polesearcher
+vector<double> temp_Re = {};
+vector<double> temp_Im = {};
 vector<double> f_val_poles = {}; //this variable holds the value of the minization function for poles
 
 double minfunc(const double *xx){
@@ -159,6 +165,35 @@ int main(int argc, char ** argv)
 	if(sheet == "true") ps.SetSheet(true);
 	
 	ofstream letwrite(polefile);
+
+	///////
+
+	TFile *file;
+	TTree *t1; 
+	string fname = "test.root";
+
+	vector<double> *tree_poles_Re = &temp_Re;
+	vector<double> *tree_poles_Im = &temp_Im;
+	vector<double> *tree_f_val_poles = &f_val_poles;
+
+	//if the file exists, update the ttree on file. otherwise, make it.
+	if(!(gSystem->AccessPathName(fname.c_str(),kFileExists))){
+		file=TFile::Open(fname.c_str(),"update");
+		t1 = (TTree*)file->Get("fits");
+		t1->SetBranchAddress("Poles_Re", &tree_poles_Re);
+		t1->SetBranchAddress("Poles_Im", &tree_poles_Im);
+		t1->SetBranchAddress("FVAL_Poles", &tree_f_val_poles);
+		
+	} else {
+		file = TFile::Open(fname.c_str(),"recreate");
+		t1 = new TTree("fits", ("Fits from code instance "+to_string(jobnum)).c_str());
+		t1->Branch("Poles_Re", &tree_poles_Re);
+		t1->Branch("Poles_Im", &tree_poles_Im);
+		t1->Branch("FVAL_Poles", &tree_f_val_poles);
+
+	}
+
+	///////
 	
 	//make the minimizer
 	ROOT::Math::Minimizer* minpoles = ROOT::Math::Factory::CreateMinimizer("Minuit2","Simplex");
@@ -260,10 +295,26 @@ int main(int argc, char ** argv)
 
 	}
 
+	//////
+
+	for(comp x : poles) temp_Re.push_back(x.real());
+	for(comp x : poles) temp_Im.push_back(x.imag());
+
+	//////
+
 	for(int k = 0; k < poles.size(); k++){
 		letwrite << poles[k].real() << "	" << poles[k].imag() << "	" << f_val_poles[k] << endl; 
+		cout << temp_Re[k] << temp_Im[k] << endl;
 		//cout << poles[k] << endl;
 	}
+
+	/*divide re and imag part, but also try with complex in tree, add f_val_poles*/
+
+	/////
+	t1->Fill();
+	t1->Write(0,TObject::kWriteDelete,0);
+	file->Close("R");
+	/////
 
 	auto abs_det = [&](double* x, double* p){
 		return abs(testObs.amplitudes[ampindex].getDenominator(comp(x[0], x[1]),false).determinant());
