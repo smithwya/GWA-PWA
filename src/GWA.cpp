@@ -56,7 +56,7 @@ double minfunc_with_InclCrossSec(const double *xx){
 	}
 
 	testObs.setFitParams(params);
-	return testObs.chisq()+testObs.chisq_with_InclCrossSec();
+	return testObs.chisq() + testObs.chisq_with_InclCrossSec();
 	
 }
 
@@ -117,7 +117,7 @@ int main(int argc, char ** argv)
 	formatReader.loadExpData();
 	if(formatReader.getInclCrossSecFlag()) formatReader.loadExpInclCrossSec();
 	
-	//gets chisq cutoff
+	//gets chisq cutoff and weights
 	double cutoff = formatReader.getChi2CutOff();
 
 	//saves the observable object outside of filereader object

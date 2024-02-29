@@ -62,7 +62,8 @@ private:
 	vector<expchan> data;
 	int numAmps;
 	expInclCrossSec data_InclCrossSec = expInclCrossSec({},{},{},{});
-
+	double incl_weight = 1.;
+	double excl_weight = 1.;
 
 public:
 	vector<amplitude> amplitudes;
@@ -737,6 +738,14 @@ public:
 		return steps;
 	};
 
+	void setinclchi2weight(double temp){
+		incl_weight = temp;
+	};
+
+	void setexclchi2weight(double temp){
+		excl_weight = temp;
+	};
+
 
 	double chisq(){
 
@@ -787,7 +796,7 @@ public:
 
 		}
 
-		return result;
+		return excl_weight * result;
 
 	}
 
@@ -835,7 +844,7 @@ public:
 
 		}
 
-		return sum;
+		return incl_weight * sum;
 
 	}
 
