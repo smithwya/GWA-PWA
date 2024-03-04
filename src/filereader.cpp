@@ -159,6 +159,26 @@ void filereader::SetChi2CutOff(){
     }
 }
 
+void filereader::SetInclChi2Weight(){
+	regex reg_InclChi2Weight("InclChi2Weight\\(\\s*([0-9\\.-]+)\\s*\\)");
+	smatch cmdmatch;
+	for(int i = 0; i < commands.size(); i++){
+		if(regex_search(commands.at(i), cmdmatch, reg_InclChi2Weight)){
+            InclChi2WeightCmd = commands[i];
+		}
+    }
+}
+
+void filereader::SetExclChi2Weight(){
+	regex reg_ExclChi2Weight("ExclChi2Weight\\(\\s*([0-9\\.-]+)\\s*\\)");
+	smatch cmdmatch;
+	for(int i = 0; i < commands.size(); i++){
+		if(regex_search(commands.at(i), cmdmatch, reg_ExclChi2Weight)){
+            ExclChi2WeightCmd = commands[i];
+		}
+    }
+}
+
 void filereader::SetFitFlag(){
 	regex reg_FitFlag("DoFit\\(\\s*(.*?)\\s*\\)");
 	smatch cmdmatch;
@@ -274,6 +294,8 @@ void filereader::SetAllCommandLists(){
 	SetSeed();
 	SetFitRegion();
 	SetChi2CutOff();
+	SetInclChi2Weight();
+	SetExclChi2Weight();
 	SetFitFlag();
 	setExpInclCrossSec();
 	SetInclCrossSecFlag();
@@ -288,6 +310,14 @@ void filereader::SetAllCommandLists(){
 
 double filereader::getChi2CutOff(){
 	return readChi2CutOffCmd(Chi2CutOffCmd);
+}
+
+double filereader::GetInclChi2Weight(){
+	return ReadInclChi2WeightCmd(InclChi2WeightCmd);
+}
+
+double filereader::GetExclChi2Weight(){
+	return ReadExclChi2WeightCmd(ExclChi2WeightCmd);
 }
 
 bool filereader::getFitFlag(){
@@ -391,6 +421,26 @@ double filereader::readChi2CutOffCmd(string cmd){
 	regex reg_Chi2CutOff("ReducedChi2CutOff\\(\\s*([0-9\\.-]+)\\s*\\)");
 
 	if(regex_search(cmd, match, reg_Chi2CutOff)){
+		return stod(string(match[1]));
+	}
+
+	return 0;
+}
+
+double filereader::ReadInclChi2WeightCmd(string cmd){
+	regex reg_InclChi2Weight("InclChi2Weight\\(\\s*([0-9\\.-]+)\\s*\\)");
+
+	if(regex_search(cmd, match, reg_InclChi2Weight)){
+		return stod(string(match[1]));
+	}
+
+	return 0;
+}
+
+double filereader::ReadExclChi2WeightCmd(string cmd){
+	regex reg_ExclChi2Weight("ExclChi2Weight\\(\\s*([0-9\\.-]+)\\s*\\)");
+
+	if(regex_search(cmd, match, reg_ExclChi2Weight)){
 		return stod(string(match[1]));
 	}
 
@@ -812,6 +862,9 @@ vector<string> filereader::getOutputCmds(){
 
 	output_cmds.push_back(Chi2CutOffCmd);
 
+	output_cmds.push_back(InclChi2WeightCmd);
+
+	output_cmds.push_back(ExclChi2WeightCmd);
 
 	output_cmds.push_back(FitFlagCmd);
 

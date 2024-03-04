@@ -58,7 +58,7 @@ double minfunc_with_InclCrossSec(const double *xx){
 	}
 
 	testObs.setFitParams(params);
-	return testObs.chisq()+testObs.chisq_with_InclCrossSec();
+	return testObs.chisq() + testObs.chisq_with_InclCrossSec();
 	
 }
 
@@ -128,7 +128,7 @@ int main(int argc, char ** argv)
 	formatReader.loadExpData();
 	if(formatReader.getInclCrossSecFlag()) formatReader.loadExpInclCrossSec();
 	
-	//gets chisq cutoff
+	//gets chisq cutoff and weights
 	double cutoff = formatReader.getChi2CutOff();
 
 	//saves the observable object outside of filereader object
@@ -156,6 +156,62 @@ int main(int argc, char ** argv)
 	double chi_squared_incl = 1.0;
 	double chi_squared_excl = 1.0;
 	vector<string> *tree_cmds = &cmds;
+
+	///
+
+	int namp = testObs.amplitudes.size();
+
+	vector<double> resmasses[namp];
+
+	for(int j = 0; j < namp; j++){
+
+		for(int k = 0; k < testObs.amplitudes[j].getResMasses().size(); k++){
+
+			resmasses[j].push_back(testObs.amplitudes[j].getResMasses()[k]);
+
+		}
+
+	}
+
+	int nchs = testObs.amplitudes[0].getChanNames().size();
+
+	int npole = testObs.amplitudes[0].getResMasses().size();
+
+	double couplings[namp][nchs][npole]; 
+
+	for(int j = 0; j < namp; j++){
+
+		for(int l = 0; l < nchs; l++){
+			
+			for(int k = 0; k < npole; k++){
+
+				couplings[j][l][k] = testObs.amplitudes[j].getChannels()[l].getCoupling(k);
+
+			}
+
+		}
+
+	}
+
+	int polgrade = testObs.amplitudes[0].getChannels()[0].getChebyCoeffs().size();
+
+	double cheby[namp][nchs][polgrade];
+
+	for(int j = 0; j < namp; j++){
+
+		for(int l = 0; l < nchs; l++){
+			
+			for(int k = 0; k < polgrade; k++){
+
+				cheby[j][l][k] = testObs.amplitudes[j].getChannels()[l].getChebyCoeffs()[k];
+
+			}
+
+		}
+
+	}
+
+	///
 	
 	//if the file exists, update the ttree on file. otherwise, make it.
 	if(!(gSystem->AccessPathName(fname.c_str(),kFileExists))){
@@ -164,6 +220,28 @@ int main(int argc, char ** argv)
 		t1->SetBranchAddress("Commands", &tree_cmds);
 		t1->SetBranchAddress("Inclusive_chi", &chi_squared_incl);
 		t1->SetBranchAddress("Exclusive_chi", &chi_squared_excl);
+
+		for(int j = 0; j < namp; j++){
+			for(int k = 0; k < resmasses[j].size(); k++){
+				t1->SetBranchAddress(("mJ" + to_string(j)).c_str(), &resmasses[j].at(k));
+			}
+		}
+
+		for(int j = 0; j < namp; j++){
+			for(int l = 0; l < nchs; l++){
+				for(int k = 0; k < npole; k++){
+					t1->SetBranchAddress(("gJ" + to_string(j) + "CH" + to_string(l) + "P" + to_string(k)).c_str(), &couplings[j][l][k]);
+				}		
+			}				
+		}
+
+		for(int j = 0; j < namp; j++){
+			for(int l = 0; l < nchs; l++){
+				for(int k = 0; k < polgrade; k++){
+					t1->SetBranchAddress(("aJ" + to_string(j) + "CH" + to_string(l) + "G" + to_string(k)).c_str(), &cheby[j][l][k]);
+				}
+			}
+		}
 		
 	} else {
 		f = TFile::Open(fname.c_str(),"recreate");
@@ -171,6 +249,28 @@ int main(int argc, char ** argv)
 		t1->Branch("Commands", &cmds);
 		t1->Branch("Inclusive_chi", &chi_squared_incl);
 		t1->Branch("Exclusive_chi", &chi_squared_excl);
+		
+		for(int j = 0; j < namp; j++){
+			for(int k = 0; k < resmasses[j].size(); k++){
+				t1->Branch(("mJ" + to_string(j)).c_str(), &resmasses[j].at(k));
+			}
+		}
+
+		for(int j = 0; j < namp; j++){
+			for(int l = 0; l < nchs; l++){
+				for(int k = 0; k < npole; k++){
+					t1->Branch(("gJ" + to_string(j) + "CH" + to_string(l) + "P" + to_string(k)).c_str(), &couplings[j][l][k]);
+				}		
+			}				
+		}
+
+		for(int j = 0; j < namp; j++){
+			for(int l = 0; l < nchs; l++){
+				for(int k = 0; k < polgrade; k++){
+					t1->Branch(("aJ" + to_string(j) + "CH" + to_string(l) + "G" + to_string(k)).c_str(), &cheby[j][l][k]);
+				}
+			}
+		}
 	}
 	
 	//does the fitting
