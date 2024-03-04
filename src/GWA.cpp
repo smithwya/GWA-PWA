@@ -35,7 +35,9 @@ observable testObs = observable();
 polesearcher ps;
 int nParams = 0;
 vector<comp> poles = {}; //this vector holds the poles found by polesearcher
-double f_val_poles = 0; //this variable holds the value of the minization function for poles
+vector<double> temp_Re = {};
+vector<double> temp_Im = {};
+vector<double> f_val_poles = {}; //this variable holds the value of the minization function for poles
 
 double minfunc(const double *xx){
 
@@ -101,13 +103,22 @@ vector<double> linspace(T start_in, T end_in, int num_in)
 
 int main(int argc, char ** argv)
 {
-	int jobnum = atoi(argv[1]);
-	int numfits = atoi(argv[2]);
-	string inputfile = (string) argv[3];
-	string fitsfolder = (string) argv[4];
+	string inputfile = (string) argv[1]; //just the core e.g. "fit73-36", without the path nor the extension
+	string polefile = (string) argv[2];
+	string pWave = (string) argv[3];
+	double grid_Re_sx = stod(argv[4]);
+	double grid_Re_dx = stod(argv[5]);
+	int grid_Re_numpts = atoi(argv[6]);
+	double grid_Im_sx = stod(argv[7]);
+	double grid_Im_dx = stod(argv[8]);
+	int grid_Im_numpts = atoi(argv[9]);
+	double func_cutoff = stod(argv[10]);
+	string sheet = (string) argv[11]; // NB: "false" = physical sheet; "true" = first unphysical sheet;
+	int jobnum = atoi(argv[12]);
+	int numfits = atoi(argv[13]);
+	//string inputfile = (string) argv[14];
+	//string fitsfolder = (string) argv[15];
 
-	//reads the file and creates an observable object with the information from the file
-	
 	filereader formatReader(inputfile);
 	formatReader.SetAllCommandLists();
 	formatReader.ConstructBareAmps();
@@ -200,8 +211,6 @@ int main(int argc, char ** argv)
 		for(int i = 0; i < nParams; i ++){
 			finalParams.push_back(min->X()[i]);
 		}
-
-		double chisq = min->MinValue()/dof;
 		
 		//if the chisquared is less than the cutoff, add it as a leaf to the ttree
 		if(chisq<cutoff){
@@ -215,10 +224,128 @@ int main(int argc, char ** argv)
 	}
 	
 }
+
+
+/*
+//initialize the polesearcher object
+	ps.settestObs(testObs); 
+	ps.setAmpIndex(pWave); 
+	int ampindex = ps.getAmpIndex(); 
+	ps.SetSheet(false);
+	if(sheet == "true") ps.SetSheet(true);
+	
+	ofstream letwrite(polefile);
+
+
+	TFile *file;
+	TTree *t1; 
+	string fname = "test.root";
+
+	vector<double> *tree_poles_Re = &temp_Re;
+	vector<double> *tree_poles_Im = &temp_Im;
+	vector<double> *tree_f_val_poles = &f_val_poles;
+
+	//if the file exists, update the ttree on file. otherwise, make it.
+	if(!(gSystem->AccessPathName(fname.c_str(),kFileExists))){
+		file=TFile::Open(fname.c_str(),"update");
+		t1 = (TTree*)file->Get("fits");
+		t1->SetBranchAddress("Poles_Re", &tree_poles_Re);
+		t1->SetBranchAddress("Poles_Im", &tree_poles_Im);
+		t1->SetBranchAddress("FVAL_Poles", &tree_f_val_poles);
+		
+	} else {
+		file = TFile::Open(fname.c_str(),"recreate");
+		t1 = new TTree("fits", ("Fits from code instance "+to_string(jobnum)).c_str());
+		t1->Branch("Poles_Re", &tree_poles_Re);
+		t1->Branch("Poles_Im", &tree_poles_Im);
+		t1->Branch("FVAL_Poles", &tree_f_val_poles);
+
+	}
+
+	
+	//make the minimizer
+	ROOT::Math::Minimizer* minpoles = ROOT::Math::Factory::CreateMinimizer("Minuit2","Simplex");
+	//Set some criteria for the minimizer to stop
+	minpoles->SetMaxFunctionCalls(10000);
+	minpoles->SetMaxIterations(1000);
+	//minpoles->SetTolerance(0.001);
+	//minpoles->SetPrecision(1.e-7);
+	minpoles->SetStrategy(1);
+	minpoles->SetPrintLevel(0);
+	
+	nParams = 2;//real and imaginary part of the pole
+	//make a function wrapper to minimize the function minfuncforpoles
+	ROOT::Math::Functor f(&minfunc_for_poles,nParams);
+	minpoles->SetFunction(f);
+	//set the initial conditions and step sizes
+
+	//change these numbers to parameters to pass into from command line
+	vector<double> grid_Re = linspace(grid_Re_sx, grid_Re_dx, grid_Re_numpts);
+	vector<double> grid_Im = linspace(grid_Im_sx, grid_Im_dx, grid_Im_numpts);
+	vector<double> fitparamspoles = {};
+	double steppoles[2] = {1.e-2, 1.e-2};
+	
+	for(int i = 0; i < grid_Re.size(); i++){
+		for(int j = 0; j < grid_Im.size(); j++){
+			
+			fitparamspoles = {grid_Re[i], grid_Im[j]};//cout << grid_Re[i] << endl;
+			//fitparamspoles = {119.,0.8};
+			
+			//cout << fitparamspoles[0] << " " << fitparamspoles[1] << endl;
+		
+			for(int l = 0; l < nParams; l++){
+				minpoles->SetVariable(l,to_string(l),fitparamspoles[l],steppoles[l]);
+			}
+
+			ps.setPoles(poles);
+
+			//run the minimization
+			minpoles->Minimize();
+			//minpoles->Minimize();
+
+			//cout << "calls = " << ps.calls_counter_poles << endl;
+
+			//extract the resulting fit parameters
+			comp finalParams = comp(minpoles->X()[0], -abs(minpoles->X()[1]));
+			long double aux = minpoles->MinValue();
+			for (int j=0; j < poles.size(); j++) aux += log(abs((finalParams - poles[j])*(finalParams - conj(poles[j]))));
+			if(aux < func_cutoff){
+				poles.push_back(finalParams);
+				f_val_poles.push_back(aux);
+			}
+			minpoles->Clear();
+
+		}
+
+	}
+
+
+
+	if(ps.GetSheet()){
+
+		testObs.PolePlotGraph2D(inputfile, polefile, sheet, grid_Re_sx, grid_Re_dx, grid_Im_sx, grid_Im_dx);
+
+		testObs.PolePlotGraph1D(inputfile, polefile, sheet, grid_Re_sx, grid_Re_dx, grid_Im_sx, grid_Im_dx);
+
+		testObs.PoleColormapPlotFunc2D(inputfile, abs_det_II, "abs_det_II", grid_Re_sx, grid_Re_dx, grid_Im_sx, grid_Im_dx);
+
+		testObs.PoleColormapPlotFunc2D(inputfile, log_abs_det_II, "log_abs_det_II", grid_Re_sx, grid_Re_dx, grid_Im_sx, grid_Im_dx);
+
+	}else{
+
+		testObs.PolePlotGraph2D(inputfile, polefile, sheet, grid_Re_sx, grid_Re_dx, grid_Im_sx, grid_Im_dx);
+
+		testObs.PolePlotGraph1D(inputfile, polefile, sheet, grid_Re_sx, grid_Re_dx, grid_Im_sx, grid_Im_dx);
+
+		testObs.PoleColormapPlotFunc2D(inputfile, abs_det, "abs_det", grid_Re_sx, grid_Re_dx, grid_Im_sx, grid_Im_dx);
+
+		testObs.PoleColormapPlotFunc2D(inputfile, log_abs_det, "log_abs_det", grid_Re_sx, grid_Re_dx, grid_Im_sx, grid_Im_dx);
+
+	} */
+
 	
 	t1->Write(0,TObject::kWriteDelete,0);
 	f->Close("R");
-  
 	return 0;
 	
 }

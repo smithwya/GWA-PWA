@@ -9,6 +9,8 @@
 #include "TF1.h"
 #include "TH1D.h"
 #include "TGraphErrors.h"
+#include <TGraph2D.h>
+#include <TF2.h>
 #include "TFile.h"
 #include "TString.h"
 #include <Math/ParamFunctor.h>
@@ -707,6 +709,182 @@ public:
 	}
 
 
+	void PolePlotGraph2D(string inputfile, string polefile, string sheet, double Re_sx, double Re_dx, double Im_sx, double Im_dx){
+
+		string temp = "Plots/" + inputfile + "_poles_graph2D.pdf";
+		if (sheet == "true") temp = "Plots/" + inputfile + "_poles_graph2D_II.pdf";
+
+		TCanvas *box = new TCanvas("box","box",600,500); //costruttore 600pt x 550 pt
+  		//gStyle->SetOptStat(0); //non voglio che mi metti il riquadro con la statistica
+  		box->SetFillColor(0);//il fondo del grafico con 0 è bianco...in teoria lo potete cambiare
+  		box->SetBorderMode(0);//mette dei bordi attorno alla figura...0 nessun bordo
+  		box->SetBorderSize(2); //spessore del bordo
+  		box->SetLeftMargin(0.18); //spazio a sinistra della figura ...20% della larghezza
+  		box->SetRightMargin(0.11);// 5% della larghezza a destra
+  		box->SetTopMargin(0.07); //3% della altezza lato superiore
+  		box->SetBottomMargin(0.14); //12% dell'altezza lato inferiore
+  		box->SetTickx(1);
+  		box->SetTicky(1);
+		
+		TGraph2D *gr = new TGraph2D(polefile.c_str());
+
+		int mymarkerstyle=20;
+  		float mymarkersize=1.;
+  		int mymarkercolor = 4;
+  		float mytextsize=0.05;
+  		int mytextfont=132;
+
+		gr->SetTitle("");
+		gr->SetMarkerColor(mymarkercolor);
+  		gr->SetMarkerSize(mymarkersize);
+  		gr->SetMarkerStyle(mymarkerstyle);
+  		gr->SetLineColor(1);
+  		gr->SetLineWidth(0);
+
+		gr->GetYaxis()->SetTitleSize(mytextsize); //controllo sulla dimension del titolo dell'asse
+  		gr->GetXaxis()->SetTitleSize(mytextsize);
+		gr->GetZaxis()->SetTitleSize(mytextsize);
+  		gr->GetXaxis()->SetLabelSize(mytextsize);//cotrollo sulla dimensione dei numeretti dell'asse
+  		gr->GetYaxis()->SetLabelSize(mytextsize);
+		gr->GetZaxis()->SetLabelSize(mytextsize);	
+  		gr->GetXaxis()->SetTitleFont(mytextfont);//controllo sul carattere usato per il titolo dell'asse
+  		gr->GetYaxis()->SetTitleFont(mytextfont);
+		gr->GetZaxis()->SetTitleFont(mytextfont);
+  		gr->GetXaxis()->SetLabelFont(mytextfont);//controllo sul carattere usato per i numeretti dell'asse
+  		gr->GetYaxis()->SetLabelFont(mytextfont);
+		gr->GetZaxis()->SetLabelFont(mytextfont);
+  		gr->GetXaxis()->SetNdivisions(908); //suddivisione dei numeri sull'asse x---es 0 a 10 a passo di 1, e ogni passo diviso in 5
+  		
+		gr->GetXaxis()->CenterTitle(1);//che il titolo dell'asse lo voglio quindi 1, se non lo volessi metterei 0
+  		gr->GetYaxis()->CenterTitle(1);
+  		gr->GetZaxis()->CenterTitle(1);
+		gr->GetXaxis()->SetTitleOffset(1.20);//definisce la distanza del titolo dell'asse dall'asse stesso
+  		gr->GetYaxis()->SetTitleOffset(1.70);
+  		gr->GetZaxis()->SetTitleOffset(1.15);
+		
+  		gr->GetXaxis()->SetTitle("Re(s) (GeV^{2})");
+  		gr->GetYaxis()->SetTitle("Im(s) (GeV^{2})");
+  		gr->GetZaxis()->SetTitle("log_{10}|det(D_{l}(s))|");
+		
+		gr->GetXaxis()->SetLimits(Re_sx, Re_dx);
+		gr->GetYaxis()->SetLimits(Im_sx, 0);
+
+		gr->Draw("p");
+
+		box->SaveAs(temp.c_str());
+		
+	};
+
+	void PolePlotGraph1D(string inputfile, string polefile, string sheet, double Re_sx, double Re_dx, double Im_sx, double Im_dx){
+
+		string temp = "Plots/" + inputfile + "_poles_graph.pdf";
+		if (sheet == "true") temp = "Plots/" + inputfile + "_poles_graph_II.pdf";
+
+		TCanvas *box = new TCanvas("box","box",600,500); //costruttore 600pt x 550 pt
+  		//gStyle->SetOptStat(0); //non voglio che mi metti il riquadro con la statistica
+  		box->SetFillColor(0);//il fondo del grafico con 0 è bianco...in teoria lo potete cambiare
+  		box->SetBorderMode(0);//mette dei bordi attorno alla figura...0 nessun bordo
+  		box->SetBorderSize(2); //spessore del bordo
+  		box->SetLeftMargin(0.18); //spazio a sinistra della figura ...20% della larghezza
+  		box->SetRightMargin(0.11);// 5% della larghezza a destra
+  		box->SetTopMargin(0.07); //3% della altezza lato superiore
+  		box->SetBottomMargin(0.14); //12% dell'altezza lato inferiore
+  		box->SetTickx(1);
+  		box->SetTicky(1);
+		
+		TGraph *gr = new TGraph(polefile.c_str());
+
+		int mymarkerstyle=20;
+  		float mymarkersize=1.;
+  		int mymarkercolor = 4;
+  		float mytextsize=0.05;
+  		int mytextfont=132;
+
+		gr->GetYaxis()->SetTitleSize(mytextsize); //controllo sulla dimension del titolo dell'asse
+  		gr->GetXaxis()->SetTitleSize(mytextsize);
+  		gr->GetXaxis()->SetLabelSize(mytextsize);//cotrollo sulla dimensione dei numeretti dell'asse
+  		gr->GetYaxis()->SetLabelSize(mytextsize);
+  		gr->GetXaxis()->SetTitleFont(mytextfont);//controllo sul carattere usato per il titolo dell'asse
+  		gr->GetYaxis()->SetTitleFont(mytextfont);
+  		gr->GetXaxis()->SetLabelFont(mytextfont);//controllo sul carattere usato per i numeretti dell'asse
+  		gr->GetYaxis()->SetLabelFont(mytextfont);
+
+  		gr->GetXaxis()->SetNdivisions(908); //suddivisione dei numeri sull'asse x---es 0 a 10 a passo di 1, e ogni passo diviso in 5
+  		
+		gr->GetXaxis()->CenterTitle(1);//che il titolo dell'asse lo voglio quindi 1, se non lo volessi metterei 0
+  		gr->GetYaxis()->CenterTitle(1);
+		gr->GetXaxis()->SetTitleOffset(1.15);//definisce la distanza del titolo dell'asse dall'asse stesso
+  		gr->GetYaxis()->SetTitleOffset(1.15);
+		gr->SetTitle("");
+  		gr->GetXaxis()->SetTitle("Re(s) (GeV^{2})");
+  		gr->GetYaxis()->SetTitle("Im(s) (GeV^{2})");
+		gr->GetXaxis()->SetRangeUser(Re_sx, Re_dx);
+		gr->GetYaxis()->SetRangeUser(Im_sx, 0);
+		gr->SetMarkerColor(mymarkercolor);
+  		gr->SetMarkerSize(mymarkersize);
+  		gr->SetMarkerStyle(mymarkerstyle);
+  		gr->SetLineColor(1);
+  		gr->SetLineWidth(0);
+		gr->Draw("AP");
+
+		box->SaveAs(temp.c_str());
+		
+	};
+
+	void PoleColormapPlotFunc2D(string inputfile, function <double(double*,double*)> func, string funcname, double Re_sx, double Re_dx, double Im_sx, double Im_dx){
+
+		string temp = "Plots/" + inputfile + "_" + funcname + ".pdf";
+
+		TCanvas *box = new TCanvas("box","box",600,500); //costruttore 600pt x 550 pt
+  		//gStyle->SetOptStat(0); //non voglio che mi metti il riquadro con la statistica
+  		box->SetFillColor(0);//il fondo del grafico con 0 è bianco...in teoria lo potete cambiare
+  		box->SetBorderMode(0);//mette dei bordi attorno alla figura...0 nessun bordo
+  		box->SetBorderSize(2); //spessore del bordo
+  		box->SetLeftMargin(0.18); //spazio a sinistra della figura ...20% della larghezza
+  		box->SetRightMargin(0.11);// 5% della larghezza a destra
+  		box->SetTopMargin(0.07); //3% della altezza lato superiore
+  		box->SetBottomMargin(0.14); //12% dell'altezza lato inferiore
+  		box->SetTickx(1);
+  		box->SetTicky(1);
+
+		//TF2 *tf = new TF2("tf", detD, 113, 121, -1, 1, 2);
+		//TF2 tf("tf", [](double* x, double* p) { return abs(testObs.amplitudes[0].getDenominator(comp(x[0], x[1])).determinant()); }, 113., 121., -1., 1.);
+		TF2 tf("tf", func, Re_sx, Re_dx, Im_sx, Im_dx, 1);
+		
+		int mymarkerstyle=20;
+  		float mymarkersize=1.;
+  		int mymarkercolor = 4;
+  		float mytextsize=0.05;
+  		int mytextfont=132;
+
+		tf.GetYaxis()->SetTitleSize(mytextsize); //controllo sulla dimension del titolo dell'asse
+  		tf.GetXaxis()->SetTitleSize(mytextsize);
+  		tf.GetXaxis()->SetLabelSize(mytextsize);//cotrollo sulla dimensione dei numeretti dell'asse
+  		tf.GetYaxis()->SetLabelSize(mytextsize);
+  		tf.GetXaxis()->SetTitleFont(mytextfont);//controllo sul carattere usato per il titolo dell'asse
+  		tf.GetYaxis()->SetTitleFont(mytextfont);
+  		tf.GetXaxis()->SetLabelFont(mytextfont);//controllo sul carattere usato per i numeretti dell'asse
+  		tf.GetYaxis()->SetLabelFont(mytextfont);
+  		tf.GetXaxis()->SetNdivisions(908); //suddivisione dei numeri sull'asse x---es 0 a 10 a passo di 1, e ogni passo diviso in 5
+		tf.GetXaxis()->CenterTitle(1);//che il titolo dell'asse lo voglio quindi 1, se non lo volessi metterei 0
+  		tf.GetYaxis()->CenterTitle(1);
+		tf.GetXaxis()->SetTitleOffset(1.15);//definisce la distanza del titolo dell'asse dall'asse stesso
+  		tf.GetYaxis()->SetTitleOffset(1.15);
+		tf.SetTitle("");
+  		tf.GetXaxis()->SetTitle("Re(s) (GeV^{2})");
+  		tf.GetYaxis()->SetTitle("Im(s) (GeV^{2})");
+		tf.SetMarkerColor(mymarkercolor);
+  		tf.SetMarkerSize(mymarkersize);
+  		tf.SetMarkerStyle(mymarkerstyle);
+  		tf.SetLineColor(1);
+  		tf.SetLineWidth(0);
+
+		tf.Draw("COLZ");
+		box->SaveAs(temp.c_str());
+
+	};
+
+
 	vector<double> getFitParams(){
 		vector<double> params = {};
 		for(amplitude a : amplitudes){
@@ -824,6 +1002,7 @@ public:
 
 				double y = data_InclCrossSec.amp_expval[i];
 				double stat_err = data_InclCrossSec.amp_expval_stat_err[i];
+
 				double sist_err = data_InclCrossSec.amp_expval_sist_err[i];
 				//uncorrelated inclusive data
 				double std = stat_err;

@@ -90,6 +90,8 @@ vector<double> amplitude::getResMasses(){
 
 	// return E_gamma * p_i * numerator * denominator.inverse()
 VectorXcd amplitude::getValue(comp s) {
+
+	bool sheet = false; //because here we are on the real axis to calculate the amplitudes
 	
 	/*
 	//comp Egamma = (pow(m_bottomonium,2)-s)/(2.0*sqrt(s));
@@ -108,23 +110,23 @@ VectorXcd amplitude::getValue(comp s) {
 	
 	MatrixXcd phsp = MatrixXcd::Identity(numChannels,numChannels);
 
-	//s = pow(10.7, 2);
+	//s = comp(118.5,0.8);
 	for(int i = 0; i < numChannels; i++){
 		phsp(i,i)= pow(getMomentum(i,s),J+0.5)/pow(s,.25);
 	}
 
-	double test = 0;
+	comp test = 0;
 	//cout << channels[2].getMasses()[0] << "	" << channels[2].getMasses()[1]<<endl;
-	//cout << getKMatrix(pow(10.7, 2)) << endl; exit(0);
-	//test = omega_s(pow(10.7, 2)).real(); cout << test << endl; exit(0);
-	//cout << getNumerator(pow(10.7, 2), channels[0].getPoleType()) << endl; exit(0);
-	//test = pow(2 * channels[2].getMomentum(pow(10.7, 2)).real(), 2 + 1); cout << test << endl; exit(0);
-	//test = getRhoN(pow(10.7, 2), 2).real(); cout << test << endl; exit(0);
-	/*cout << getIntegral(s, 2) << endl << endl; 
+	//cout << getKMatrix(comp(118.5,0.8)) << endl; exit(0);
+	//test = omega_s(comp(118.5,0.8)).imag(); cout << test << endl; exit(0);
+	//cout << getNumerator(comp(118.5,0.8), channels[0].getPoleType()) << endl; exit(0);
+	//test = pow(2. * channels[2].getMomentum(comp(118.5,0.8)), 2 + 1); cout << test.real() << "	" << test.imag() << endl; exit(0);
+	//test = getRhoN(comp(118.5,0.8), 2); cout << test.real() << "	" << test.imag() << endl; exit(0);
+	cout << getIntegral(comp(118.5,0.8), 2, sheet) << endl << endl;
 	//cout << phsp << endl; exit(0);
-	//cout << (getKMatrix(s).inverse()) << endl; exit(0);
-	cout << getDenominator(s) << endl << endl;
-	cout << getDenominator(s).inverse() << endl; exit(0);*/
+	//cout << (getKMatrix(comp(118.5,0.8)).inverse()) << endl; exit(0);
+	//cout << getDenominator(comp(118.5,0.8)) << endl; exit(0);
+	cout << getDenominator(comp(118.5,0.8), sheet).inverse() << endl; 
 	
 	MatrixXcd K = getKMatrix(s);
 	MatrixXcd I = MatrixXcd::Identity(numChannels,numChannels);
@@ -132,7 +134,7 @@ VectorXcd amplitude::getValue(comp s) {
 	MatrixXcd DispRhoN = MatrixXcd::Zero(numChannels,numChannels);
 
 	for(int k = 0; k < numChannels; k++){
-		DispRhoN(k,k) = getIntegral(s,k);
+		DispRhoN(k,k) = getIntegral(s,k,sheet);
 	}
 
 	return (getNumerator(s, channels[0].getPoleType()).transpose() * (I - K * DispRhoN).inverse() * K) * phsp;
@@ -208,7 +210,7 @@ VectorXcd amplitude::getNumerator(comp s, int type){
 }
 
 //calculates rhoN_ki(s') = delta_ki * (2p_i)^{2J+1}/(s'+sL)^{J+alpha}
-comp amplitude::getRhoN(comp sprime,int k)
+comp amplitude::getRhoN(comp sprime,int k,bool sheet)
 {
 	int dumbJ = J;
 	//if(k==2) dumbJ = 0;
@@ -217,27 +219,39 @@ comp amplitude::getRhoN(comp sprime,int k)
 
 	comp x = pow(2.0*channels[k].getMomentum(sprime),2.0*dumbJ+1.0)/pow(sprime + sL,dumbJ+alpha);
 
+	if(sheet) x = pow(-1., dumbJ) * pow(2.0*channels[k].getComplexMomentum(sprime),2.0*dumbJ+1.0)/pow(sprime + sL,dumbJ+alpha);
+
 	return x;
 }
 
-//overload later for other sheets
+//overload later for other sheets: no, see below
 comp amplitude::getIntegrand(double sp,comp s, int k){
 
-	comp z = getRhoN(sp,k)*s/(sp*(sp-s-comp(0,1)*epsilon)*TMath::Pi());
+	bool sheet = false; //because we need this function just to calculate the integral on the first sheet (see "GetIntegral()")
+
+	comp z = getRhoN(sp,k,sheet)*s/(sp*(sp-s-comp(0,1)*epsilon)*TMath::Pi());
 	//return z.real() + comp(0,1)*getRhoN(s,k);
 	return z;
 }
 
 
-comp amplitude::getIntegral(comp s,int k){
+comp amplitude::getIntegral(comp s,int k,bool sh){
+
+	comp result = 0;
+
+	if(sh) result += 2. * getRhoN(s,k,sh);
+
+	//cout << "result before = " << result << endl; // .
+	
 	//add parameter to select sheet, "+-++" etc
-	intKey skpair = intKey(s,k);
+	intKey skpair = intKey(s,k,sh);
 	auto mapit = integralList.find(skpair);
 
-	if(mapit!=integralList.end()) return mapit->second;
+	//if(mapit!=integralList.end()) return mapit->second; //anyway for the polesearch there's no need to store the result 
 
 	if(abs(s.imag()) < 2 * epsilon){
 		double sreal = s.real();
+		//result += getIntegral(sreal, k);
 		comp result = getIntegral(sreal, k);
 		integralList[skpair] = result;
 		return result;
@@ -263,21 +277,28 @@ comp amplitude::getIntegral(comp s,int k){
 	double realpart = intRe.IntegralUp(threshold+.001);
 	double imagpart = intIm.IntegralUp(threshold+.001);
 	
-	comp result = comp(realpart,imagpart);
+	//comp result = comp(realpart,imagpart);
+	result += comp(realpart,imagpart);
 
+	integralList[skpair]=result; // if(sh) cout << "ehilà" << endl; // .
 
-	integralList[skpair]=result;
+	// cout << "result after = " << result << endl; // .
+
+	//if(sh) result += 2. * getRhoN(s,k,sh);
 
 	return result;
 }
 
 comp amplitude::getIntegral(double s,int k){
 
-	double tempRhoN = getRhoN(s, k).real();
+	bool sheet = false; //because the value of the amplitude (and therefore also the dispersive integral) on the real axis 
+	// is the same for every sheet (in fact the unphyhsical sheets fuses with the physical one in the real axis)
+
+	double tempRhoN = getRhoN(s, k, sheet).real();
 
 	auto integrand = [&](double sp)
 	{
-		return s * (getRhoN(sp, k).real() - tempRhoN)/(sp * (sp - s)) / TMath::Pi(); //if sp is real getRhoN(sp,k) is real too
+		return s * (getRhoN(sp, k, sheet).real() - tempRhoN)/(sp * (sp - s)) / TMath::Pi(); //if sp is real getRhoN(sp,k) is real too
 	};
 
 	ROOT::Math::Functor1D integrand_fun(integrand);
@@ -301,24 +322,24 @@ comp amplitude::getIntegral(double s,int k){
 }
 
 
-void amplitude::calcIntegrals(vector<comp> slist,int k){
+void amplitude::calcIntegrals(vector<comp> slist,int k,bool sheet){
 
 	for(comp s : slist){
-		integralList[intKey(s,k)]=getIntegral(s,k);
+		integralList[intKey(s,k,sheet)]=getIntegral(s,k,sheet);
 	}
 	
 
 	return;
 }
 
-MatrixXcd amplitude::getDenominator(comp s)
+MatrixXcd amplitude::getDenominator(comp s,bool sheet)
 {
 	MatrixXcd Kinv = getKMatrix(s).inverse();
 
 	MatrixXcd M = MatrixXcd::Zero(numChannels,numChannels);
 
 	for(int k = 0; k < numChannels; k++){
-		M(k,k) = getIntegral(s,k);
+		M(k,k) = getIntegral(s,k,sheet);
 	}
 
 	return Kinv-M;
@@ -329,6 +350,11 @@ MatrixXcd amplitude::getDenominator(comp s)
 comp amplitude::getMomentum(int chan, comp s)
 {
 	return channels[chan].getMomentum(s);
+}
+
+comp amplitude::getComplexMomentum(int chan, comp s)
+{
+	return channels[chan].getComplexMomentum(s);
 }
 
 comp amplitude::getTrueMomentum(int chan, comp s)
@@ -365,7 +391,8 @@ MatrixXcd amplitude::getKMatrix(comp s) {
 
 	}
 
-	return kmat.real();
+	//return kmat.real();
+	return kmat;
 }
 
 void amplitude::setChebyCoeffs(string cname, int poletype, double s0, vector<double> coeffs){
