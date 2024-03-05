@@ -747,10 +747,10 @@ void filereader::randomize(){
 	return;
 }
 
-void filereader::randomize(int seed){
+void filereader::randomize(int new_seed){
 	vector<double> params = obsObject.getFitParams();
 	vector<double> stepsizes = obsObject.getStepSizes();
-
+	seed = new_seed;
 	TRandom3 gen(seed);
 
 	//might need to make sure pole masses are positive somehow
@@ -790,67 +790,62 @@ void filereader::readExpInclCrossSecCmd(string cmd){
 	
 	if(regex_search(cmd, match, reg_inclcrosssec)){
 		ExpInclCrossSecFilename = match[1];
-		//cout << ExpInclCrossSecFilename << endl;
     }
 }
-
 void filereader::writeOutputFile(string outname){
-
+	
 	ofstream letswrite(outname);
+	for(string s: getOutputCmds()) letswrite << s << endl;
 
-	output_cmds.push_back(SeedCmd);
+	letswrite.close();
+	 
+}
 
-	output_cmds.push_back("");
+
+vector<string> filereader::getOutputCmds(){
+	vector<string> output_cmds = {};
+
+	output_cmds.push_back("SetSeed("+to_string(seed)+")");
 
 	output_cmds.push_back(FitRegion);
 
-	output_cmds.push_back("");
 
 	output_cmds.push_back(Chi2CutOffCmd);
 
-	output_cmds.push_back("");
 
 	output_cmds.push_back(FitFlagCmd);
 
-	output_cmds.push_back("");
 
 	output_cmds.push_back(InclCrossSecFlagCmd);
 
-	output_cmds.push_back("");
 
 	output_cmds.push_back(RandomizeFlagCmd);
 
-	output_cmds.push_back("");
 
 	for(string s: AddChannel_list) output_cmds.push_back(s);
 
-	output_cmds.push_back("");
 
 	for(string s: AddWave_list) output_cmds.push_back(s);
 
-	output_cmds.push_back("");
 
-	RewriteChebyList();
+	vector<string> clist = RewriteChebyList();
+	output_cmds.insert(output_cmds.end(),clist.begin(),clist.end());
 
-	output_cmds.push_back("");
 
-	RewriteAddPoleList();
+	vector<string> plist = RewriteAddPoleList();
+	output_cmds.insert(output_cmds.end(),plist.begin(),plist.end());
 
-	output_cmds.push_back("");
 
-	RewriteKmatList();
+	vector<string> klist = RewriteKmatList();
+	output_cmds.insert(output_cmds.end(),klist.begin(),klist.end());
 
-	output_cmds.push_back("");
 
 	for(string s: ExpData_list) output_cmds.push_back(s);
 
-	output_cmds.push_back("");
 
 	output_cmds.push_back(ExpInclCrossSecCmd);
 
-	for(string s: output_cmds) letswrite << s << endl;
-
-	letswrite.close();
+return output_cmds;
 	 
 }
 
@@ -1034,8 +1029,8 @@ void filereader::writeMathematicaOutputFile(string outname){
 }
 
 
-void filereader::RewriteAddPoleList(){
-	
+vector<string> filereader::RewriteAddPoleList(){
+	vector<string> plist = {};
 	regex testreg_number("([+-]{0,1}?(?=\\.\\d|\\d)(?:\\d+)?(?:\\.?\\d*))(?:[Ee]([+-]{0,1}?\\d+))?");
 	regex testreg_name("[A-Za-z0-9\\.\\-\\_]+");
 	regex reg_AddPole("AddPole\\(\"(.*?)\"\\s*,\\s*([0-9\\.-]+\\s*\\\\pm\\s*[0-9\\.]+)\\s*,\\s*\\{\\s*((\"(.*?)\"\\s*,?\\s*)+)\\}\\s*,\\s*\\{\\s*(([0-9\\.-]+\\s*\\\\pm\\s*[0-9\\.]+\\s*,?\\s*)+)\\}\\s*\\)"); 
@@ -1057,15 +1052,10 @@ void filereader::RewriteAddPoleList(){
 
 	for(string s : getAddPoleList()){
 
-		//cout << s << endl;
-
 		if(regex_search(s, match, reg_AddPole)){
 
-			//for (int i = 0; i<15; i++) cout << i << ": " << match[i] << endl;
-			//exit(0);
 			wname = match[1];
 			remove(wname.begin(), wname.end(), ' ');
-			//cout << wname << endl;
 	
 		}
 
@@ -1077,21 +1067,9 @@ void filereader::RewriteAddPoleList(){
 		for(int i = 0; i < numchans; i++){
 			for(int j = 0; j < numpoles; j++){
 				couplings_to_poles[i][j] = obsObject.amplitudes[amp_index].getChannels()[i].getCouplings()[j];
-				//cout << couplings_to_poles[i][j] << " ";
 				couplings_to_poles_steps[i][j] = obsObject.amplitudes[amp_index].getChannels()[i].getCouplingSteps()[j];
 			}
-			//cout << endl;
 		}
-
-		/*for(string channame: obsObject.amplitudes[amp_index].getChanNames()){
-			int chan_index = obsObject.getchanindex(wname, channame);
-			for(double coup: obsObject.amplitudes[amp_index].getChannels()[chan_index].getCouplings()){
-				cout << coup << " ";
-			}
-			cout << endl;
-		}*/
-
-		//s = regex_replace(s, testreg_number, obsObject.amplitudes[amp_index].)
 
 		s = prefixe;
 
@@ -1103,10 +1081,6 @@ void filereader::RewriteAddPoleList(){
 		s += suffixe;
 
 		if(regex_search(s, testmatch, reg_mass_pm_inc)){
-			
-			//cout << testmatch[0] << endl;
-
-			//cout << testmatch.prefix() << endl << testmatch.suffix() << endl;
 
 			double mass = obsObject.amplitudes[amp_index].getResMasses()[pole_index];
 
@@ -1114,7 +1088,7 @@ void filereader::RewriteAddPoleList(){
 
 			s = string(testmatch.prefix()) + to_string(mass) + " \\pm " + to_string(inc_mass) + string(testmatch.suffix()); 
 
-			output_cmds.push_back(s);
+			plist.push_back(s);
 
 		}
 
@@ -1123,11 +1097,12 @@ void filereader::RewriteAddPoleList(){
 		pole_index++;
 		
 	}
+	return plist;
 	
 }
 
-void filereader::RewriteChebyList(){
-
+vector<string> filereader::RewriteChebyList(){
+	vector<string> clist = {};
 	regex testreg_number("([+-]{0,1}?(?=\\.\\d|\\d)(?:\\d+)?(?:\\.?\\d*))(?:[Ee]([+-]{0,1}?\\d+))?");
 	regex testreg_name("[A-Za-z0-9\\.\\-\\_]+");
 	regex reg_Cheby("ChebyCoeffs\\(\\s*\"(.*?)\"\\s*,\\s*\"(.*?)\"\\s*,\\s*\"(.*?)\"\\s*,\\s*\\{((\\s*[0-9\\.-]+\\s*\\\\pm\\s*[0-9\\.]+\\s*,?\\s*)+)\\}\\)");
@@ -1142,7 +1117,6 @@ void filereader::RewriteChebyList(){
 
 	for(string s : getChebyList()){
 
-		//cout << s << endl;
 
 		if(regex_search(s, match, reg_Cheby)){
 			wname = match[1];
@@ -1173,16 +1147,14 @@ void filereader::RewriteChebyList(){
 
 		s += suffixe;
 
-		//cout << s << endl;
-
-		output_cmds.push_back(s);
+		clist.push_back(s);
 
 	}
-
+	return clist;
 }
 
-void filereader::RewriteKmatList(){
-	
+vector<string> filereader::RewriteKmatList(){
+	vector<string> klist = {};
 	regex reg_Kmat("AddKmatBackground\\(\\s*\"(.*?)\"\\s*,\\s*([0-9\\.-]+)\\s*,\\s*\\{((\\s*\\{((\\s*[0-9\\.-]+\\s*\\\\pm\\s*[0-9\\.]+\\s*,?\\s*)+)\\}\\s*,?\\s*)+)\\}\\s*\\)");
 	regex reg_Kmat_core("\\{((\\s*\\{((\\s*[0-9\\.-]+\\s*\\\\pm\\s*[0-9\\.]+\\s*,?\\s*)+)\\}\\s*,?\\s*)+)\\}");
 
@@ -1190,8 +1162,6 @@ void filereader::RewriteKmatList(){
 	int power = 0;
 
 	for(string s : getKmatList()){
-
-		//cout << s << endl;
 
 		if(regex_search(s, match, reg_Kmat)){
 
@@ -1218,16 +1188,6 @@ void filereader::RewriteKmatList(){
 				}
 			}
 
-			/*for(int i = 0; i < numchan; i++){
-				for(int j = 0; j < numchan; j++){
-					cout << mat_steps(i,j) << " ";
-				}
-				cout << endl;
-			}
-
-			for(double x: steps) cout << x << endl;*/
-			
-
 			string prefix = testmatch.prefix();
 			string suffix = testmatch.suffix();
 
@@ -1247,10 +1207,9 @@ void filereader::RewriteKmatList(){
 
 		}
 
-		//cout << s << endl;
 
-		output_cmds.push_back(s);
+		klist.push_back(s);
 
 	}
-
+	return klist;
 }

@@ -8,7 +8,7 @@ CPPFLAGS := $(shell root-config --cflags) $(STDINCDIR) -I/usr/include/eigen3
 CPPFLAGS += -O3
 
 #linking flags
-LDFLAGS := -Xlinker -rpath . $(shell root-config --glibs) $(STDLIBDIR)
+LDFLAGS := -Xlinker -rpath . $(shell root-config --glibs ) $(STDLIBDIR)
 
 SRCDIR = src
 OBJDIR = obj
@@ -17,6 +17,7 @@ BINDIR = bin
 SOURCES := $(wildcard $(SRCDIR)/*.cpp)
 INCLUDES := $(wildcard $(SRCDIR)/*.h)
 OBJECTS := $(SOURCES:$(SRCDIR)/%.cpp=$(OBJDIR)/%.o)
+
 rm = rm -f
 
 all: $(BINDIR)/$(TARGET)
@@ -32,4 +33,6 @@ $(OBJECTS): $(OBJDIR)/%.o : $(SRCDIR)/%.cpp
 	@echo "Compiled "$<" successfully"
 clean:
 	$(rm) $(OBJECTS)
+	$(rm) libGWA.so  GWADict.cxx GWADict_rdict.pcm
 	@echo "Cleanup complete"
+

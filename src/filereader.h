@@ -170,10 +170,11 @@ public:
 	void randomize();
 	void randomize(int newseed);
 	void writeOutputFile(string outfile);
+	vector<string> getOutputCmds();
 	void writeMathematicaOutputFile(string outname);
-	void RewriteChebyList();
-	void RewriteAddPoleList();
-	void RewriteKmatList();
+	vector<string> RewriteChebyList();
+	vector<string> RewriteAddPoleList();
+	vector<string> RewriteKmatList();
 	void setSeed(int newseed);
 	void setExpInclCrossSec();
 
@@ -182,7 +183,7 @@ private:
 	bool FitFlag = true;
 	bool InclCrossSecFlag = true; 
 	string NameOfFile;
-	vector<std::string> commands = {}, output_cmds = {}, Math_output_cmds = {};
+	vector<std::string> commands = {}, Math_output_cmds = {};
 	smatch match, testmatch;
 	string FitFlagCmd, SeedCmd, FitRegion, Chi2CutOffCmd, RandomizeFlagCmd, ExpInclCrossSecCmd, ExpInclCrossSecFilename, InclCrossSecFlagCmd;
 	vector<string> AddChannel_list, AddWave_list, Cheby_list, AddPole_list, Kmat_list,ExpData_list;

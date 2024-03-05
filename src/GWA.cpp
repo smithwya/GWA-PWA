@@ -103,8 +103,6 @@ vector<double> linspace(T start_in, T end_in, int num_in)
 
 int main(int argc, char ** argv)
 {
-//polesearch
-  
 	string inputfile = (string) argv[1]; //just the core e.g. "fit73-36", without the path nor the extension
 	string polefile = (string) argv[2];
 	string pWave = (string) argv[3];
@@ -121,43 +119,115 @@ int main(int argc, char ** argv)
 	//string inputfile = (string) argv[14];
 	//string fitsfolder = (string) argv[15];
 
-
-	//reads the file and creates an observable object with the information from the file
+	filereader formatReader(inputfile);
+	formatReader.SetAllCommandLists();
+	formatReader.ConstructBareAmps();
+	formatReader.setChebys();
+	formatReader.setPoles();
+	formatReader.setKmats();
+	formatReader.loadExpData();
+	if(formatReader.getInclCrossSecFlag()) formatReader.loadExpInclCrossSec();
 	
-	filereader testReader("Data/" + inputfile + ".txt");
-	testReader.SetAllCommandLists();
-	testReader.ConstructBareAmps();
-	testReader.setChebys();
-	testReader.setPoles();
-	testReader.setKmats();
-	testReader.loadExpData();
-
-	if(testReader.getInclCrossSecFlag()) testReader.loadExpInclCrossSec();
-/*	
-	//saves current time
-	std::chrono::system_clock::time_point now = std::chrono::system_clock::now();
-	time_t tt = std::chrono::system_clock::to_time_t(now);
-	tm local_tm = *localtime(&tt);
-	
-	std::stringstream timebuffer;
-	auto t = std::chrono::system_clock::now();
-	timebuffer << local_tm.tm_year + 1900 << '-'<< local_tm.tm_mon + 1 << '-'<< local_tm.tm_mday;
-	
-	//selects a seed based off clock + job number
-	int seed = now.time_since_epoch().count()+jobnum+numfits;
-	testReader.setSeed(seed); 
-
 	//gets chisq cutoff
-	double cutoff = testReader.getChi2CutOff();
-*/
+	double cutoff = formatReader.getChi2CutOff();
+
 	//saves the observable object outside of filereader object
-	testObs = testReader.getObs(); 
+	testObs = formatReader.getObs();
 
-//vector<double> steps = testObs.getStepSizes();
+	//saves original starting parameters
+	vector<double> startparams = testObs.getFitParams();
+	vector<double> steps = testObs.getStepSizes();
+	
+	//gets degrees of freedom
+	string fittype = "excl";
+	int dof = testObs.getNumData()-steps.size();
+	
+	if(formatReader.getInclCrossSecFlag()){
+		dof+=testObs.getNumInclData();
+		fittype = "incl";
+	}
+	
+	//Opens up the fit files and sets up TTrees
+	string fname = fitsfolder+"run"+to_string(jobnum)+".root";
 
-//cout << testObs.chisq() << "	" << testObs.chisq()/(testObs.getNumData() - steps.size() + testObs.getNumInclData()) << endl;
+	TFile *f;
+	TTree *t1;
+	vector<string> cmds = formatReader.getOutputCmds();
+	double chi_squared_incl = 1.0;
+	double chi_squared_excl = 1.0;
+	vector<string> *tree_cmds = &cmds;
+	
+	//if the file exists, update the ttree on file. otherwise, make it.
+	if(!(gSystem->AccessPathName(fname.c_str(),kFileExists))){
+		f=TFile::Open(fname.c_str(),"update");
+		t1 = (TTree*)f->Get("fits");
+		t1->SetBranchAddress("Commands", &tree_cmds);
+		t1->SetBranchAddress("Inclusive_chi", &chi_squared_incl);
+		t1->SetBranchAddress("Exclusive_chi", &chi_squared_excl);
+		
+	} else {
+		f = TFile::Open(fname.c_str(),"recreate");
+		t1 = new TTree("fits", ("Fits from code instance "+to_string(jobnum)).c_str());
+		t1->Branch("Commands", &cmds);
+		t1->Branch("Inclusive_chi", &chi_squared_incl);
+		t1->Branch("Exclusive_chi", &chi_squared_excl);
+	}
+	
+	//does the fitting
+	for (int j = 0; j < numfits; j++){
+		//resets the observable
+		testObs.setFitParams(startparams);
+		formatReader.setObs(testObs);
+		auto now = std::chrono::system_clock::now();
+		int seed = now.time_since_epoch().count()+jobnum;
+		//randomizes the parameters
+		if(formatReader.getRandomizeFlag()) formatReader.randomize(seed);
+		testObs = formatReader.getObs();
+		
+	if(formatReader.getFitFlag()){
+		//make the minimzer
+		ROOT::Math::Minimizer* min = ROOT::Math::Factory::CreateMinimizer("Minuit2","");
+		//Set some criteria for the minimzer to stop
+		min->SetMaxFunctionCalls(100000);
+		min->SetMaxIterations(10000);
+		min->SetTolerance(0.001);
+		min->SetPrintLevel(1);
+		//get the initial parameters and steps from the constructed observable object
+		vector<double> fitparams = testObs.getFitParams();
+		nParams = fitparams.size();
+		//make a function wrapper to minimize the function minfunc (=chisquared)
+		ROOT::Math::Functor f(&minfunc,nParams);
+		ROOT::Math::Functor g(&minfunc_with_InclCrossSec,nParams);
+		if(formatReader.getInclCrossSecFlag()) min->SetFunction(g);
+		else min->SetFunction(f);
+		//set the initial conditions and step sizes
+		for(int i = 0; i < nParams; i++){
+			min->SetVariable(i,to_string(i),fitparams[i],steps[i]);
+		}
+		//run the minimization
+		min->Minimize();
+		//extract the resulting fit parameters
+		vector<double> finalParams = {};
+		for(int i = 0; i < nParams; i ++){
+			finalParams.push_back(min->X()[i]);
+		}
+		
+		//if the chisquared is less than the cutoff, add it as a leaf to the ttree
+		if(chisq<cutoff){
+      			testObs.setFitParams(finalParams);
+			chi_squared_excl= testObs.chisq()/(testObs.getNumData()-steps.size());
+			chi_squared_incl=chisq;
+			formatReader.setObs(testObs);
+			cmds = formatReader.getOutputCmds();
+			t1->Fill();
+		}
+	}
+	
+}
 
-	//initialize the polesearcher object
+
+/*
+//initialize the polesearcher object
 	ps.settestObs(testObs); 
 	ps.setAmpIndex(pWave); 
 	int ampindex = ps.getAmpIndex(); 
@@ -166,7 +236,6 @@ int main(int argc, char ** argv)
 	
 	ofstream letwrite(polefile);
 
-	///////
 
 	TFile *file;
 	TTree *t1; 
@@ -193,7 +262,6 @@ int main(int argc, char ** argv)
 
 	}
 
-	///////
 	
 	//make the minimizer
 	ROOT::Math::Minimizer* minpoles = ROOT::Math::Factory::CreateMinimizer("Minuit2","Simplex");
@@ -216,50 +284,6 @@ int main(int argc, char ** argv)
 	vector<double> grid_Im = linspace(grid_Im_sx, grid_Im_dx, grid_Im_numpts);
 	vector<double> fitparamspoles = {};
 	double steppoles[2] = {1.e-2, 1.e-2};
-
-	/*cout << testObs.amplitudes[0].getChannels()[0].getMomentum(comp(118,0.5)) << endl;
-	cout << testObs.amplitudes[0].getChannels()[0].getComplexMomentum(comp(118,0.5)) << endl << endl; 
-
-	cout << testObs.amplitudes[0].getRhoN(comp(118,0.5),0,false) << endl;
-	cout << testObs.amplitudes[0].getRhoN(comp(118,0.5),0,true) << endl << endl;*/
-
-	//cout << testObs.amplitudes[0].getIntegrand(118.,comp(118,0.5),0) << endl << endl; 
-
-	/*cout << testObs.amplitudes[0].getIntegral(comp(118.,.5),0,false) << endl; 
-	cout << testObs.amplitudes[0].getIntegral(comp(118.,.5),0,true) << endl << endl; */
-
-	//testReader.writeMathematicaOutputFile("Data/Math_fit47-32.txt");exit(0);
-
-	auto imagpartintcomplex = [&](double x){
-		return testObs.amplitudes[0].getIntegral(comp(x*x,pow(10,-2)),0,false).imag();
-	};
-
-	auto imagpartintcomplexII = [&](double x){
-		return testObs.amplitudes[0].getIntegral(comp(x*x,-pow(10,-2)),0,true).imag();
-	};
-
-	auto repartintcomplex = [&](double x){
-		return testObs.amplitudes[0].getIntegral(comp(x*x,pow(10,-2)),0,false).real();
-	};
-
-	auto repartintcomplexII = [&](double x){
-		return testObs.amplitudes[0].getIntegral(comp(x*x,-pow(10,-2)),0,true).real();
-	};
-
-	/*testObs.makePlotGraph("P", "BB", "imagpartintcomplex", imagpartintcomplex, 10.6322, 11.0208);
-	testObs.makePlotGraph("P", "BB", "imagpartintcomplexII", imagpartintcomplexII, 10.6322, 11.0208);
-	testObs.makePlotGraph("P", "BB", "repartintcomplex", repartintcomplex, 10.6322, 11.0208);
-	testObs.makePlotGraph("P", "BB", "repartintcomplexII", repartintcomplexII, 10.6322, 11.0208);*/
-
-	//cout << testObs.amplitudes[0].getKMatrix(comp(118,0.5)) << endl;
-
-	/*cout << testObs.amplitudes[0].getDenominator(comp(118,0.5),false) << endl << endl;
-	cout << testObs.amplitudes[0].getDenominator(comp(118,0.5),true) << endl; exit(0);*/
-	
-	/*cout << testObs.amplitudes[0].getDenominator(comp(118,5.5),false) << endl << endl;
-	cout << testObs.amplitudes[0].getDenominator(comp(118,5.5),true) << endl; exit(0);*/
-
-	//cout << log10(abs(testObs.amplitudes[0].getDenominator(comp(113.676, -0.00807683),true).determinant())) << endl; exit(0);
 	
 	for(int i = 0; i < grid_Re.size(); i++){
 		for(int j = 0; j < grid_Im.size(); j++){
@@ -295,50 +319,7 @@ int main(int argc, char ** argv)
 
 	}
 
-	//////
 
-	for(comp x : poles) temp_Re.push_back(x.real());
-	for(comp x : poles) temp_Im.push_back(x.imag());
-
-	//////
-
-	for(int k = 0; k < poles.size(); k++){
-		letwrite << poles[k].real() << "	" << poles[k].imag() << "	" << f_val_poles[k] << endl; 
-		cout << temp_Re[k] << temp_Im[k] << endl;
-		//cout << poles[k] << endl;
-	}
-
-	/*divide re and imag part, but also try with complex in tree, add f_val_poles*/
-
-	/////
-	t1->Fill();
-	t1->Write(0,TObject::kWriteDelete,0);
-	file->Close("R");
-	/////
-
-	auto abs_det = [&](double* x, double* p){
-		return abs(testObs.amplitudes[ampindex].getDenominator(comp(x[0], x[1]),false).determinant());
-		/*MatrixXcd temp = (comp(x[0], x[1]) - comp(115,0.5)) * (comp(x[0], x[1]) - comp(118,0.7)) * (comp(x[0], x[1]) - comp(115,-0.5)) * (comp(x[0], x[1]) - comp(118,-0.7)) * MatrixXcd({{1}});
-		return abs(temp.determinant());*/
-	};
-
-	auto log_abs_det = [&](double* x, double* p){
-		return log10(abs(testObs.amplitudes[ampindex].getDenominator(comp(x[0], x[1]),false).determinant()));
-		/*MatrixXcd temp = (comp(x[0], x[1]) - comp(115,0.5)) * (comp(x[0], x[1]) - comp(118,0.7)) * (comp(x[0], x[1]) - comp(115,-0.5)) * (comp(x[0], x[1]) - comp(118,-0.7)) * MatrixXcd({{1}});
-		return log(abs(temp.determinant()));*/
-	};
-
-	auto abs_det_II = [&](double* x, double* p){
-		return abs(testObs.amplitudes[ampindex].getDenominator(comp(x[0], x[1]),true).determinant());
-		/*MatrixXcd temp = (comp(x[0], x[1]) - comp(115,0.5)) * (comp(x[0], x[1]) - comp(118,0.7)) * (comp(x[0], x[1]) - comp(115,-0.5)) * (comp(x[0], x[1]) - comp(118,-0.7)) * MatrixXcd({{1}});
-		return abs(temp.determinant());*/
-	};
-
-	auto log_abs_det_II = [&](double* x, double* p){
-		return log10(abs(testObs.amplitudes[ampindex].getDenominator(comp(x[0], x[1]),true).determinant()));
-		/*MatrixXcd temp = (comp(x[0], x[1]) - comp(115,0.5)) * (comp(x[0], x[1]) - comp(118,0.7)) * (comp(x[0], x[1]) - comp(115,-0.5)) * (comp(x[0], x[1]) - comp(118,-0.7)) * MatrixXcd({{1}});
-		return log(abs(temp.determinant()));*/
-	};
 
 	if(ps.GetSheet()){
 
@@ -360,86 +341,11 @@ int main(int argc, char ** argv)
 
 		testObs.PoleColormapPlotFunc2D(inputfile, log_abs_det, "log_abs_det", grid_Re_sx, grid_Re_dx, grid_Im_sx, grid_Im_dx);
 
-	}
+	} */
 
-/*
-	cout << "test " << testObs.amplitudes[0].getValue(pow(10.7,2)) << endl;
-
-	testObs.makePlotGraph("P", "BB", "test2_ImagPartInt", ImagPartInt, 10.6322, 11.0208);
-	testObs.makePlotGraph("P", "BB", "test2_AlternImagPartInt", AlternImagPartInt, 10.6322, 11.0208);
-	testObs.makePlotGraph("P", "BB", "test2_RealPartInt", RealPartInt, 10.6322, 11.0208);
-	testObs.makePlotGraph("P", "BB", "test2_AlternRealPartInt", AlternRealPartInt, 10.6322, 11.0208);
-	testObs.makePlotGraphWithExp("P", "BB", "test2_BB", intensityP_BB, 10.6322,11.0208);
-	testObs.makePlotGraphWithExp("P", "BBstar", "test2_BBstar", intensityP_BBstar, 10.6322,11.0208);
-	testObs.makePlotGraphWithExp("P", "BstarBstar", "test2_BstarBstar", intensityP_BstarBstar, 10.6322,11.0208);
-	testObs.makePlotGraphWithExp("P", "B_sstarB_sstar", "BottB_sstarB_sstar_Graph_WithExp", intensityP_B_sstarB_sstar, 10.6322,11.0208);
 	
-
-
-	//saves original starting parameters
-	//vector<double> startparams = testObs.getFitParams();
-	vector<double> steps = testObs.getStepSizes();
-	
-	//gets degrees of freedom
-	string fittype = "excl";
-	int dof = testObs.getNumData()-steps.size();
-	
-	if(testReader.getInclCrossSecFlag()){
-		dof+=testObs.getNumInclData();
-		fittype = "incl";
-	}
-
-	for (int j = 0; j < numfits; j++){
-		
-		if(testReader.getRandomizeFlag()) testReader.randomize(seed);
-		testObs = testReader.getObs();
-		
-		
-	if(testReader.getFitFlag()){
-		//make the minimzer
-		ROOT::Math::Minimizer* min = ROOT::Math::Factory::CreateMinimizer("Minuit2","");
-		//Set some criteria for the minimzer to stop
-		min->SetMaxFunctionCalls(100000);
-		min->SetMaxIterations(10000);
-		min->SetTolerance(0.001);
-		min->SetPrintLevel(1);
-		//get the initial parameters and steps from the constructed observable object
-		vector<double> fitparams = testObs.getFitParams();
-		nParams = fitparams.size();
-		//make a function wrapper to minimize the function minfunc (=chisquared)
-		ROOT::Math::Functor f(&minfunc,nParams);
-		ROOT::Math::Functor g(&minfunc_with_InclCrossSec,nParams);
-		if(testReader.getInclCrossSecFlag()) min->SetFunction(g);
-		else min->SetFunction(f);
-		//set the initial conditions and step sizes
-		for(int i = 0; i < nParams; i++){
-			min->SetVariable(i,to_string(i),fitparams[i],steps[i]);
-		}
-		//run the minimization
-		min->Minimize();
-		//extract the resulting fit parameters
-		vector<double> finalParams = {};
-		for(int i = 0; i < nParams; i ++){
-			finalParams.push_back(min->X()[i]);
-		}
-
-		if(chisq<cutoff){
-			double excl_chisq = testObs.chisq()/(testObs.getNumData()-steps.size());
-			string fname = fitsfolder+timebuffer.str()+"-"+to_string(jobnum)+"-"+to_string(j)+"-"+fittype+"-"+to_string(chisq)+"-"+to_string(excl_chisq);
-			testObs.setFitParams(finalParams);
-			testReader.setObs(testObs);
-			testReader.writeOutputFile(fname);
-			ofstream outputfile(fname,ios::app);
-			outputfile<<"chisq = "<<chisq<<endl;
-			outputfile<<"excl_chisq = "<<excl_chisq<<endl;
-			outputfile.close();
-		}
-		
-		testReader.setObs(testObs);
-	}	
-	
-}
-*/
+	t1->Write(0,TObject::kWriteDelete,0);
+	f->Close("R");
 	return 0;
 	
 }
