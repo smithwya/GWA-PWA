@@ -1,0 +1,7 @@
+Possible additions/to-do:
+1- Add CG coefficient option as input
+2- Integral over a closed contour
+3- Check the fact that the analytic continuation formula holds both with +- and -+
+4- Check the intKey to store the result of integrals also with the bool
+5- Add sequential calls to different Minuit strategies
+7- Modify mathematica code to include a pole search algorithm for cross checking
