@@ -118,7 +118,7 @@ int main(int argc, char ** argv)
 	int numfits = atoi(argv[13]);
 	//string inputfile = (string) argv[14];
 	//string fitsfolder = (string) argv[15];
-
+	string fitsfolder = "Fits/";
 	filereader formatReader(inputfile);
 	formatReader.SetAllCommandLists();
 	formatReader.ConstructBareAmps();
@@ -311,7 +311,7 @@ int main(int argc, char ** argv)
 		for(int i = 0; i < nParams; i ++){
 			finalParams.push_back(min->X()[i]);
 		}
-		
+		double chisq = min->MinValue()/dof;
 		//if the chisquared is less than the cutoff, add it as a leaf to the ttree
 		if(chisq<cutoff){
       			testObs.setFitParams(finalParams);
