@@ -10,5 +10,5 @@ Possible additions/to-do:
 10- For Giorgio: copy the good fits' input files in "BUONI"; then add input files to the farm's folder
 11- Add a flag for just plotting and for the polesearch
 12- has the polesearch to be done also in each jobs' run automatically?
-13- change name of chisq functions
+13- change name of chisq functions and name of chisq values in the tree
 14- make the format in which you pass the name of the input files to poleasearch consistent
