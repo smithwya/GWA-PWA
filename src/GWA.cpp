@@ -131,7 +131,7 @@ int main(int argc, char ** argv)
 		comp value = testObs.amplitudes[0].getValue(pow(x,2))(1);
 		return (value*conj(value)).real();
 	};
-	
+/*	
 	auto intensityP_BstarBstar = [&](double x){
 		comp value = testObs.amplitudes[0].getValue(pow(x,2))(2);
 		return (value*conj(value)).real();
@@ -141,19 +141,19 @@ int main(int argc, char ** argv)
 		comp value = testObs.amplitudes[0].getValue(pow(x,2))(3);
 		return (value*conj(value)).real();
 	};
-	
+*/	
 	auto intensityP_Dummy = [&](double x){
-		comp value = testObs.amplitudes[0].getValue(pow(x,2))(4);
+		comp value = testObs.amplitudes[0].getValue(pow(x,2))(2);
 		return (value*conj(value)).real();
 	};
 
 	testObs.makePlotGraphWithExp("P", "BB", plotname+"_BB", intensityP_BB, 10.6322,11.0208);
 	testObs.makePlotGraphWithExp("P", "BBstar", plotname+"_BBstar", intensityP_BBstar, 10.6322,11.0208);
-	testObs.makePlotGraphWithExp("P", "BstarBstar", plotname+"_BstarBstar", intensityP_BstarBstar, 10.6322,11.0208);
-	testObs.makePlotGraphWithExp("P", "B_sstarB_sstar", plotname+"_B_sstarB_sstar", intensityP_B_sstarB_sstar, 10.6322,11.0208);
+	//testObs.makePlotGraphWithExp("P", "BstarBstar", plotname+"_BstarBstar", intensityP_BstarBstar, 10.6322,11.0208);
+	//testObs.makePlotGraphWithExp("P", "B_sstarB_sstar", plotname+"_B_sstarB_sstar", intensityP_B_sstarB_sstar, 10.6322,11.0208);
 	testObs.makePlotGraphDummy(plotname+"_Dummy", intensityP_Dummy, 10.6322,11.0208);
-	testObs.plotInclCrossSecVsSumOfExcl(plotname+"_InclCrossSecVsSumOfExcl", 10.6322,11.0208);
-	testObs.plotInclCrossSecWithExp(plotname+"_InclCrossSecWithExp", 10.6322,11.0208);
+	//testObs.plotInclCrossSecVsSumOfExcl(plotname+"_InclCrossSecVsSumOfExcl", 10.6322,11.2062);
+	testObs.plotInclCrossSecWithExp(plotname+"_InclCrossSecWithExp", 10.6322,11.2062);
 
 	//testObs.makePlotGraph_ExpOnly("P", "BB", plotname+"_BB_justpts", 10.6322,  11.0208, "#sqrt{s} (GeV)", "#sigma (pb)");
 	//testObs.makePlotGraph_ExpOnly("P", "BBstar", plotname+"_BBstar_justpts", 10.6322,  11.0208, "#sqrt{s} (GeV)", "#sigma (pb)");
@@ -186,7 +186,9 @@ int main(int argc, char ** argv)
 
 	cout << testObs.chisq_with_InclCrossSec() << endl;
 
-	cout << testObs.chisq_with_InclCrossSec() / (testObs.getNumData() + testObs.getNumInclData() - steps.size()) << endl;
+	cout << testObs.chisq_with_InclCrossSec() / (testObs.getNumInclData() - steps.size()) << endl;
+
+	cout << (15*testObs.chisq() + testObs.chisq_with_InclCrossSec())/(testObs.getNumData() + testObs.getNumInclData() - steps.size()) << endl; 
 	
 	return 0;
 	

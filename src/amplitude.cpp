@@ -59,7 +59,7 @@ amplitude::amplitude(int j, double alp, double ssl, vector<channel> chans, vecto
 	name = "";
 }
 
-amplitude::amplitude(string ampName, int Jj,double ssL, double ssmin, double ssmax, vector<channel> chans){
+amplitude::amplitude(string ampName, int Jj,double ssL, double ssmin, double ssmax, vector<channel> chans, string kmat, string rhoN){
 	name = ampName;
 	numChannels = chans.size();
 	J = Jj;
@@ -77,6 +77,9 @@ amplitude::amplitude(string ampName, int Jj,double ssL, double ssmin, double ssm
 		channel_names.push_back(c.getName());
 	}
 	epsilon = 1e-3;
+
+	kmattype = kmat;
+	rhoNtype = rhoN;
 }
 
 vector<channel> amplitude::getChannels(){
@@ -105,6 +108,17 @@ VectorXcd amplitude::getValue(comp s) {
 	return ((getNumerator(s,3).transpose())*(getDenominator(s).inverse()))*phsp;
 	*/
 
+	if(kmattype == "kmat-CDD"){
+
+		MatrixXcd phsp = MatrixXcd::Identity(numChannels,numChannels);
+
+		for(int i = 0; i < numChannels; i++){
+			phsp(i,i)= pow(getMomentum(i,s),J+0.5)/pow(s,.25);
+		}
+	
+		return ((getNumerator(s,3).transpose())*(getDenominator(s).inverse()))*phsp;
+	
+	}
 	
 	MatrixXcd phsp = MatrixXcd::Identity(numChannels,numChannels);
 
@@ -153,7 +167,14 @@ comp amplitude::chebyshev(comp x, int n) {
 };
 
 
+comp amplitude::legendreII(comp x, int n) {
+	
+	if (n == 0) return 1./2. * log((1. + x)/(1. - x));
+    if (n == 1) return x * legendreII(x, 0) - 1.;
+    if (n > 1) return (2. * (double)n - 1.)/(double)n * x * legendreII(x, n - 1) - ((double)n - 1.)/(double)n * legendreII(x, n - 2);
+	return comp(0,0);
 
+};
 
 //calculates omega_s
 comp amplitude::omega_p(comp s) {
@@ -210,14 +231,24 @@ VectorXcd amplitude::getNumerator(comp s, int type){
 //calculates rhoN_ki(s') = delta_ki * (2p_i)^{2J+1}/(s'+sL)^{J+alpha}
 comp amplitude::getRhoN(comp sprime,int k)
 {
+
 	int dumbJ = J;
-	//if(k==2) dumbJ = 0;
+	//if(k==2) dumbJ = 0; //hardcoded!!
 
 	//cout << "dumbJ = " << J << endl;
+
+	if(rhoNtype == "rhoN-Qmodel"){
+
+		comp x = legendreII(1. + sL/(2. * pow(channels[k].getMomentum(sprime), 2)), J) / (2. * channels[k].getMomentum(sprime));
+
+		return x;
+
+	}
 
 	comp x = pow(2.0*channels[k].getMomentum(sprime),2.0*dumbJ+1.0)/pow(sprime + sL,dumbJ+alpha);
 
 	return x;
+
 }
 
 //overload later for other sheets
@@ -313,7 +344,8 @@ void amplitude::calcIntegrals(vector<comp> slist,int k){
 
 MatrixXcd amplitude::getDenominator(comp s)
 {
-	MatrixXcd Kinv = getKMatrix(s).inverse();
+	MatrixXcd Kinv = getKMatrix(s);//.inverse();//getDenominator acts just when we use the CDD parametrization, 
+	//so I can avoid to calculate the inverse, taking GetKMatrix as the inverse directly
 
 	MatrixXcd M = MatrixXcd::Zero(numChannels,numChannels);
 
@@ -342,7 +374,34 @@ void amplitude::setResMasses(vector<double> rm){
 }
 
 MatrixXcd amplitude::getKMatrix(comp s) {
-//return MatrixXcd::Ones(numChannels, numChannels);
+
+	if(kmattype == "kmat-CDD"){
+
+		MatrixXcd kmat = MatrixXcd::Zero(numChannels, numChannels);
+
+		for (int k = 0; k < numChannels; k++) {
+			for (int i = 0; i <= k; i++) {
+				comp tempMatrixTerm = 0;
+
+				for (int R = 0; R < resmasses.size(); R++) {
+					tempMatrixTerm += channels[k].getCoupling(R) * channels[i].getCoupling(R) / (resmasses[R] - s);
+				}
+
+				kmat(k, i) = - tempMatrixTerm;
+				kmat(i, k) = - tempMatrixTerm;
+			}
+		}
+
+		for (int j = 0; j < kParameters.size(); j++) {
+
+			kmat += pow(-s, j) * kParameters[j];
+
+		}
+
+		return kmat.real();//if s is real Kmatrix is real, do we still need this .real(); 
+		//for the polesearch this seems not good
+
+	}
 
 	MatrixXcd kmat = MatrixXcd::Zero(numChannels, numChannels);
 
@@ -365,7 +424,8 @@ MatrixXcd amplitude::getKMatrix(comp s) {
 
 	}
 
-	return kmat.real();
+	return kmat.real();//if s is real Kmatrix is real, do we still need this .real(); 
+	//for the polesearch this seems not good
 }
 
 void amplitude::setChebyCoeffs(string cname, int poletype, double s0, vector<double> coeffs){
