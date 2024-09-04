@@ -103,7 +103,7 @@ vector<double> linspace(T start_in, T end_in, int num_in)
 
 int main(int argc, char ** argv)
 {
-	string inputfile = (string) argv[1]; //just the core e.g. "fit73-36", without the path nor the extension
+	string inputfile = (string) argv[1]; //TO CHANGE: for polesearch is just the core e.g. "fit73-36", without the path nor the extension
 	string polefile = (string) argv[2];
 	string pWave = (string) argv[3];
 	double grid_Re_sx = stod(argv[4]);
@@ -119,6 +119,7 @@ int main(int argc, char ** argv)
 	//string inputfile = (string) argv[14];
 	//string fitsfolder = (string) argv[15];
 	string fitsfolder = "Fits/";
+
 	filereader formatReader(inputfile);
 	formatReader.SetAllCommandLists();
 	formatReader.ConstructBareAmps();
@@ -133,6 +134,85 @@ int main(int argc, char ** argv)
 
 	//saves the observable object outside of filereader object
 	testObs = formatReader.getObs();
+
+	/*
+	
+	//if you want just plotting: add a flag:
+	
+	double lower_bound = testObs.amplitudes[0].getFitInterval()[0];
+	double upper_bound = testObs.amplitudes[0].getFitInterval()[1];
+
+	auto intensityP_BB = [&](double x){
+		comp value = testObs.amplitudes[0].getValue(pow(x,2))(0);
+		return (value*conj(value)).real();
+	};
+
+	auto intensityP_BBstar = [&](double x){
+		comp value = testObs.amplitudes[0].getValue(pow(x,2))(1);
+		return (value*conj(value)).real();
+	};
+	
+	auto intensityP_BstarBstar = [&](double x){
+		comp value = testObs.amplitudes[0].getValue(pow(x,2))(2);
+		return (value*conj(value)).real();
+	};
+
+	auto intensityP_B_sstarB_sstar = [&](double x){
+		comp value = testObs.amplitudes[0].getValue(pow(x,2))(3);
+		return (value*conj(value)).real();
+	};
+	
+	auto intensityP_Dummy = [&](double x){
+		comp value = testObs.amplitudes[0].getValue(pow(x,2))(2);
+		return (value*conj(value)).real();
+	};
+
+	testObs.makePlotGraphWithExp("P", "BB", plotname+"_BB", intensityP_BB, 10.6322,11.0208);
+	testObs.makePlotGraphWithExp("P", "BBstar", plotname+"_BBstar", intensityP_BBstar, 10.6322,11.0208);
+	testObs.makePlotGraphWithExp("P", "BstarBstar", plotname+"_BstarBstar", intensityP_BstarBstar, 10.6322,11.0208);
+	testObs.makePlotGraphWithExp("P", "B_sstarB_sstar", plotname+"_B_sstarB_sstar", intensityP_B_sstarB_sstar, 10.6322,11.0208);
+	testObs.makePlotGraphDummy(plotname+"_Dummy", intensityP_Dummy, 10.6322,11.0208);
+	testObs.plotInclCrossSecVsSumOfExcl(plotname+"_InclCrossSecVsSumOfExcl", 10.6322,11.2062);
+	testObs.plotInclCrossSecWithExp(plotname+"_InclCrossSecWithExp", 10.6322,11.2062);
+
+	//testObs.makePlotGraph_ExpOnly("P", "BB", plotname+"_BB_justpts", 10.6322,  11.0208, "#sqrt{s} (GeV)", "#sigma (pb)");
+	//testObs.makePlotGraph_ExpOnly("P", "BBstar", plotname+"_BBstar_justpts", 10.6322,  11.0208, "#sqrt{s} (GeV)", "#sigma (pb)");
+	//testObs.makePlotGraph_ExpOnly("P", "BstarBstar", plotname+"_BstarBstar_justpts", 10.6322,  11.0208, "#sqrt{s} (GeV)", "#sigma (pb)");
+	//testObs.makePlotGraph_ExpOnly("P", "B_sstarB_sstar", plotname+"_B_sstarB_sstar_justpts", 10.84,  11.0208, "#sqrt{s} (GeV)", "#sigma (pb)");
+
+	vector<double> steps = testObs.getStepSizes();
+
+	//cout << testObs.chisq_with_InclCrossSec() << "	" << testObs.chisq_with_InclCrossSec()/(testObs.getNumData() - steps.size() + testObs.getNumInclData()) << endl;
+
+	//cout << testObs.chisq_with_InclCrossSec() - testObs.chisq() << endl;
+
+	//cout << (testObs.chisq_with_InclCrossSec() + testObs.chisq()) / (testObs.getNumData() - steps.size() + testObs.getNumInclData()) << endl;
+
+	
+	
+	//double totabs = 1.7 * (testObs.getNumData() - steps.size() + testObs.getNumInclData());
+
+	//double exclabs = 24.6 * (testObs.getNumData() - steps.size());
+
+	//double ratio = exclabs/totabs;
+
+	//cout << totabs << "	" << exclabs << "	" << ratio << endl;
+
+	
+
+	cout << testObs.chisq() << endl;
+
+	cout << testObs.chisq() / (testObs.getNumData() - steps.size()) << endl;
+
+	cout << testObs.chisq_with_InclCrossSec() << endl;
+
+	cout << testObs.chisq_with_InclCrossSec() / (testObs.getNumInclData() - steps.size()) << endl;
+
+	cout << (15*testObs.chisq() + testObs.chisq_with_InclCrossSec())/(testObs.getNumData() + testObs.getNumInclData() - steps.size()) << endl; 
+	
+	return 0;
+	
+	*/
 
 	//saves original starting parameters
 	vector<double> startparams = testObs.getFitParams();
@@ -304,6 +384,18 @@ int main(int argc, char ** argv)
 		for(int i = 0; i < nParams; i++){
 			min->SetVariable(i,to_string(i),fitparams[i],steps[i]);
 		}
+
+		int numKmatbgcoeffs = formatReader.getKmatList().size() * testObs.numChans * (testObs.numChans + 1)/2.;
+		int numremainingparamsperamp = nParams/testObs.getNumAmps() - numKmatbgcoeffs;
+		for(int i = 0; i < testObs.getNumAmps(); i++){
+			if(testObs.amplitudes[i].getKMatType() == "kmat-CDD"){
+				for(int j = numremainingparamsperamp; j < numremainingparamsperamp + numKmatbgcoeffs; j++){
+					//cout << fitparams[j + i * (numremainingparamsperamp + numremainingparamsperamp)] << endl;
+					min->SetVariableLowerLimit(j + i * (numremainingparamsperamp + numremainingparamsperamp), 0.);
+				}
+			}
+		}exit(0);
+
 		//run the minimization
 		min->Minimize();
 		//extract the resulting fit parameters
@@ -327,6 +419,9 @@ int main(int argc, char ** argv)
 
 
 /*
+
+//if you want to add a polesearch flag:
+
 //initialize the polesearcher object
 	ps.settestObs(testObs); 
 	ps.setAmpIndex(pWave); 
@@ -419,7 +514,29 @@ int main(int argc, char ** argv)
 
 	}
 
+	auto abs_det = [&](double* x, double* p){
+		return abs(testObs.amplitudes[ampindex].getDenominator(comp(x[0], x[1]),false).determinant());
+		//MatrixXcd temp = (comp(x[0], x[1]) - comp(115,0.5)) * (comp(x[0], x[1]) - comp(118,0.7)) * (comp(x[0], x[1]) - comp(115,-0.5)) * (comp(x[0], x[1]) - comp(118,-0.7)) * MatrixXcd({{1}});
+		//return abs(temp.determinant());
+	};
 
+	auto log_abs_det = [&](double* x, double* p){
+		return log10(abs(testObs.amplitudes[ampindex].getDenominator(comp(x[0], x[1]),false).determinant()));
+		//MatrixXcd temp = (comp(x[0], x[1]) - comp(115,0.5)) * (comp(x[0], x[1]) - comp(118,0.7)) * (comp(x[0], x[1]) - comp(115,-0.5)) * (comp(x[0], x[1]) - comp(118,-0.7)) * MatrixXcd({{1}});
+		//return log(abs(temp.determinant()));
+	};
+
+	auto abs_det_II = [&](double* x, double* p){
+		return abs(testObs.amplitudes[ampindex].getDenominator(comp(x[0], x[1]),true).determinant());
+		//MatrixXcd temp = (comp(x[0], x[1]) - comp(115,0.5)) * (comp(x[0], x[1]) - comp(118,0.7)) * (comp(x[0], x[1]) - comp(115,-0.5)) * (comp(x[0], x[1]) - comp(118,-0.7)) * MatrixXcd({{1}});
+		//return abs(temp.determinant());
+	};
+
+	auto log_abs_det_II = [&](double* x, double* p){
+		return log10(abs(testObs.amplitudes[ampindex].getDenominator(comp(x[0], x[1]),true).determinant()));
+		//MatrixXcd temp = (comp(x[0], x[1]) - comp(115,0.5)) * (comp(x[0], x[1]) - comp(118,0.7)) * (comp(x[0], x[1]) - comp(115,-0.5)) * (comp(x[0], x[1]) - comp(118,-0.7)) * MatrixXcd({{1}});
+		//return log(abs(temp.determinant()));
+	};
 
 	if(ps.GetSheet()){
 

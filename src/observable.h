@@ -252,6 +252,87 @@ public:
 
 	}; 
 
+	void makePlotGraphDummy(string pdfname, function<double(double)> func, double lower_bound, double upper_bound){
+
+		const int num_th_pts = 1000;
+		double x[num_th_pts], y[num_th_pts], ex[num_th_pts], ey[num_th_pts];
+
+		double lb = lower_bound;
+		double ub = upper_bound;
+
+		for (int i = 0; i < num_th_pts; i++){
+
+			x[i] = lb + (ub - lb) * i / ((double)num_th_pts - 1.);
+
+		}
+
+		double val = 0;	
+
+		for(int i = 0; i < num_th_pts; i++){
+
+			val = func(x[i]);
+			if(isnan(val)) y[i] = 0;
+			else y[i] = val;
+
+		}
+
+		auto gr1 = new TGraph(num_th_pts,x,y);
+
+		int mymarkerstyle=20;
+  		float mymarkersize=0;
+  		int mymarkercolor = 4;
+  		float mytextsize=0.04;
+  		int mytextfont=132;
+
+		TCanvas *Scatola = new TCanvas("Scatola","Scatola",600,500); //costruttore 600pt x 550 pt
+  		//gStyle->SetOptStat(0); //non voglio che mi metti il riquadro con la statistica
+  		Scatola->SetFillColor(0);//il fondo del grafico con 0 è bianco...in teoria lo potete cambiare
+  		Scatola->SetBorderMode(0);//mette dei bordi attorno alla figura...0 nessun bordo
+  		Scatola->SetBorderSize(2); //spessore del bordo
+  		Scatola->SetLeftMargin(0.18); //spazio a sinistra della figura ...20% della larghezza
+  		Scatola->SetRightMargin(0.11);// 5% della larghezza a destra
+  		Scatola->SetTopMargin(0.07); //3% della altezza lato superiore
+  		Scatola->SetBottomMargin(0.14); //12% dell'altezza lato inferiore
+  		Scatola->SetTickx(1);
+  		Scatola->SetTicky(1);
+
+		//gr1->SetTitle("Dummy channel");
+		gr1->GetYaxis()->SetTitleSize(mytextsize); //controllo sulla dimension del titolo dell'asse
+  		gr1->GetXaxis()->SetTitleSize(mytextsize);
+  		gr1->GetXaxis()->SetLabelSize(mytextsize);//cotrollo sulla dimensione dei numeretti dell'asse
+  		gr1->GetYaxis()->SetLabelSize(mytextsize);
+  		gr1->GetXaxis()->SetTitleFont(mytextfont);//controllo sul carattere usato per il titolo dell'asse
+  		gr1->GetYaxis()->SetTitleFont(mytextfont);
+  		gr1->GetXaxis()->SetLabelFont(mytextfont);//controllo sul carattere usato per i numeretti dell'asse
+  		gr1->GetYaxis()->SetLabelFont(mytextfont);
+  		gr1->GetXaxis()->SetNdivisions(908); //suddivisione dei numeri sull'asse x---es 0 a 10 a passo di 1, e ogni passo diviso in 5
+  		gr1->GetXaxis()->CenterTitle(1);//che il titolo dell'asse lo voglio quindi 1, se non lo volessi metterei 0
+  		gr1->GetYaxis()->CenterTitle(1);
+  		gr1->GetXaxis()->SetTitleOffset(1.15);//definisce la distanza del titolo dell'asse dall'asse stesso
+  		gr1->GetYaxis()->SetTitleOffset(1.15);
+  		gr1->SetTitle("");
+  		gr1->GetXaxis()->SetTitle("#sqrt{s} (GeV)");
+  		gr1->GetYaxis()->SetTitle("#sigma (pb)");
+  		gr1->SetMarkerColor(mymarkercolor);
+  		gr1->SetMarkerSize(mymarkersize);
+  		gr1->SetMarkerStyle(mymarkerstyle);
+  		gr1->SetLineColor(kBlue);
+  		gr1->SetLineWidth(1);
+		gr1->GetXaxis()->SetRangeUser(lb,ub);
+		//gr1->GetYaxis()->SetRangeUser(0,450.);
+		gr1->SetLineWidth(1);
+		//gr1->SetLineColor(kMagenta);
+
+		TFile file("pdf_folder.root", "recreate");
+		
+		gr1->Write();
+		gr1->Draw("AL");
+		Scatola->SaveAs(("Plots/"+pdfname+".pdf").c_str());
+		file.Close();
+		return;
+
+	}
+
 	void makePlotWithExp(string ampname, string channame, string pdfname, function<double(double)> func, double lower_bound, double upper_bound, int num_bins){
 
 		int numamp = getampindex(ampname);
@@ -304,7 +385,7 @@ public:
 
 		double x1[num_exp_pts], y1[num_exp_pts], ex1[num_exp_pts], ey1[num_exp_pts];
 
-		const int num_th_pts = 100;
+		const int num_th_pts = 1000;
 		double x2[num_th_pts], y2[num_th_pts], ex2[num_th_pts], ey2[num_th_pts];
 
 		for(int i = 0; i < num_exp_pts; i++){
@@ -359,12 +440,50 @@ public:
 		auto gr1 = new TGraphErrors(num_exp_pts,x1,y1,ex1,ey1);
 		auto gr2 = new TGraph(num_th_pts,x2,y2);
 
-   		//gr1->SetTitle("TGraphErrors Example");
-   		gr1->SetMarkerColor(4);
-   		gr1->SetMarkerStyle(21);
+   		int mymarkerstyle=20;
+  		float mymarkersize=1.;
+  		int mymarkercolor = 4;
+  		float mytextsize=0.04;
+  		int mytextfont=132;
+
+		TCanvas *Scatola = new TCanvas("Scatola","Scatola",600,500); //costruttore 600pt x 550 pt
+  		//gStyle->SetOptStat(0); //non voglio che mi metti il riquadro con la statistica
+  		Scatola->SetFillColor(0);//il fondo del grafico con 0 è bianco...in teoria lo potete cambiare
+  		Scatola->SetBorderMode(0);//mette dei bordi attorno alla figura...0 nessun bordo
+  		Scatola->SetBorderSize(2); //spessore del bordo
+  		Scatola->SetLeftMargin(0.18); //spazio a sinistra della figura ...20% della larghezza
+  		Scatola->SetRightMargin(0.11);// 5% della larghezza a destra
+  		Scatola->SetTopMargin(0.07); //3% della altezza lato superiore
+  		Scatola->SetBottomMargin(0.14); //12% dell'altezza lato inferiore
+  		Scatola->SetTickx(1);
+  		Scatola->SetTicky(1);
+
+   		gr1->SetTitle(("Wave " + ampname + " channel " + channame).c_str());
+		gr1->GetYaxis()->SetTitleSize(mytextsize); //controllo sulla dimension del titolo dell'asse
+  		gr1->GetXaxis()->SetTitleSize(mytextsize);
+  		gr1->GetXaxis()->SetLabelSize(mytextsize);//cotrollo sulla dimensione dei numeretti dell'asse
+  		gr1->GetYaxis()->SetLabelSize(mytextsize);
+  		gr1->GetXaxis()->SetTitleFont(mytextfont);//controllo sul carattere usato per il titolo dell'asse
+  		gr1->GetYaxis()->SetTitleFont(mytextfont);
+  		gr1->GetXaxis()->SetLabelFont(mytextfont);//controllo sul carattere usato per i numeretti dell'asse
+  		gr1->GetYaxis()->SetLabelFont(mytextfont);
+  		gr1->GetXaxis()->SetNdivisions(908); //suddivisione dei numeri sull'asse x---es 0 a 10 a passo di 1, e ogni passo diviso in 5
+  		gr1->GetXaxis()->CenterTitle(1);//che il titolo dell'asse lo voglio quindi 1, se non lo volessi metterei 0
+  		gr1->GetYaxis()->CenterTitle(1);
+  		gr1->GetXaxis()->SetTitleOffset(1.15);//definisce la distanza del titolo dell'asse dall'asse stesso
+  		gr1->GetYaxis()->SetTitleOffset(1.15);
+  		gr1->SetTitle("");
+  		gr1->GetXaxis()->SetTitle("#sqrt{s} (GeV)");
+  		gr1->GetYaxis()->SetTitle("#sigma (pb)");
+  		gr1->SetMarkerColor(mymarkercolor);
+  		gr1->SetMarkerSize(mymarkersize);
+  		gr1->SetMarkerStyle(mymarkerstyle);
+  		gr1->SetLineColor(1);
+  		gr1->SetLineWidth(1);
 		gr1->GetXaxis()->SetRangeUser(lower_bound, upper_bound);
-		//gr1->GetYaxis()->SetRangeUser(0, 0.2);
+		//gr1->GetYaxis()->SetRangeUser(0,450.);
 		gr1->SetLineWidth(1);
+		//gr1->SetLineColor(kMagenta);
 
 		//gr2->SetTitle("TGraphErrors Example");
    		gr2->SetMarkerSize(0);
@@ -374,12 +493,12 @@ public:
 		gr2->SetLineColor(kRed);
 
 		TFile file("pdf_folder.root", "recreate");
-		TCanvas canv;
+		
 		gr1->Write();
 		gr2->Write();
 		gr1->Draw("AP");
 		gr2->Draw("same");
-		canv.SaveAs(("Plots/"+pdfname+".pdf").c_str());
+		Scatola->SaveAs(("Plots/"+pdfname+".pdf").c_str());
 		file.Close();
 		return;
 		
@@ -582,6 +701,149 @@ public:
 
 	}
 
+		void plotInclCrossSecWithExp(string pdfname, double lower_bound, double upper_bound){
+		
+		int num_exp_pts = data_InclCrossSec.sqrts.size();
+
+		double x[num_exp_pts], y[num_exp_pts], ex[num_exp_pts], ey[num_exp_pts];
+
+		const int num_th_pts = 1000;
+		double x2[num_th_pts], y2[num_th_pts], ex2[num_th_pts], ey2[num_th_pts];
+
+		for(int i = 0; i < num_exp_pts; i++){
+
+			x[i] = 0;
+			y[i] = 0;
+			ex[i] = 0;
+			ey[i] = 0;
+
+		}
+
+		double lb = data_InclCrossSec.sqrts[0];
+
+		double ub = data_InclCrossSec.sqrts[num_exp_pts - 1];
+
+		for (int i = 0; i < num_th_pts; i++){
+
+			x2[i] = lb + (ub - lb) * i / ((double)num_th_pts - 1.);
+
+		}
+
+		double val = 0; 
+
+		for(int i = 0; i < num_exp_pts; i++){
+
+			val = data_InclCrossSec.sqrts[i];
+			if(isnan(val)) x[i] = 0;
+			else x[i] = val;
+
+			val = data_InclCrossSec.amp_expval[i];
+			if(isnan(val)) y[i] = 0;
+			else y[i] = val;
+
+			ex[i] = 0;
+
+			val = data_InclCrossSec.amp_expval_stat_err[i];
+			if(isnan(val)) ey[i] = 0;
+			else ey[i] = val;
+
+		}
+
+		comp temp = 0;
+		double aux = 0;
+
+		for(int i = 0; i < num_th_pts; i++){
+
+			aux = 0;
+
+			for(string ampname : getAmpNames()){
+
+				int amp_index = getampindex(ampname);
+				amplitude amp = amplitudes[amp_index];
+
+				for(string channame : amp.getChanNames()){
+
+					int chan_index = getchanindex(ampname, channame);
+					temp = amp.getValue(pow(x2[i],2))(chan_index);
+					aux += (temp*conj(temp)).real();
+
+				}
+
+			}
+
+			val = aux;
+			if(isnan(val)) y2[i] = 0;
+			else y2[i] = val;
+
+		}
+
+		auto gr1 = new TGraphErrors(num_exp_pts,x,y,ex,ey);
+		auto gr2 = new TGraph(num_th_pts,x2,y2);
+
+		int mymarkerstyle=20;
+  		float mymarkersize=1.;
+  		int mymarkercolor = 4;
+  		float mytextsize=0.04;
+  		int mytextfont=132;
+
+		TCanvas *Scatola = new TCanvas("Scatola","Scatola",600,500); //costruttore 600pt x 550 pt
+  		//gStyle->SetOptStat(0); //non voglio che mi metti il riquadro con la statistica
+  		Scatola->SetFillColor(0);//il fondo del grafico con 0 è bianco...in teoria lo potete cambiare
+  		Scatola->SetBorderMode(0);//mette dei bordi attorno alla figura...0 nessun bordo
+  		Scatola->SetBorderSize(2); //spessore del bordo
+  		Scatola->SetLeftMargin(0.18); //spazio a sinistra della figura ...20% della larghezza
+  		Scatola->SetRightMargin(0.11);// 5% della larghezza a destra
+  		Scatola->SetTopMargin(0.07); //3% della altezza lato superiore
+  		Scatola->SetBottomMargin(0.14); //12% dell'altezza lato inferiore
+  		Scatola->SetTickx(1);
+  		Scatola->SetTicky(1);
+
+		//gr1->SetTitle("TGraphErrors Example");
+		gr1->GetYaxis()->SetTitleSize(mytextsize); //controllo sulla dimension del titolo dell'asse
+  		gr1->GetXaxis()->SetTitleSize(mytextsize);
+  		gr1->GetXaxis()->SetLabelSize(mytextsize);//cotrollo sulla dimensione dei numeretti dell'asse
+  		gr1->GetYaxis()->SetLabelSize(mytextsize);
+  		gr1->GetXaxis()->SetTitleFont(mytextfont);//controllo sul carattere usato per il titolo dell'asse
+  		gr1->GetYaxis()->SetTitleFont(mytextfont);
+  		gr1->GetXaxis()->SetLabelFont(mytextfont);//controllo sul carattere usato per i numeretti dell'asse
+  		gr1->GetYaxis()->SetLabelFont(mytextfont);
+  		gr1->GetXaxis()->SetNdivisions(908); //suddivisione dei numeri sull'asse x---es 0 a 10 a passo di 1, e ogni passo diviso in 5
+  		gr1->GetXaxis()->CenterTitle(1);//che il titolo dell'asse lo voglio quindi 1, se non lo volessi metterei 0
+  		gr1->GetYaxis()->CenterTitle(1);
+  		gr1->GetXaxis()->SetTitleOffset(1.15);//definisce la distanza del titolo dell'asse dall'asse stesso
+  		gr1->GetYaxis()->SetTitleOffset(1.15);
+  		gr1->SetTitle("");
+  		gr1->GetXaxis()->SetTitle("#sqrt{s} (GeV)");
+  		gr1->GetYaxis()->SetTitle("#sigma (pb)");
+  		gr1->SetMarkerColor(mymarkercolor);
+  		gr1->SetMarkerSize(mymarkersize);
+  		gr1->SetMarkerStyle(mymarkerstyle);
+  		gr1->SetLineColor(1);
+  		gr1->SetLineWidth(1);
+		gr1->GetXaxis()->SetRangeUser(lower_bound, upper_bound);
+		gr1->GetYaxis()->SetRangeUser(0.,450.);
+		gr1->SetLineWidth(1);
+		//gr1->SetLineColor(kMagenta);
+
+		//gr2->SetTitle("TGraphErrors Example");
+   		gr2->SetMarkerSize(0);
+		gr2->GetXaxis()->SetRangeUser(lower_bound, upper_bound);
+		//gr2->GetYaxis()->SetRangeUser(0, 0.2);
+		gr2->SetLineWidth(1);
+		gr2->SetLineColor(kRed);
+
+		TFile file("pdf_folder.root", "recreate");
+		
+		gr1->Write();
+		gr2->Write();
+		gr1->Draw("AP");
+		gr2->Draw("same");
+		Scatola->SaveAs(("Plots/"+pdfname+".pdf").c_str());
+		file.Close();
+		return;
+
+	}
+
 	void plotInclCrossSecVsSumOfExcl(string pdfname, double lower_bound, double upper_bound){
 
 		int totnumofmeasuredchans = data.size();
@@ -591,6 +853,23 @@ public:
 		//cout << getchanindex("P", "B_sstarB_sstar") << endl;
 		int num_incl_pts = data_InclCrossSec.amp_expval.size();
 
+		double test1 = 0;
+		double test2 = 0;
+
+		for(int i = 0; i < num_excl_pts; i++){
+			for(int j = 0; j < 3; j++) test1 += 1./(pow(data[j].amp_expval_sist_err[i], 2) + pow(data[j].amp_expval_stat_err[i], 2));
+		}
+
+		test2 = test1;
+
+		for(int i = 0; i < num_Bsstar_pts; i++){
+			int index = getchanindex("P", "B_sstarB_sstar");
+			//cout << 1./pow(data[index].amp_expval_sist_err[i], 2) + pow(data[index].amp_expval_stat_err[i], 2) << endl;
+			test2 += 1./pow(data[index].amp_expval_sist_err[i], 2) + pow(data[index].amp_expval_stat_err[i], 2);
+		}
+
+		//cout << num_excl_pts << "	" << num_incl_pts << "	" << test1 << "	" << test2 << endl; 
+
 		//cout << num_excl_pts << " " << num_Bsstar_pts << " " << num_incl_pts << endl; //I have
 		//to exclude B_sstarB_sstar channel from gr1 because it has a different number of points
 		//with respect of the other exclusive sigma!!! 
@@ -598,10 +877,13 @@ public:
 		double x1[num_excl_pts], y1[num_excl_pts], ex1[num_excl_pts], ey1[num_excl_pts];
 		double x2[num_Bsstar_pts], y2[num_Bsstar_pts], ex2[num_Bsstar_pts], ey2[num_Bsstar_pts];
 		double x3[num_incl_pts], y3[num_incl_pts], ex3[num_incl_pts], ey3[num_incl_pts];
+		double y4[num_incl_pts], ey4[num_incl_pts];
 
 		double val = 0;
 
 		for(int i = 0; i < num_excl_pts; i++){
+
+			int index = getchanindex("P", "B_sstarB_sstar");
 
 			val = data[0].sqrts[i];
 			if(isnan(val)) x1[i] = 0;
@@ -613,12 +895,27 @@ public:
 			if(isnan(val)) y1[i] = 0;
 			else y1[i] = val;
 
+			/*int tempdiff = num_excl_pts - num_Bsstar_pts;
+			cout << tempdiff << endl; 
+			val = 0;
+			if(i > tempdiff){cout << i << endl;exit(0);
+				val += data[index].amp_expval[i - tempdiff];
+				cout << data[index].amp_expval[i - tempdiff] << endl;
+				if(isnan(val)) y4[i] = y1[i];
+				else y4[i] = val;
+			}*/
+
 
 			val = 0;
-			for(int j = 0; j < 3; j++) val += pow(data[j].amp_expval_stat_err[i], 2);
+			for(int j = 0; j < 3; j++) val += pow(data[j].amp_expval_stat_err[i], 2) + pow(data[j].amp_expval_sist_err[i], 2);
 			val = sqrt(val);
 			if(isnan(val)) ey1[i] = 0;
 			else ey1[i] = val;
+			/*if(i > tempdiff){
+				val += sqrt(pow(data[index].amp_expval_stat_err[i - tempdiff], 2) + pow(data[index].amp_expval_sist_err[i - tempdiff], 2));
+				if(isnan(val)) y4[i] = 0;
+				else y4[i] = val;
+			}*/
 
 		}
 
@@ -631,20 +928,36 @@ public:
 			else x2[i] = val;
 			//cout << val << endl;
 			ex2[i] = 0;
-			cout << val << " ";
+			//cout << val << " ";
 
 			val = data[index].amp_expval[i];
 			if(isnan(val)) y2[i] = 0;
 			else y2[i] = val;
-			cout << val << " ";
+			//cout << val << " ";
 
 
 			val = pow(data[index].amp_expval_stat_err[i], 2);
 			val += pow(data[index].amp_expval_sist_err[i], 2);
-			val = pow(val, 0.5);
+			val = sqrt(val);
 			if(isnan(val)) ey2[i] = 0;
 			else ey2[i] = val;
-			cout << val << endl;
+			//cout << val << endl;
+
+		}
+
+		int tempdiff = num_excl_pts - num_Bsstar_pts;
+
+		for(int i = 0; i < num_excl_pts; i++){
+			y4[i] = y1[i];
+			ey4[i] = ey1[i];
+
+			for(int j = 0; j < num_Bsstar_pts; j++){
+				if(abs(x1[i] - x2[j]) <= 0.001){
+					y4[i] += y2[j];
+					//ey4[i] += ey2[j]; 
+					ey4[i] = sqrt(pow(ey1[i], 2) + pow(ey2[j], 2));
+				}
+			}
 
 		}
 
@@ -659,51 +972,229 @@ public:
 			if(isnan(val)) y3[i] = 0;
 			else y3[i] = val;
 
-			val = pow(data_InclCrossSec.amp_expval_stat_err[i], 2);
+			/*val = pow(data_InclCrossSec.amp_expval_stat_err[i], 2);
 			val += pow(data_InclCrossSec.amp_expval_sist_err[i], 2);
-			val = pow(val, 0.5);
+			val = pow(val, 0.5);*/
+			val = data_InclCrossSec.amp_expval_stat_err[i];
 			if(isnan(val)) ey3[i] = 0;
 			else ey3[i] = val;
+
+		}
+
+		const int num_th_pts = 1000;
+		int num_exp_pts = data_InclCrossSec.sqrts.size();
+
+		double x6[num_th_pts], y6[num_th_pts];
+
+		double lb = data_InclCrossSec.sqrts[0];
+
+		double ub = data_InclCrossSec.sqrts[num_exp_pts - 1];
+
+		for (int i = 0; i < num_th_pts; i++){
+
+			x6[i] = lb + (ub - lb) * i / ((double)num_th_pts - 1.);
+
+		}
+
+		comp temp = 0;
+		double aux = 0;
+
+		for(int i = 0; i < num_th_pts; i++){
+
+			aux = 0;
+
+			for(string ampname : getAmpNames()){
+
+				int amp_index = getampindex(ampname);
+				amplitude amp = amplitudes[amp_index];
+
+				for(string channame : amp.getChanNames()){
+
+					int chan_index = getchanindex(ampname, channame);
+					temp = amp.getValue(pow(x6[i],2))(chan_index);
+					aux += (temp*conj(temp)).real();
+
+				}
+
+			}
+
+			val = aux;
+			if(isnan(val)) y6[i] = 0;
+			else y6[i] = val;
 
 		}
 
 		auto gr1 = new TGraphErrors(num_excl_pts,x1,y1,ex1,ey1);
 		auto gr2 = new TGraphErrors(num_Bsstar_pts,x2,y2,ex2,ey2);
 		auto gr3 = new TGraphErrors(num_incl_pts,x3,y3,ex3,ey3);
+		auto gr4 = new TGraphErrors(num_excl_pts,x1,y4,ex1,ey4);
+		auto gr5 = new TGraphErrors("Data/RED_incl_with_weight.txt");
+		auto gr6 = new TGraph(num_th_pts,x6,y6);
+
+		int mymarkerstyle=20;
+  		float mymarkersize=1.;
+  		int mymarkercolor = 4;
+  		float mytextsize=0.04;
+  		int mytextfont=132;
+
+		TCanvas *Scatola = new TCanvas("Scatola","Scatola",600,500); //costruttore 600pt x 550 pt
+  		//gStyle->SetOptStat(0); //non voglio che mi metti il riquadro con la statistica
+  		Scatola->SetFillColor(0);//il fondo del grafico con 0 è bianco...in teoria lo potete cambiare
+  		Scatola->SetBorderMode(0);//mette dei bordi attorno alla figura...0 nessun bordo
+  		Scatola->SetBorderSize(2); //spessore del bordo
+  		Scatola->SetLeftMargin(0.18); //spazio a sinistra della figura ...20% della larghezza
+  		Scatola->SetRightMargin(0.11);// 5% della larghezza a destra
+  		Scatola->SetTopMargin(0.07); //3% della altezza lato superiore
+  		Scatola->SetBottomMargin(0.14); //12% dell'altezza lato inferiore
+  		Scatola->SetTickx(1);
+  		Scatola->SetTicky(1);
 
    		//gr1->SetTitle("TGraphErrors Example");
-   		gr1->SetMarkerColor(kBlue);
-   		gr1->SetMarkerStyle(21);
+		gr1->GetYaxis()->SetTitleSize(mytextsize); //controllo sulla dimension del titolo dell'asse
+  		gr1->GetXaxis()->SetTitleSize(mytextsize);
+  		gr1->GetXaxis()->SetLabelSize(mytextsize);//cotrollo sulla dimensione dei numeretti dell'asse
+  		gr1->GetYaxis()->SetLabelSize(mytextsize);
+  		gr1->GetXaxis()->SetTitleFont(mytextfont);//controllo sul carattere usato per il titolo dell'asse
+  		gr1->GetYaxis()->SetTitleFont(mytextfont);
+  		gr1->GetXaxis()->SetLabelFont(mytextfont);//controllo sul carattere usato per i numeretti dell'asse
+  		gr1->GetYaxis()->SetLabelFont(mytextfont);
+  		gr1->GetXaxis()->SetNdivisions(908); //suddivisione dei numeri sull'asse x---es 0 a 10 a passo di 1, e ogni passo diviso in 5
+  		gr1->GetXaxis()->CenterTitle(1);//che il titolo dell'asse lo voglio quindi 1, se non lo volessi metterei 0
+  		gr1->GetYaxis()->CenterTitle(1);
+  		gr1->GetXaxis()->SetTitleOffset(1.15);//definisce la distanza del titolo dell'asse dall'asse stesso
+  		gr1->GetYaxis()->SetTitleOffset(1.15);
+  		gr1->SetTitle("");
+  		gr1->GetXaxis()->SetTitle("#sqrt{s} (GeV)");
+  		gr1->GetYaxis()->SetTitle("#sigma (pb)");
+  		gr1->SetMarkerColor(kMagenta);
+  		gr1->SetMarkerSize(mymarkersize);
+  		gr1->SetMarkerStyle(mymarkerstyle);
+  		gr1->SetLineColor(1);
+  		gr1->SetLineWidth(0);
 		gr1->GetXaxis()->SetRangeUser(lower_bound, upper_bound);
 		gr1->GetYaxis()->SetRangeUser(0,450.);
 		gr1->SetLineWidth(1);
-		gr1->SetLineColor(kBlue);
+		gr1->SetLineColor(kMagenta);
 
 		//gr2->SetTitle("TGraphErrors Example");
-   		gr2->SetMarkerColor(kRed);
+		gr3->GetYaxis()->SetTitleSize(mytextsize); //controllo sulla dimension del titolo dell'asse
+  		gr3->GetXaxis()->SetTitleSize(mytextsize);
+  		gr3->GetXaxis()->SetLabelSize(mytextsize);//cotrollo sulla dimensione dei numeretti dell'asse
+  		gr3->GetYaxis()->SetLabelSize(mytextsize);
+  		gr3->GetXaxis()->SetTitleFont(mytextfont);//controllo sul carattere usato per il titolo dell'asse
+  		gr3->GetYaxis()->SetTitleFont(mytextfont);
+  		gr3->GetXaxis()->SetLabelFont(mytextfont);//controllo sul carattere usato per i numeretti dell'asse
+  		gr3->GetYaxis()->SetLabelFont(mytextfont);
+  		gr3->GetXaxis()->SetNdivisions(908); //suddivisione dei numeri sull'asse x---es 0 a 10 a passo di 1, e ogni passo diviso in 5
+  		gr3->GetXaxis()->CenterTitle(1);//che il titolo dell'asse lo voglio quindi 1, se non lo volessi metterei 0
+  		gr3->GetYaxis()->CenterTitle(1);
+  		gr3->GetXaxis()->SetTitleOffset(1.15);//definisce la distanza del titolo dell'asse dall'asse stesso
+  		gr3->GetYaxis()->SetTitleOffset(1.15);
+  		gr3->SetTitle("");
+  		gr3->GetXaxis()->SetTitle("#sqrt{s} (GeV)");
+  		gr3->GetYaxis()->SetTitle("#sigma (pb)");
+  		gr3->SetMarkerColor(mymarkercolor);
+  		gr3->SetMarkerSize(mymarkersize);
+  		gr3->SetMarkerStyle(mymarkerstyle);
+		gr3->GetXaxis()->SetRangeUser(lower_bound, upper_bound);
+		gr3->GetYaxis()->SetRangeUser(0,450.);
+		gr3->SetLineWidth(1);
+		gr3->SetLineColor(mymarkercolor);
+		gr3->GetXaxis()->SetRangeUser(lower_bound, upper_bound);
+		//gr2->GetYaxis()->SetRangeUser(0, 0.2);
+		gr3->SetLineWidth(1);
+
+
+		//gr2->SetTitle("TGraphErrors Example");
+   		gr2->SetMarkerColor(kGreen);
 		gr2->SetMarkerStyle(21);
 		gr2->GetXaxis()->SetRangeUser(lower_bound, upper_bound);
-		//gr2->GetYaxis()->SetRangeUser(0, 0.2);
-		gr2->SetLineWidth(1);
-		gr2->SetLineColor(kRed);
-
-		//gr3->SetTitle("TGraphErrors Example");
-   		gr3->SetMarkerColor(kMagenta);
-		gr3->SetMarkerStyle(21);
-		gr3->GetXaxis()->SetRangeUser(lower_bound, upper_bound);
 		//gr3->GetYaxis()->SetRangeUser(0, 0.2);
-		gr3->SetLineWidth(1);
-		gr3->SetLineColor(kMagenta);
+		gr2->SetLineWidth(1);
+		gr2->SetLineColor(kGreen);
+
+		//gr4->SetTitle("TGraphErrors Example");
+		gr4->GetYaxis()->SetTitleSize(mytextsize); //controllo sulla dimension del titolo dell'asse
+  		gr4->GetXaxis()->SetTitleSize(mytextsize);
+  		gr4->GetXaxis()->SetLabelSize(mytextsize);//cotrollo sulla dimensione dei numeretti dell'asse
+  		gr4->GetYaxis()->SetLabelSize(mytextsize);
+  		gr4->GetXaxis()->SetTitleFont(mytextfont);//controllo sul carattere usato per il titolo dell'asse
+  		gr4->GetYaxis()->SetTitleFont(mytextfont);
+  		gr4->GetXaxis()->SetLabelFont(mytextfont);//controllo sul carattere usato per i numeretti dell'asse
+  		gr4->GetYaxis()->SetLabelFont(mytextfont);
+  		gr4->GetXaxis()->SetNdivisions(908); //suddivisione dei numeri sull'asse x---es 0 a 10 a passo di 1, e ogni passo diviso in 5
+  		gr4->GetXaxis()->CenterTitle(1);//che il titolo dell'asse lo voglio quindi 1, se non lo volessi metterei 0
+  		gr4->GetYaxis()->CenterTitle(1);
+  		gr4->GetXaxis()->SetTitleOffset(1.15);//definisce la distanza del titolo dell'asse dall'asse stesso
+  		gr4->GetYaxis()->SetTitleOffset(1.15);
+  		gr4->SetTitle("");
+  		gr4->GetXaxis()->SetTitle("#sqrt{s} (GeV)");
+  		gr4->GetYaxis()->SetTitle("#sigma (pb)");
+  		gr4->SetMarkerSize(mymarkersize);
+  		gr4->SetMarkerStyle(mymarkerstyle);
+   		gr4->SetMarkerColor(kRed);
+		gr4->GetXaxis()->SetRangeUser(lower_bound, upper_bound);
+		gr4->GetYaxis()->SetRangeUser(0,450.);
+		gr4->SetLineWidth(1);
+		gr4->SetLineColor(kRed);
+		gr4->SetMarkerStyle(21);
+		gr4->GetXaxis()->SetRangeUser(lower_bound, upper_bound);
+		//gr4->GetYaxis()->SetRangeUser(0, 0.2);
+		gr4->SetLineWidth(1);
+
+		//gr4->SetTitle("TGraphErrors Example");
+		gr5->GetYaxis()->SetTitleSize(mytextsize); //controllo sulla dimension del titolo dell'asse
+  		gr5->GetXaxis()->SetTitleSize(mytextsize);
+  		gr5->GetXaxis()->SetLabelSize(mytextsize);//cotrollo sulla dimensione dei numeretti dell'asse
+  		gr5->GetYaxis()->SetLabelSize(mytextsize);
+  		gr5->GetXaxis()->SetTitleFont(mytextfont);//controllo sul carattere usato per il titolo dell'asse
+  		gr5->GetYaxis()->SetTitleFont(mytextfont);
+  		gr5->GetXaxis()->SetLabelFont(mytextfont);//controllo sul carattere usato per i numeretti dell'asse
+  		gr5->GetYaxis()->SetLabelFont(mytextfont);
+  		gr5->GetXaxis()->SetNdivisions(908); //suddivisione dei numeri sull'asse x---es 0 a 10 a passo di 1, e ogni passo diviso in 5
+  		gr5->GetXaxis()->CenterTitle(1);//che il titolo dell'asse lo voglio quindi 1, se non lo volessi metterei 0
+  		gr5->GetYaxis()->CenterTitle(1);
+  		gr5->GetXaxis()->SetTitleOffset(1.15);//definisce la distanza del titolo dell'asse dall'asse stesso
+  		gr5->GetYaxis()->SetTitleOffset(1.15);
+  		gr5->SetTitle("");
+  		gr5->GetXaxis()->SetTitle("#sqrt{s} (GeV)");
+  		gr5->GetYaxis()->SetTitle("#sigma (pb)");
+  		gr5->SetMarkerSize(mymarkersize);
+  		gr5->SetMarkerStyle(mymarkerstyle);
+   		gr5->SetMarkerColor(kBlack);
+		gr5->GetXaxis()->SetRangeUser(lower_bound, upper_bound);
+		gr5->GetYaxis()->SetRangeUser(0,450.);
+		gr5->SetLineWidth(1);
+		gr5->SetLineColor(kBlack);
+		gr5->SetMarkerStyle(21);
+		gr5->GetXaxis()->SetRangeUser(lower_bound, upper_bound);
+		//gr4->GetYaxis()->SetRangeUser(0, 0.2);
+		gr5->SetLineWidth(1);
+
+		//gr2->SetTitle("TGraphErrors Example");
+   		gr6->SetMarkerSize(0);
+		gr6->GetXaxis()->SetRangeUser(lower_bound, upper_bound);
+		//6r2->GetYaxis()->SetRangeUser(0, 0.2);
+		gr6->SetLineWidth(1);
+		gr6->SetLineColor(kRed);
 
 		TFile file("pdf_folder.root", "recreate");
-		TCanvas canv;
+		
 		gr1->Write();
 		gr2->Write();
 		gr3->Write();
-		gr1->Draw("AP");
-		gr2->Draw("Psame");
-		gr3->Draw("Psame");
-		canv.SaveAs(("Plots/"+pdfname+".pdf").c_str());
+		gr4->Write();
+		gr5->Write();
+		gr6->Write();
+		//gr3->Draw("AP");
+		gr5->Draw("AP");
+		//gr2->Draw("Psame");
+		//gr1->Draw("Psame");
+		gr4->Draw("Psame");
+		gr6->Draw("same");
+		//gr3->Draw("Psame");
+		//gr5->Draw("Psame");
+		Scatola->SaveAs(("Plots/"+pdfname+".pdf").c_str());
 		file.Close();
 		return;
 
