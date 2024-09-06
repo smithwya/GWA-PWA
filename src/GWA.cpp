@@ -354,7 +354,7 @@ int main(int argc, char ** argv)
 	}
 	
 	//does the fitting
-	for (int j = 0; j < numfits; j++){
+	//for (int j = 0; j < numfits; j++){
 		//resets the observable
 		testObs.setFitParams(startparams);
 		formatReader.setObs(testObs);
@@ -364,56 +364,97 @@ int main(int argc, char ** argv)
 		if(formatReader.getRandomizeFlag()) formatReader.randomize(seed);
 		testObs = formatReader.getObs();
 		
-	if(formatReader.getFitFlag()){
+		if(formatReader.getFitFlag()){
 		//make the minimzer
-		ROOT::Math::Minimizer* min = ROOT::Math::Factory::CreateMinimizer("Minuit2","");
-		//Set some criteria for the minimzer to stop
-		min->SetMaxFunctionCalls(100000);
-		min->SetMaxIterations(10000);
-		min->SetTolerance(0.001);
-		min->SetPrintLevel(1);
+		//ROOT::Math::Minimizer* min = ROOT::Math::Factory::CreateMinimizer("Minuit2","Simplex");
+		ROOT::Math::Minimizer* min[2];
+		min[0] = ROOT::Math::Factory::CreateMinimizer("Minuit2","Simplex");
+		min[1] = ROOT::Math::Factory::CreateMinimizer("Minuit2","Migrad");
+
 		//get the initial parameters and steps from the constructed observable object
 		vector<double> fitparams = testObs.getFitParams();
 		nParams = fitparams.size();
 		//make a function wrapper to minimize the function minfunc (=chisquared)
 		ROOT::Math::Functor f(&minfunc,nParams);
 		ROOT::Math::Functor g(&minfunc_with_InclCrossSec,nParams);
-		if(formatReader.getInclCrossSecFlag()) min->SetFunction(g);
-		else min->SetFunction(f);
-		//set the initial conditions and step sizes
-		for(int i = 0; i < nParams; i++){
-			min->SetVariable(i,to_string(i),fitparams[i],steps[i]);
-		}
+
+		double chisq = 0;
 
 		int numKmatbgcoeffs = formatReader.getKmatList().size() * testObs.numChans * (testObs.numChans + 1)/2.;
 		int numremainingparamsperamp = nParams/testObs.getNumAmps() - numKmatbgcoeffs;
-		for(int i = 0; i < testObs.getNumAmps(); i++){
-			if(testObs.amplitudes[i].getKMatType() == "kmat-CDD"){
-				for(int j = numremainingparamsperamp; j < numremainingparamsperamp + numKmatbgcoeffs; j++){
-					//cout << fitparams[j + i * (numremainingparamsperamp + numremainingparamsperamp)] << endl;
-					min->SetVariableLowerLimit(j + i * (numremainingparamsperamp + numremainingparamsperamp), 0.);
+		int numresmasses = formatReader.getAddPoleList().size();
+
+		for(int l = 0; l < sizeof(min)/sizeof(ROOT::Math::Minimizer*); l++){
+
+			//Set some criteria for the minimzer to stop
+			min[l]->SetMaxFunctionCalls(10);
+			min[l]->SetMaxIterations(10);
+			min[l]->SetTolerance(1);
+			min[l]->SetPrintLevel(1);
+
+			if(formatReader.getInclCrossSecFlag()) min[l]->SetFunction(g);
+			else min[l]->SetFunction(f);
+
+			//set the initial conditions and step sizes
+			for(int i = 0; i < nParams; i++){
+				min[l]->SetVariable(i,to_string(i),fitparams[i],steps[i]);
+			} 
+
+			for(int i = 0; i < testObs.getNumAmps(); i++){
+				if(testObs.amplitudes[i].getKMatType() == "kmat-CDD"){
+					for(int k = numremainingparamsperamp - numresmasses; k < nParams - numresmasses; k++){
+						min[l]->SetVariableLowerLimit(k + i * nParams, 0.);
+					}
 				}
 			}
-		}exit(0);
 
-		//run the minimization
-		min->Minimize();
-		//extract the resulting fit parameters
-		vector<double> finalParams = {};
-		for(int i = 0; i < nParams; i ++){
-			finalParams.push_back(min->X()[i]);
+			//run the minimization
+			min[l]->Minimize();
+
+			if(min[l]->Status() == 0 /*|| min[l]->IsValidError() == false*/){
+				cout << "The fit is not valid:" << endl;
+				cout << min[l]->Status() << endl;
+				//cout << min[l]->IsValidError() << endl;
+				return 0;
+			}
+
+			//extract the resulting fit parameters
+			for(int i = 0; i < nParams; i++){
+				fitparams[i] = min[l]->X()[i];
+				//cout << min[l]->X()[i] << endl;
+			}
+
+			chisq = min[l]->MinValue()/dof; cout << chisq << endl <<endl;
+
 		}
-		double chisq = min->MinValue()/dof;
+
+		vector<double> finalParams = {};
+
+		for(int i = 0; i < nParams; i++){
+			finalParams.push_back(fitparams[i]);
+		}
+
+		for(int i = 0; i < testObs.getNumAmps(); i++){
+			if(testObs.amplitudes[i].getKMatType() == "kmat-CDD"){
+				for(int k = numremainingparamsperamp - numresmasses; k < nParams - numresmasses; k++){
+					//min[l]->SetVariableLowerLimit(k + i * nParams, 0.);
+					cout << finalParams[k + i * nParams] << endl;
+				}
+			}
+		}		
+
+		//exit(0);
+
 		//if the chisquared is less than the cutoff, add it as a leaf to the ttree
 		if(chisq<cutoff){
-      			testObs.setFitParams(finalParams);
+      		testObs.setFitParams(finalParams);
 			chi_squared_excl= testObs.chisq()/(testObs.getNumData()-steps.size());
 			chi_squared_incl=chisq;
 			formatReader.setObs(testObs);
 			cmds = formatReader.getOutputCmds();
 			t1->Fill();
 		}
-	}
+	//}
 	
 }
 
