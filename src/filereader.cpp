@@ -61,7 +61,7 @@ void filereader::ConstructBareAmps(){
 	//creates list of amplitude data objects
 	for(string s : getAddWaveList()){
 		ampDat ampd = readWave(s);
-		amplitude amp = amplitude(ampd.wname,ampd.J,ampd.sL,smin,smax,chlist);
+		amplitude amp = amplitude(ampd.wname,ampd.J,ampd.sL,smin,smax,chlist,ampd.kmatflag,ampd.rhoN);
 		amps.push_back(amp);
 	}
 

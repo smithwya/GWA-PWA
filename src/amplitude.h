@@ -47,9 +47,10 @@ class amplitude {
 public:
 	amplitude();
 	amplitude(int j, double alpha, double sl, vector<channel> c, vector<MatrixXcd> kParams, vector<double> rmasses,double s0, double smin, double smax);
-	amplitude(string ampName,int J, double sl, double smin, double smax, vector<channel> chans);
+	amplitude(string ampName,int J, double sl, double smin, double smax, vector<channel> chans, string kmat, string rhoN);
 
 	comp chebyshev(comp x, int n);
+	comp legendreII(comp x, int n);
 	comp omega_s(comp s);
 	comp omega_p(comp s);
 	comp omega_ps(comp s);
@@ -90,6 +91,7 @@ public:
 	vector<double> getStepSizes();
 	vector<double> getFittedSteps();
 	vector<double> getFitInterval();
+	string getKMatType();
 
 private:
 	vector<channel> channels;
@@ -109,5 +111,8 @@ private:
 	double smax;
 	double epsilon;
 	string name;
+
+	string kmattype;
+	string rhoNtype;
 	
 };

@@ -59,7 +59,7 @@ amplitude::amplitude(int j, double alp, double ssl, vector<channel> chans, vecto
 	name = "";
 }
 
-amplitude::amplitude(string ampName, int Jj,double ssL, double ssmin, double ssmax, vector<channel> chans){
+amplitude::amplitude(string ampName, int Jj,double ssL, double ssmin, double ssmax, vector<channel> chans, string kmat, string rhoN){
 	name = ampName;
 	numChannels = chans.size();
 	J = Jj;
@@ -77,6 +77,9 @@ amplitude::amplitude(string ampName, int Jj,double ssL, double ssmin, double ssm
 		channel_names.push_back(c.getName());
 	}
 	epsilon = 1e-3;
+
+	kmattype = kmat;
+	rhoNtype = rhoN;
 }
 
 vector<channel> amplitude::getChannels(){
@@ -86,6 +89,10 @@ vector<channel> amplitude::getChannels(){
 
 vector<double> amplitude::getResMasses(){
 	return resmasses;
+}
+
+string amplitude::getKMatType(){
+	return kmattype;
 }
 
 	// return E_gamma * p_i * numerator * denominator.inverse()
@@ -107,7 +114,6 @@ VectorXcd amplitude::getValue(comp s) {
 	return ((getNumerator(s,3).transpose())*(getDenominator(s).inverse()))*phsp;
 	*/
 
-	
 	MatrixXcd phsp = MatrixXcd::Identity(numChannels,numChannels);
 
 	//s = comp(118.5,0.8);
@@ -115,18 +121,24 @@ VectorXcd amplitude::getValue(comp s) {
 		phsp(i,i)= pow(getMomentum(i,s),J+0.5)/pow(s,.25);
 	}
 
-	comp test = 0;
+	if(kmattype == "kmat-CDD"){
+	
+		return ((getNumerator(s, channels[0].getPoleType()).transpose())*(getDenominator(s, sheet).inverse()))*phsp;
+	
+	}
+
+	//comp test = 0;
 	//cout << channels[2].getMasses()[0] << "	" << channels[2].getMasses()[1]<<endl;
 	//cout << getKMatrix(comp(118.5,0.8)) << endl; exit(0);
 	//test = omega_s(comp(118.5,0.8)).imag(); cout << test << endl; exit(0);
 	//cout << getNumerator(comp(118.5,0.8), channels[0].getPoleType()) << endl; exit(0);
 	//test = pow(2. * channels[2].getMomentum(comp(118.5,0.8)), 2 + 1); cout << test.real() << "	" << test.imag() << endl; exit(0);
 	//test = getRhoN(comp(118.5,0.8), 2); cout << test.real() << "	" << test.imag() << endl; exit(0);
-	cout << getIntegral(comp(118.5,0.8), 2, sheet) << endl << endl;
+	//cout << getIntegral(comp(118.5,0.8), 2, sheet) << endl << endl;
 	//cout << phsp << endl; exit(0);
 	//cout << (getKMatrix(comp(118.5,0.8)).inverse()) << endl; exit(0);
 	//cout << getDenominator(comp(118.5,0.8)) << endl; exit(0);
-	cout << getDenominator(comp(118.5,0.8), sheet).inverse() << endl; 
+	//cout << getDenominator(comp(118.5,0.8), sheet).inverse() << endl; 
 	
 	MatrixXcd K = getKMatrix(s);
 	MatrixXcd I = MatrixXcd::Identity(numChannels,numChannels);
@@ -154,8 +166,14 @@ comp amplitude::chebyshev(comp x, int n) {
 	return comp(0,0);
 };
 
+comp amplitude::legendreII(comp x, int n) {
+	
+	if (n == 0) return 1./2. * log((1. + x)/(1. - x));
+    if (n == 1) return x * legendreII(x, 0) - 1.;
+    if (n > 1) return (2. * (double)n - 1.)/(double)n * x * legendreII(x, n - 1) - ((double)n - 1.)/(double)n * legendreII(x, n - 2);
+	return comp(0,0);
 
-
+};
 
 //calculates omega_s
 comp amplitude::omega_p(comp s) {
@@ -216,6 +234,14 @@ comp amplitude::getRhoN(comp sprime,int k,bool sheet)
 	//if(k==2) dumbJ = 0;
 
 	//cout << "dumbJ = " << J << endl;
+
+	if(rhoNtype == "rhoN-Qmodel"){
+
+		comp x = legendreII(1. + sL/(2. * pow(channels[k].getMomentum(sprime), 2)), J) / (2. * channels[k].getMomentum(sprime));
+
+		return x;
+
+	}	
 
 	comp x = pow(2.0*channels[k].getMomentum(sprime),2.0*dumbJ+1.0)/pow(sprime + sL,dumbJ+alpha);
 
@@ -334,7 +360,8 @@ void amplitude::calcIntegrals(vector<comp> slist,int k,bool sheet){
 
 MatrixXcd amplitude::getDenominator(comp s,bool sheet)
 {
-	MatrixXcd Kinv = getKMatrix(s).inverse();
+	MatrixXcd Kinv = getKMatrix(s).inverse();//.inverse();//getDenominator acts just when we use the CDD parametrization, 
+	//so I can avoid to calculate the inverse, taking GetKMatrix as the inverse directly
 
 	MatrixXcd M = MatrixXcd::Zero(numChannels,numChannels);
 
@@ -368,9 +395,32 @@ void amplitude::setResMasses(vector<double> rm){
 }
 
 MatrixXcd amplitude::getKMatrix(comp s) {
-//return MatrixXcd::Ones(numChannels, numChannels);
 
 	MatrixXcd kmat = MatrixXcd::Zero(numChannels, numChannels);
+
+	if(kmattype == "kmat-CDD"){
+
+		for (int k = 0; k < numChannels; k++) {
+			for (int i = 0; i <= k; i++) {
+				comp tempMatrixTerm = 0;
+
+				for (int R = 0; R < resmasses.size(); R++) {
+					tempMatrixTerm += channels[k].getCoupling(R) * channels[i].getCoupling(R) / (resmasses[R] - s);
+				}
+
+				kmat(k, i) = - tempMatrixTerm;
+				kmat(i, k) = - tempMatrixTerm;
+			}
+		}
+
+		for (int j = 0; j < kParameters.size(); j++) {
+
+			kmat += pow(-s, j) * kParameters[j];
+
+		}
+
+		return kmat;
+	}
 
 	for (int k = 0; k < numChannels; k++) {
 		for (int i = 0; i <= k; i++) {
