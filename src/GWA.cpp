@@ -354,7 +354,7 @@ int main(int argc, char ** argv)
 	}
 	
 	//does the fitting
-	//for (int j = 0; j < numfits; j++){
+	for (int j = 0; j < numfits; j++){
 		//resets the observable
 		testObs.setFitParams(startparams);
 		formatReader.setObs(testObs);
@@ -454,7 +454,7 @@ int main(int argc, char ** argv)
 			cmds = formatReader.getOutputCmds();
 			t1->Fill();
 		}
-	//}
+	}
 	
 }
 

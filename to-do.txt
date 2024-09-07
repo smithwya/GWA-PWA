@@ -12,4 +12,5 @@ Possible additions/to-do:
 12- has the polesearch to be done also in each jobs' run automatically?
 13- change name of chisq functions and name of chisq values in the tree
 14- make the format in which you pass the name of the input files to poleasearch consistent
-15- calculation of residues: in development
+15- calculation of residues (also as a criterion to characterize a pole): in development
+16- write in input file (or as an argument of the main) a string with the name of the minuit2's algorithms you want to call in sequence (ex. Simplex, Migrad). The subsequent minization is already thought to be generalized in this way: in progress
