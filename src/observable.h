@@ -472,7 +472,6 @@ public:
   		gr1->GetYaxis()->CenterTitle(1);
   		gr1->GetXaxis()->SetTitleOffset(1.15);//definisce la distanza del titolo dell'asse dall'asse stesso
   		gr1->GetYaxis()->SetTitleOffset(1.15);
-  		gr1->SetTitle("");
   		gr1->GetXaxis()->SetTitle("#sqrt{s} (GeV)");
   		gr1->GetYaxis()->SetTitle("#sigma (pb)");
   		gr1->SetMarkerColor(mymarkercolor);

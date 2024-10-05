@@ -189,6 +189,26 @@ void filereader::SetFitFlag(){
     }
 }
 
+void filereader::SetPlotFlag(){
+	regex reg_PlotFlag("DoPlotting\\(\\s*(.*?)\\s*\\)");
+	smatch cmdmatch;
+	for(int i = 0; i < commands.size(); i++){
+		if(regex_search(commands.at(i), cmdmatch, reg_PlotFlag)){
+            PlotFlagCmd = commands[i];
+		}
+    }
+}
+
+void filereader::SetPolesearchFlag(){
+	regex reg_PolesearchFlag("DoPolesearch\\(\\s*(.*?)\\s*\\)");
+	smatch cmdmatch;
+	for(int i = 0; i < commands.size(); i++){
+		if(regex_search(commands.at(i), cmdmatch, reg_PolesearchFlag)){
+            PolesearchFlagCmd = commands[i];
+		}
+    }
+}
+
 void filereader::SetRandomizeFlag(){
 	regex reg_Randomize("DoRandomize\\(\\s*(.*?)\\s*\\)");
 	smatch cmdmatch;
@@ -297,6 +317,8 @@ void filereader::SetAllCommandLists(){
 	SetInclChi2Weight();
 	SetExclChi2Weight();
 	SetFitFlag();
+	SetPlotFlag();
+	SetPolesearchFlag();
 	setExpInclCrossSec();
 	SetInclCrossSecFlag();
 	SetRandomizeFlag();
@@ -323,6 +345,16 @@ double filereader::GetExclChi2Weight(){
 bool filereader::getFitFlag(){
 	readFitFlag(FitFlagCmd);
 	return FitFlag;
+}
+
+bool filereader::getPlotFlag(){
+	readPlotFlag(PlotFlagCmd);
+	return PlotFlag;
+}
+
+bool filereader::getPolesearchFlag(){
+	readPolesearchFlag(PolesearchFlagCmd);
+	return PolesearchFlag;
 }
 
 bool filereader::getInclCrossSecFlag(){
@@ -389,6 +421,30 @@ void filereader::readFitFlag(string cmd){
 		remove(my_str.begin(), my_str.end(), ' ');
 		if (my_str == "No"){
 			FitFlag = false;
+		}
+	}
+}
+
+void filereader::readPlotFlag(string cmd){
+	regex reg_PlotFlag("DoPlotting\\(\\s*(.*?)\\s*\\)");
+
+	if(regex_search(cmd, match, reg_PlotFlag)){
+		string my_str = match[1];
+		remove(my_str.begin(), my_str.end(), ' ');
+		if (my_str == "No"){
+			PlotFlag = false;
+		}
+	}
+}
+
+void filereader::readPolesearchFlag(string cmd){
+	regex reg_FitFlag("DoPolesearch\\(\\s*(.*?)\\s*\\)");
+
+	if(regex_search(cmd, match, reg_FitFlag)){
+		string my_str = match[1];
+		remove(my_str.begin(), my_str.end(), ' ');
+		if (my_str == "No"){
+			PolesearchFlag = false;
 		}
 	}
 }
@@ -873,6 +929,11 @@ vector<string> filereader::getOutputCmds(){
 
 
 	output_cmds.push_back(RandomizeFlagCmd);
+
+
+	output_cmds.push_back(PolesearchFlagCmd);
+
+	output_cmds.push_back(PlotFlagCmd);
 
 
 	for(string s: AddChannel_list) output_cmds.push_back(s);
