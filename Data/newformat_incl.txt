@@ -3,7 +3,7 @@ FitRegion(10.65,11.2062)
 InclChi2Weight(1)
 ExclChi2Weight(10)
 ReducedChi2CutOff(10)
-DoFit(No)
+DoFit(Yes)
 FitAlsoToInclusiveCrossSection(Yes)
 DoRandomize(No)
 

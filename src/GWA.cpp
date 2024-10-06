@@ -62,7 +62,7 @@ double minfunc(const double *xx){
 	}
 
 	testObs.setFitParams(params);
-	return testObs.chisq();
+	return testObs.excl_chisq();
 }
 
 double minfunc_with_InclCrossSec(const double *xx){
@@ -73,7 +73,7 @@ double minfunc_with_InclCrossSec(const double *xx){
 	}
 
 	testObs.setFitParams(params);
-	return testObs.chisq() + testObs.chisq_with_InclCrossSec();
+	return testObs.excl_chisq() + testObs.incl_chisq();
 	
 }
 
@@ -202,11 +202,11 @@ int main(int argc, char ** argv)
 
 		vector<double> steps = testObs.getStepSizes();
 
-		//cout << testObs.chisq_with_InclCrossSec() << "	" << testObs.chisq_with_InclCrossSec()/(testObs.getNumData() - steps.size() + testObs.getNumInclData()) << endl;
+		//cout << testObs.incl_chisq() << "	" << testObs.incl_chisq()/(testObs.getNumData() - steps.size() + testObs.getNumInclData()) << endl;
 
-		//cout << testObs.chisq_with_InclCrossSec() - testObs.chisq() << endl;
+		//cout << testObs.incl_chisq() - testObs.excl_chisq() << endl;
 
-		//cout << (testObs.chisq_with_InclCrossSec() + testObs.chisq()) / (testObs.getNumData() - steps.size() + testObs.getNumInclData()) << endl;
+		//cout << (testObs.incl_chisq() + testObs.excl_chisq()) / (testObs.getNumData() - steps.size() + testObs.getNumInclData()) << endl;
 
 		
 		
@@ -220,15 +220,15 @@ int main(int argc, char ** argv)
 
 		
 
-		//cout << testObs.chisq() << endl;
+		//cout << testObs.excl_chisq() << endl;
 
-		//cout << testObs.chisq() / (testObs.getNumData() - steps.size()) << endl;
+		//cout << testObs.excl_chisq() / (testObs.getNumData() - steps.size()) << endl;
 
-		//cout << testObs.chisq_with_InclCrossSec() << endl;
+		//cout << testObs.incl_chisq() << endl;
 
-		//cout << testObs.chisq_with_InclCrossSec() / (testObs.getNumInclData() - steps.size()) << endl;
+		//cout << testObs.incl_chisq() / (testObs.getNumInclData() - steps.size()) << endl;
 
-		//cout << (15*testObs.chisq() + testObs.chisq_with_InclCrossSec())/(testObs.getNumData() + testObs.getNumInclData() - steps.size()) << endl; 
+		//cout << (testObs.excl_chisq() + testObs.incl_chisq())/(testObs.getNumData() + testObs.getNumInclData() - steps.size()) << endl; 
 
 	}
 	
@@ -254,8 +254,9 @@ int main(int argc, char ** argv)
 		TFile *file;
 		TTree *t1;
 		vector<string> cmds = formatReader.getOutputCmds();
-		double chi_squared_incl = 1.0;
-		double chi_squared_excl = 1.0;
+		double red_chi_squared = 1.0;
+		double red_chi_squared_incl = 1.0;
+		double red_chi_squared_excl = 1.0;
 		vector<string> *tree_cmds = &cmds;
 
 		///
@@ -350,8 +351,12 @@ int main(int argc, char ** argv)
 			file=TFile::Open(fname.c_str(),"update");
 			t1 = (TTree*)file->Get("fits");
 			t1->SetBranchAddress("Commands", &tree_cmds);
-			t1->SetBranchAddress("Inclusive_chi", &chi_squared_incl);
-			t1->SetBranchAddress("Exclusive_chi", &chi_squared_excl);
+			t1->SetBranchAddress("Red_chi", &red_chi_squared);
+
+			if(formatReader.getInclCrossSecFlag()){
+				t1->SetBranchAddress("Inclusive_red_chi", &red_chi_squared_incl);
+				t1->SetBranchAddress("Exclusive_red_chi", &red_chi_squared_excl);
+			}
 
 			for(int j = 0; j < namp; j++){
 				npolej = testObs.amplitudes[j].getResMasses().size();
@@ -400,8 +405,12 @@ int main(int argc, char ** argv)
 			file = TFile::Open(fname.c_str(),"recreate");
 			t1 = new TTree("fits", ("Fits from code instance "+to_string(jobnum)).c_str());
 			t1->Branch("Commands", &cmds);
-			t1->Branch("Inclusive_chi", &chi_squared_incl);
-			t1->Branch("Exclusive_chi", &chi_squared_excl);
+			t1->Branch("Red_chi", &red_chi_squared);
+
+			if(formatReader.getInclCrossSecFlag()){
+				t1->Branch("Inclusive_red_chi", &red_chi_squared_incl);
+				t1->Branch("Exclusive_red_chi", &red_chi_squared_excl);
+			}
 			
 			for(int j = 0; j < namp; j++){
 				npolej = testObs.amplitudes[j].getResMasses().size();
@@ -474,7 +483,7 @@ int main(int argc, char ** argv)
 			ROOT::Math::Functor f(&minfunc,nParams);
 			ROOT::Math::Functor g(&minfunc_with_InclCrossSec,nParams);
 
-			double chisq = 0;
+			double chisq[2];
 			int numKmatbgcoeffs = formatReader.getKmatList().size() * testObs.numChans * (testObs.numChans + 1)/2.;
 			int numremainingparamsperamp = nParams/testObs.getNumAmps() - numKmatbgcoeffs;
 			int numresmasses = formatReader.getAddPoleList().size();
@@ -519,7 +528,7 @@ int main(int argc, char ** argv)
 					//cout << min[l]->X()[i] << endl;
 				}
 
-				chisq = min[l]->MinValue()/dof; cout << chisq << endl <<endl;
+				chisq[l] = min[l]->MinValue()/dof; cout << chisq[l] << endl <<endl;
 
 			}
 
@@ -543,7 +552,7 @@ int main(int argc, char ** argv)
 			//exit(0);
 
 			//if the chisquared is less than the cutoff, add it as a leaf to the ttree
-			if(chisq<cutoff){
+			if(chisq[1]<cutoff){
 				testObs.setFitParams(finalParams);
 
 				for(int j = 0; j < namp; j++){
@@ -603,8 +612,13 @@ int main(int argc, char ** argv)
 					}
 				}
 
-				chi_squared_excl= testObs.chisq()/(testObs.getNumData()-steps.size());
-				chi_squared_incl=chisq;
+				red_chi_squared=chisq[1]; //cout << "Prova: " << chisq[1] << "VS " << (testObs.excl_chisq() + testObs.incl_chisq())/(testObs.getNumInclData() + testObs.getNumData()-steps.size()) << endl;
+
+				if(formatReader.getInclCrossSecFlag()){
+					red_chi_squared_excl= testObs.excl_chisq()/(testObs.getNumData()-steps.size());
+					red_chi_squared_incl= testObs.incl_chisq()/(testObs.getNumInclData()-steps.size());
+				}
+				
 				formatReader.setObs(testObs);
 				cmds = formatReader.getOutputCmds();
 				t1->Fill();

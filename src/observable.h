@@ -1415,7 +1415,7 @@ public:
 	};
 
 
-	double chisq(){
+	double excl_chisq(){
 
 		double result = 0;
 
@@ -1469,7 +1469,7 @@ public:
 	}
 
 
-	double chisq_with_InclCrossSec(){
+	double incl_chisq(){
 
 		double sum = 0;
 		double lower_bound = sqrt(amplitudes[0].getFitInterval()[0]);
