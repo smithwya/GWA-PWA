@@ -25,20 +25,7 @@
 #include "TBranch.h"
 #include "TObject.h"
 #include "TSystem.h"
-#include <TInterpreter.h>
 
-/*
-#ifdef __CLING__
-
-#pragma link C++ nestedclasses;
-#pragma link C++ nestedtypedefs;
-#pragma link C++ class vector<Eigen::MatrixXcd>+;
-#pragma link C++ class vector<Eigen::MatrixXcd>::*;
-#pragma link C++ class vector<Eigen::VectorXcd>+;
-#pragma link C++ class vector<Eigen::VectorXcd>::*;
-
-#endif
-*/
 
 using namespace std;
 typedef std::chrono::system_clock Clock;
@@ -118,7 +105,7 @@ vector<double> linspace(T start_in, T end_in, int num_in)
 
 int main(int argc, char ** argv)
 {
-	string inputfile = (string) argv[1]; //TO CHANGE: for polesearch is just the core e.g. "fit73-36", without the path nor the extension
+	string inputfile = (string) argv[1]; //just the core e.g. "fit73-36", without the path nor the extension
 	string polefile = (string) argv[2];
 	string pWave = (string) argv[3];
 	double grid_Re_sx = stod(argv[4]);
@@ -136,8 +123,6 @@ int main(int argc, char ** argv)
 	string fitsfolder = "Fits/";
 	string polesfolder = "Poles/";
 
-	//gInterpreter->GenerateDictionary("vector<Eigen::MatrixXcd>", "vector;/usr/local/include/eigen3/Eigen/Dense");
-	//gInterpreter->GenerateDictionary("vector<Eigen::VectorXcd>", "vector;/usr/local/include/eigen3/Eigen/Dense");
 
 	filereader formatReader(string("Data/") + inputfile + string(".txt"));
 	formatReader.SetAllCommandLists();
@@ -192,43 +177,15 @@ int main(int argc, char ** argv)
 		testObs.makePlotGraphWithExp("P", "BstarBstar", inputfile+"_BstarBstar", intensityP_BstarBstar, 10.6322,11.0208);
 		testObs.makePlotGraphWithExp("P", "B_sstarB_sstar", inputfile+"_B_sstarB_sstar", intensityP_B_sstarB_sstar, 10.6322,11.0208);
 		testObs.makePlotGraphDummy(inputfile+"_Dummy", intensityP_Dummy, 10.6322,11.0208);
-		testObs.plotInclCrossSecVsSumOfExcl(inputfile+"_InclCrossSecVsSumOfExcl", 10.6322,11.2062);
-		testObs.plotInclCrossSecWithExp(inputfile+"_InclCrossSecWithExp", 10.6322,11.2062);
+		if(formatReader.getInclCrossSecFlag()){
+			testObs.plotInclCrossSecVsSumOfExcl(inputfile+"_InclCrossSecVsSumOfExcl", 10.6322,11.2062);
+			testObs.plotInclCrossSecWithExp(inputfile+"_InclCrossSecWithExp", 10.6322,11.2062);
+		}
 
 		//testObs.makePlotGraph_ExpOnly("P", "BB", inputfile+"_BB_justpts", 10.6322,  11.0208, "#sqrt{s} (GeV)", "#sigma (pb)");
 		//testObs.makePlotGraph_ExpOnly("P", "BBstar", inputfile+"_BBstar_justpts", 10.6322,  11.0208, "#sqrt{s} (GeV)", "#sigma (pb)");
 		//testObs.makePlotGraph_ExpOnly("P", "BstarBstar", inputfile+"_BstarBstar_justpts", 10.6322,  11.0208, "#sqrt{s} (GeV)", "#sigma (pb)");
 		//testObs.makePlotGraph_ExpOnly("P", "B_sstarB_sstar", inputfile+"_B_sstarB_sstar_justpts", 10.84,  11.0208, "#sqrt{s} (GeV)", "#sigma (pb)");
-
-		vector<double> steps = testObs.getStepSizes();
-
-		//cout << testObs.incl_chisq() << "	" << testObs.incl_chisq()/(testObs.getNumData() - steps.size() + testObs.getNumInclData()) << endl;
-
-		//cout << testObs.incl_chisq() - testObs.excl_chisq() << endl;
-
-		//cout << (testObs.incl_chisq() + testObs.excl_chisq()) / (testObs.getNumData() - steps.size() + testObs.getNumInclData()) << endl;
-
-		
-		
-		//double totabs = 1.7 * (testObs.getNumData() - steps.size() + testObs.getNumInclData());
-
-		//double exclabs = 24.6 * (testObs.getNumData() - steps.size());
-
-		//double ratio = exclabs/totabs;
-
-		//cout << totabs << "	" << exclabs << "	" << ratio << endl;
-
-		
-
-		//cout << testObs.excl_chisq() << endl;
-
-		//cout << testObs.excl_chisq() / (testObs.getNumData() - steps.size()) << endl;
-
-		//cout << testObs.incl_chisq() << endl;
-
-		//cout << testObs.incl_chisq() / (testObs.getNumInclData() - steps.size()) << endl;
-
-		//cout << (testObs.excl_chisq() + testObs.incl_chisq())/(testObs.getNumData() + testObs.getNumInclData() - steps.size()) << endl; 
 
 	}
 	
@@ -267,79 +224,11 @@ int main(int argc, char ** argv)
 
 		int nchs = testObs.amplitudes[0].getChanNames().size();//0th element because the number of channels is the same for each wave
 
-		//int npole = testObs.amplitudes[0].getResMasses().size();
-
-		//double couplings[namp][nchs][npole];
 		vector<double> couplings[namp][nchs]; 
 
-		//int polgrade = testObs.amplitudes[0].getChannels()[0].getChebyCoeffs().size();
-
-		//double cheby[namp][nchs][polgrade];
 		vector<double> cheby[namp][nchs];
 
-		//double kmats[namp][nchs][nchs][grade];
 		vector<double> kmats[namp][nchs][nchs];
-
-		/*for(MatrixXcd x: testObs.amplitudes[0].getkParameters()) cout << x << endl; cout << endl;
-
-		for(int j = 0; j < namp; j++){
-			int gradej = testObs.amplitudes[j].getkParameters().size();
-			for(int l = 0; l < nchs; l++){
-				for(int m = l; m < nchs; m++){
-					for(int k = 0; k < gradej; k++){
-					
-						kmats[j][l][m].push_back(testObs.amplitudes[j].getkParameters()[k](l,m).real());//real because the kmatrix bg coeffs are real
-						if(l != m) kmats[j][m][l].push_back(kmats[j][l][m].at(k));
-						//cout << testObs.amplitudes[j].getkParameters()[k](l,m) << endl;
-					}
-				}
-			}
-		}	
-		
-		for(int k = 0; k < testObs.amplitudes[0].getkParameters().size(); k++){
-			for(int i = 0; i < nchs; i++){
-				for(int j = 0; j < nchs; j++){
-					cout << kmats[0][i][j][k];
-				}
-				cout << endl;
-			}
-		}exit(0);*/
-
-		///
-
-		/*for(int j = 0; j < namp; j++){
-			int npolej = testObs.amplitudes[j].getResMasses().size();
-			for(int l = 0; l < nchs; l++){
-				
-				for(int k = 0; k < npolej; k++){
-				
-					//couplings[j][l][k] = testObs.amplitudes[j].getChannels()[l].getCoupling(k);
-					couplings[j][l].push_back(testObs.amplitudes[j].getChannels()[l].getCoupling(k));
-					cout << couplings[j][l].at(k) << endl;
-				}
-
-			}
-
-		}*/	
-
-		///
-
-				/*for(int j = 0; j < namp; j++){
-
-					for(int l = 0; l < nchs; l++){
-						int polgradej = testObs.amplitudes[j].getChannels()[l].getChebyCoeffs().size();
-						for(int k = 0; k < polgradej; k++){
-						
-							cheby[j][l].push_back(testObs.amplitudes[j].getChannels()[l].getChebyCoeffs()[k]);
-							cout << 
-
-						}
-
-					}
-
-				}*/	
-
-		///
 
 		int npolej = 0;
 		int polgradej = 0;
@@ -347,7 +236,7 @@ int main(int argc, char ** argv)
 		
 		//if the file exists, update the ttree on file. otherwise, make it.
 		if(!(gSystem->AccessPathName(fname.c_str(),kFileExists))){
-			cout<<"sono qua!1\n";
+			//cout<<"sono qua!1\n";
 			file=TFile::Open(fname.c_str(),"update");
 			t1 = (TTree*)file->Get("fits");
 			t1->SetBranchAddress("Commands", &tree_cmds);
@@ -369,7 +258,7 @@ int main(int argc, char ** argv)
 			for(int j = 0; j < namp; j++){
 				npolej = testObs.amplitudes[j].getResMasses().size();
 				for(int l = 0; l < nchs; l++){
-					couplings[j][l].resize(npolej); // Ensure the vector has npolej elements
+					couplings[j][l].resize(npolej);
 					for(int k = 0; k < npolej; k++){
 						t1->SetBranchAddress(("gJ" + to_string(j) + "CH" + to_string(l) + "P" + to_string(k)).c_str(), &couplings[j][l].at(k));
 					}		
@@ -401,7 +290,7 @@ int main(int argc, char ** argv)
 			}	
 			
 		} else {
-			cout<<"sono qua!2\n";
+			//cout<<"sono qua!2\n";
 			file = TFile::Open(fname.c_str(),"recreate");
 			t1 = new TTree("fits", ("Fits from code instance "+to_string(jobnum)).c_str());
 			t1->Branch("Commands", &cmds);
@@ -416,7 +305,7 @@ int main(int argc, char ** argv)
 				npolej = testObs.amplitudes[j].getResMasses().size();
 				resmasses[j].resize(npolej);
 				for(int k = 0; k < npolej; k++){
-					t1->Branch(("mJ" + to_string(j) + "_num" + to_string(k)).c_str(), &resmasses[j].at(k));cout << "hello" << endl;
+					t1->Branch(("mJ" + to_string(j) + "_num" + to_string(k)).c_str(), &resmasses[j].at(k));//cout << "hello" << endl;
 				}
 			}
 
@@ -433,7 +322,7 @@ int main(int argc, char ** argv)
 
 			for(int j = 0; j < namp; j++){
 				for(int l = 0; l < nchs; l++){
-					polgradej = testObs.amplitudes[j].getChannels()[l].getChebyCoeffs().size(); cout << polgradej << endl; 
+					polgradej = testObs.amplitudes[j].getChannels()[l].getChebyCoeffs().size(); //cout << polgradej << endl; 
 					cheby[j][l].resize(polgradej);
 					for(int k = 0; k < polgradej; k++){
 						t1->Branch(("aJ" + to_string(j) + "CH" + to_string(l) + "G" + to_string(k)).c_str(), &cheby[j][l].at(k));
@@ -457,7 +346,7 @@ int main(int argc, char ** argv)
 
 		}
 
-		
+		vector<string> fitseq = formatReader.readFitSequence(formatReader.getFitSequence());
 		
 		//does the fitting
 		for (int j = 0; j < numfits; j++){
@@ -471,10 +360,11 @@ int main(int argc, char ** argv)
 			testObs = formatReader.getObs();
 
 			//make the minimzer
-			//ROOT::Math::Minimizer* min = ROOT::Math::Factory::CreateMinimizer("Minuit2","Simplex");
-			ROOT::Math::Minimizer* min[2];
-			min[0] = ROOT::Math::Factory::CreateMinimizer("Minuit2","Simplex");
-			min[1] = ROOT::Math::Factory::CreateMinimizer("Minuit2","Migrad");
+			ROOT::Math::Minimizer* min[fitseq.size()];
+
+			for(int l = 0; l < fitseq.size(); l++){
+				min[l] = ROOT::Math::Factory::CreateMinimizer("Minuit2",fitseq[l]);
+			}
 
 			//get the initial parameters and steps from the constructed observable object
 			vector<double> fitparams = testObs.getFitParams();
@@ -483,7 +373,7 @@ int main(int argc, char ** argv)
 			ROOT::Math::Functor f(&minfunc,nParams);
 			ROOT::Math::Functor g(&minfunc_with_InclCrossSec,nParams);
 
-			double chisq[2];
+			double chisq[fitseq.size()];
 			int numKmatbgcoeffs = formatReader.getKmatList().size() * testObs.numChans * (testObs.numChans + 1)/2.;
 			int numremainingparamsperamp = nParams/testObs.getNumAmps() - numKmatbgcoeffs;
 			int numresmasses = formatReader.getAddPoleList().size();
@@ -491,9 +381,10 @@ int main(int argc, char ** argv)
 			for(int l = 0; l < sizeof(min)/sizeof(ROOT::Math::Minimizer*); l++){
 
 				//Set some criteria for the minimzer to stop
-				min[l]->SetMaxFunctionCalls(1);
-				min[l]->SetMaxIterations(1);
-				min[l]->SetTolerance(1);
+
+				min[l]->SetMaxFunctionCalls(100000);
+				min[l]->SetMaxIterations(10000);
+				min[l]->SetTolerance(0.001);
 				min[l]->SetPrintLevel(1);
 
 				if(formatReader.getInclCrossSecFlag()) min[l]->SetFunction(g);
@@ -528,7 +419,7 @@ int main(int argc, char ** argv)
 					//cout << min[l]->X()[i] << endl;
 				}
 
-				chisq[l] = min[l]->MinValue()/dof; cout << chisq[l] << endl <<endl;
+				chisq[l] = min[l]->MinValue()/dof; //cout << chisq[l] << endl << endl;
 
 			}
 
@@ -536,23 +427,12 @@ int main(int argc, char ** argv)
 
 			for(int i = 0; i < nParams; i++){
 				finalParams.push_back(fitparams[i]);
-			}
+			}		
 
-			/*for(int i = 0; i < testObs.getNumAmps(); i++){
-				if(testObs.amplitudes[i].getKMatType() == "kmat-CDD"){
-					for(int k = numremainingparamsperamp - numresmasses; k < nParams - numresmasses; k++){
-						//min[l]->SetVariableLowerLimit(k + i * nParams, 0.);
-						cout << finalParams[k + i * nParams] << endl;
-					}
-				}
-			}*/		
-
-			for(double x: finalParams) cout << x << endl;	
-
-			//exit(0);
+			//for(double x: finalParams) cout << x << endl;	
 
 			//if the chisquared is less than the cutoff, add it as a leaf to the ttree
-			if(chisq[1]<cutoff){
+			if(chisq[fitseq.size() - 1]<cutoff){
 				testObs.setFitParams(finalParams);
 
 				for(int j = 0; j < namp; j++){
@@ -572,7 +452,6 @@ int main(int argc, char ** argv)
 						couplings[j][l].resize(npolej); // Ensure the vector has npolej elements
 						for(int k = 0; k < npolej; k++){
 						
-							//couplings[j][l][k] = testObs.amplitudes[j].getChannels()[l].getCoupling(k);
 							couplings[j][l].push_back(testObs.amplitudes[j].getChannels()[l].getCoupling(k));
 			
 						}
@@ -605,14 +484,13 @@ int main(int argc, char ** argv)
 							
 								kmats[j][l][m].push_back(testObs.amplitudes[j].getkParameters()[k](l,m).real());//real because the kmatrix bg coeffs are real
 								if(l != m) kmats[j][m][l].push_back(kmats[j][l][m].at(k));
-								//cout << testObs.amplitudes[j].getkParameters()[k](l,m) << endl;
 
 							}
 						}
 					}
 				}
 
-				red_chi_squared=chisq[1]; //cout << "Prova: " << chisq[1] << "VS " << (testObs.excl_chisq() + testObs.incl_chisq())/(testObs.getNumInclData() + testObs.getNumData()-steps.size()) << endl;
+				red_chi_squared=chisq[fitseq.size() - 1]; //cout << "Prova: " << chisq[1] << "VS " << (testObs.excl_chisq() + testObs.incl_chisq())/(testObs.getNumInclData() + testObs.getNumData()-steps.size()) << endl;
 
 				if(formatReader.getInclCrossSecFlag()){
 					red_chi_squared_excl= testObs.excl_chisq()/(testObs.getNumData()-steps.size());
@@ -669,10 +547,7 @@ int main(int argc, char ** argv)
 		for(int i = 0; i < grid_Re.size(); i++){
 			for(int j = 0; j < grid_Im.size(); j++){
 				
-				fitparamspoles = {grid_Re[i], grid_Im[j]};//cout << grid_Re[i] << endl;
-				//fitparamspoles = {119.,0.8};
-				
-				//cout << fitparamspoles[0] << " " << fitparamspoles[1] << endl;
+				fitparamspoles = {grid_Re[i], grid_Im[j]};
 			
 				for(int l = 0; l < nParams; l++){
 					minpoles->SetVariable(l,to_string(l),fitparamspoles[l],steppoles[l]);
@@ -682,7 +557,6 @@ int main(int argc, char ** argv)
 
 				//run the minimization
 				minpoles->Minimize();
-				//minpoles->Minimize();
 
 				//cout << "calls = " << ps.calls_counter_poles << endl;
 
@@ -780,12 +654,10 @@ int main(int argc, char ** argv)
 				tree_denomres_phase[i][j] = &denomres_phase[i][j];
 			}
 		}
-		
-		//vector <vector<double>> *tree_denomresidues = &denomresidues;
 
 		//if the file exists, update the ttree on file. otherwise, make it.
 		if(!(gSystem->AccessPathName(fname_poles.c_str(),kFileExists))){
-			cout << "sono qui! 3" << endl;
+			//cout << "sono qui! 3" << endl;
 			file_poles=TFile::Open(fname_poles.c_str(),"update");
 			t1_poles = (TTree*)file_poles->Get("poles");
 			t1_poles->SetBranchAddress("Poles_Re", &tree_poles_Re);
@@ -801,7 +673,7 @@ int main(int argc, char ** argv)
 			}
 			
 		} else {
-			cout << "sono qui! 4" << endl;
+			//cout << "sono qui! 4" << endl;
 			file_poles = TFile::Open(fname_poles.c_str(),"recreate");
 			t1_poles = new TTree("poles", ("Poles from code instance " + inputfile).c_str());
 			t1_poles->Branch("Poles_Re", &temp_Re);

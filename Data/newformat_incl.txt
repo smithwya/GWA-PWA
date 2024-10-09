@@ -1,14 +1,16 @@
 SetSeed(-890126156)
 FitRegion(10.65,11.2062)
+FittingSequence({"Simplex", "Migrad"})
 InclChi2Weight(1)
 ExclChi2Weight(10)
 ReducedChi2CutOff(10)
 DoFit(Yes)
-FitAlsoToInclusiveCrossSection(Yes)
 DoRandomize(No)
 
 DoPolesearch(No)
 DoPlotting(No)
+
+IncludeAlsoInclusiveCrossSection(Yes)
 
 AddChannel("BB", {5.27925, 5.27925})
 AddChannel("BBstar", {5.27925, 5.32471})

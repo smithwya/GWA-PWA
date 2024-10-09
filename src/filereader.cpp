@@ -220,7 +220,7 @@ void filereader::SetRandomizeFlag(){
 }
 
 void filereader::SetInclCrossSecFlag(){
-	regex reg_InclCrossSecFlag("FitAlsoToInclusiveCrossSection\\(\\s*(.*?)\\s*\\)");
+	regex reg_InclCrossSecFlag("IncludeAlsoInclusiveCrossSection\\(\\s*(.*?)\\s*\\)");
 	smatch cmdmatch;
 	for(int i = 0; i < commands.size(); i++){
 		if(regex_search(commands.at(i), cmdmatch, reg_InclCrossSecFlag)){
@@ -247,6 +247,16 @@ void filereader::SetFitRegion(){
             FitRegion = commands[i];
 		}
     }		
+}
+
+void filereader::SetFitSequence(){
+	regex reg_fitseq("FittingSequence\\(\\s*\\{\\s*((\"(.*?)\"\\s*,?\\s*)+)\\}\\s*\\)");
+	smatch cmdmatch;
+	for(int i = 0; i < commands.size(); i++){
+		if(regex_search(commands.at(i), cmdmatch, reg_fitseq)){
+            FitSequenceCmd = commands[i]; 
+		}
+    }
 }
 
 void filereader::setExpInclCrossSec(){
@@ -313,6 +323,7 @@ void filereader::SetKmatList(){
 void filereader::SetAllCommandLists(){
 	SetSeed();
 	SetFitRegion();
+	SetFitSequence();
 	SetChi2CutOff();
 	SetInclChi2Weight();
 	SetExclChi2Weight();
@@ -377,6 +388,10 @@ void filereader::setSeed(int newseed){
 
 string filereader::getFitRegion(){
 	return FitRegion;
+}
+
+string filereader::getFitSequence(){
+	return FitSequenceCmd;
 }
 
 vector<string> filereader::getAddChannelList(){
@@ -462,7 +477,7 @@ void filereader::readRandomizeFlag(string cmd){
 }
 
 void filereader::readInclCrossSecFlag(string cmd){
-	regex reg_InclCrossSecFlag("FitAlsoToInclusiveCrossSection\\(\\s*(.*?)\\s*\\)");
+	regex reg_InclCrossSecFlag("IncludeAlsoInclusiveCrossSection\\(\\s*(.*?)\\s*\\)");
 
 	if(regex_search(cmd, match, reg_InclCrossSecFlag)){
 		string my_str = match[1];
@@ -513,6 +528,31 @@ vector<double> filereader::readFitReg(string cmd){
     }
 
 	return {smin,smax};
+}
+
+vector<string> filereader::readFitSequence(string cmd){
+	regex reg_fitseq("FittingSequence\\(\\s*\\{\\s*((\"(.*?)\"\\s*,?\\s*)+)\\}\\s*\\)");
+	regex testreg_name("[A-Za-z\\_]+");
+
+	string mySuffix, temp;
+	vector<string> vecstr = {};
+
+	if(regex_search(cmd, match, reg_fitseq)){
+	
+		mySuffix = match[1];
+
+		while(regex_search(mySuffix, testmatch, testreg_name))
+		{
+			temp = testmatch[0];
+			remove(temp.begin(), temp.end(), ' ');
+			//cout << temp << endl;
+			vecstr.push_back(temp);
+			mySuffix = testmatch.suffix();
+		}
+
+	}
+
+	return vecstr;
 }
 
 
@@ -915,6 +955,7 @@ vector<string> filereader::getOutputCmds(){
 
 	output_cmds.push_back(FitRegion);
 
+	output_cmds.push_back(FitSequenceCmd);
 
 	output_cmds.push_back(Chi2CutOffCmd);
 
@@ -924,17 +965,13 @@ vector<string> filereader::getOutputCmds(){
 
 	output_cmds.push_back(FitFlagCmd);
 
-
-	output_cmds.push_back(InclCrossSecFlagCmd);
-
-
 	output_cmds.push_back(RandomizeFlagCmd);
-
 
 	output_cmds.push_back(PolesearchFlagCmd);
 
 	output_cmds.push_back(PlotFlagCmd);
 
+	output_cmds.push_back(InclCrossSecFlagCmd);
 
 	for(string s: AddChannel_list) output_cmds.push_back(s);
 

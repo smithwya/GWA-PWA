@@ -3,14 +3,9 @@ Possible additions/to-do:
 2- Integral over a closed contour
 3- For Giorgio: Check the fact that the analytic continuation formula holds both with +- and -+
 4- Check the intKey to store the result of integrals also with the bool: not necessary
-
-7- Modify mathematica code to include a pole search algorithm for cross checking pole positions and residues
-
-9- add other sheets (in this moment we have the 1st and and the 4th), so we have to pass from a binary to a more complex way to name them
-10- For Giorgio: copy the good fits' input files in "BUONI"; then add input files to the farm's folder
-
-12- has the polesearch to be done also in each jobs' run automatically? no
-
-15- calculation of residues (also as a criterion to characterize a pole): in development
-16- write in input file (or as an argument of the main) a string with the name of the minuit2's algorithms you want to call in sequence (ex. Simplex, Migrad). The subsequent minization is already thought to be generalized in this way: in progress
-17-check the choice of cutoff
+5- Modify mathematica code to include a pole search algorithm for cross checking pole positions and residues
+6- add other sheets (in this moment we have the 1st and and the 4th), so we have to pass from a binary to a more complex way to name them
+7- For Giorgio: copy the good fits' input files in "BUONI"; then add input files to the farm's folder
+8- residues as a criterion to characterize a pole
+9- check the choice of cutoff
+10- double check the parametrization
