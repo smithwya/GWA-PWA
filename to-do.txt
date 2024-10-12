@@ -7,8 +7,6 @@ Possible additions/to-do:
 6- add other sheets (in this moment we have the 1st and and the 4th), so we have to pass from a binary to a more complex way to name them
 7- For Giorgio: copy the good fits' input files in "BUONI"; then add input files to the farm's folder
 8- residues as a criterion to characterize a pole
-9- if the pole is too near to real axis calculate the residue with a 2-point rule
-10- just one flag for actions
 
 Remember:
 1- CDD Kmat has positive coeffs whose positions in the list of fit parameters is hardcoded counted

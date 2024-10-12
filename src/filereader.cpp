@@ -189,36 +189,6 @@ void filereader::SetActionCmd(){
     }
 }
 
-void filereader::SetFitFlag(){
-	regex reg_FitFlag("DoFit\\(\\s*(.*?)\\s*\\)");
-	smatch cmdmatch;
-	for(int i = 0; i < commands.size(); i++){
-		if(regex_search(commands.at(i), cmdmatch, reg_FitFlag)){
-            FitFlagCmd = commands[i];
-		}
-    }
-}
-
-void filereader::SetPlotFlag(){
-	regex reg_PlotFlag("DoPlotting\\(\\s*(.*?)\\s*\\)");
-	smatch cmdmatch;
-	for(int i = 0; i < commands.size(); i++){
-		if(regex_search(commands.at(i), cmdmatch, reg_PlotFlag)){
-            PlotFlagCmd = commands[i];
-		}
-    }
-}
-
-void filereader::SetPolesearchFlag(){
-	regex reg_PolesearchFlag("DoPolesearch\\(\\s*(.*?)\\s*\\)");
-	smatch cmdmatch;
-	for(int i = 0; i < commands.size(); i++){
-		if(regex_search(commands.at(i), cmdmatch, reg_PolesearchFlag)){
-            PolesearchFlagCmd = commands[i];
-		}
-    }
-}
-
 void filereader::SetRandomizeFlag(){
 	regex reg_Randomize("DoRandomize\\(\\s*(.*?)\\s*\\)");
 	smatch cmdmatch;
@@ -338,9 +308,6 @@ void filereader::SetAllCommandLists(){
 	SetInclChi2Weight();
 	SetExclChi2Weight();
 	SetActionCmd();
-	//SetFitFlag();
-	//SetPlotFlag();
-	//SetPolesearchFlag();
 	setExpInclCrossSec();
 	SetInclCrossSecFlag();
 	SetRandomizeFlag();
@@ -456,42 +423,6 @@ void filereader::readActionCmd(string cmd){
 		}
 	}
 
-}
-
-void filereader::readFitFlag(string cmd){
-	regex reg_FitFlag("DoFit\\(\\s*(.*?)\\s*\\)");
-
-	if(regex_search(cmd, match, reg_FitFlag)){
-		string my_str = match[1];
-		remove(my_str.begin(), my_str.end(), ' ');
-		if (my_str == "No"){
-			FitFlag = false;
-		}
-	}
-}
-
-void filereader::readPlotFlag(string cmd){
-	regex reg_PlotFlag("DoPlotting\\(\\s*(.*?)\\s*\\)");
-
-	if(regex_search(cmd, match, reg_PlotFlag)){
-		string my_str = match[1];
-		remove(my_str.begin(), my_str.end(), ' ');
-		if (my_str == "No"){
-			PlotFlag = false;
-		}
-	}
-}
-
-void filereader::readPolesearchFlag(string cmd){
-	regex reg_FitFlag("DoPolesearch\\(\\s*(.*?)\\s*\\)");
-
-	if(regex_search(cmd, match, reg_FitFlag)){
-		string my_str = match[1];
-		remove(my_str.begin(), my_str.end(), ' ');
-		if (my_str == "No"){
-			PolesearchFlag = false;
-		}
-	}
 }
 
 void filereader::readRandomizeFlag(string cmd){
@@ -995,13 +926,7 @@ vector<string> filereader::getOutputCmds(){
 
 	output_cmds.push_back(ActionFlagCmd);
 
-	//output_cmds.push_back(FitFlagCmd);
-
 	output_cmds.push_back(RandomizeFlagCmd);
-
-	//output_cmds.push_back(PolesearchFlagCmd);
-
-	//output_cmds.push_back(PlotFlagCmd);
 
 	output_cmds.push_back(InclCrossSecFlagCmd);
 

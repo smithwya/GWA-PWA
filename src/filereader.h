@@ -160,10 +160,7 @@ public:
 	double ReadInclChi2WeightCmd(string cmd);
 	double ReadExclChi2WeightCmd(string cmd);
 	void readActionCmd(string cmd);
-	void readFitFlag(string cmd);
-	void readPlotFlag(string cmd);
 	void readInclCrossSecFlag(string cmd);
-	void readPolesearchFlag(string cmd);
 	void readRandomizeFlag(string cmd);
 	int readSeed(string cmd);
 	vector<double> readFitReg(string cmd);
