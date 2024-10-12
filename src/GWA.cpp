@@ -613,11 +613,19 @@ int main(int argc, char ** argv)
 				//VectorXcd tempvec = eps * tempamp.getValueForPoles(x, false); // order O(eps)
 				VectorXcd tempvec = 0.25 * eps * (tempamp.getValueForPoles(x + eps, sh) - tempamp.getValueForPoles(x - eps, sh) + comp(0.,1.) * tempamp.getValueForPoles(x + comp(0.,1.) * eps, sh) - comp(0.,1.) * tempamp.getValueForPoles(x - comp(0.,1.) * eps, sh)); // order O(eps^2)
 
+				if(abs(poles[i].imag()) < 2 * tempamp.getEpsilon()){
+					tempvec = 0.5 * eps * (tempamp.getValueForPoles(x + eps, sh) - tempamp.getValueForPoles(x - eps, sh));
+				}
+				
 				ampres_mod[k].push_back(abs(tempvec(k))); 
 				ampres_phase[k].push_back(arg(tempvec(k))); 
 
 				//MatrixXcd tempmat = eps * tempamp.getDenominator(x, false).inverse();
 				MatrixXcd tempmat = 0.25 * eps * (tempamp.getDenominator(x + eps, sh).inverse() - tempamp.getDenominator(x - eps, sh).inverse() + comp(0.,1.) * tempamp.getDenominator(x + comp(0.,1.) * eps, sh).inverse() - comp(0.,1.) * tempamp.getDenominator(x - comp(0.,1.) * eps, sh).inverse()); 
+
+				if(abs(poles[i].imag()) < 2 * tempamp.getEpsilon()){
+					tempmat = 0.5 * eps * (tempamp.getDenominator(x + eps, sh).inverse() - tempamp.getDenominator(x - eps, sh).inverse());
+				}
 
 				for(int j = 0; j < testObs.numChans; j++){
 					denomres_mod[k][j].push_back(abs(tempmat(k,j)));

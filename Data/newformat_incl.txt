@@ -4,12 +4,10 @@ FittingSequence({"Simplex", "Migrad"})
 InclChi2Weight(1)
 ExclChi2Weight(10)
 ReducedChi2CutOff(10)
-DoFit(Yes)
+
+ChooseAnAction("Plot")
+
 DoRandomize(No)
-
-DoPolesearch(No)
-DoPlotting(No)
-
 IncludeAlsoInclusiveCrossSection(Yes)
 
 AddChannel("BB", {5.27925, 5.27925})
@@ -35,4 +33,4 @@ LoadExpInclusiveCrossSection("Data/inclusive-cross-section.dat")
 
 #the type of kmatrix for each amplitude can be: "kmat-nominal", "kmat-CDD"
 #the type of rhoN for each amplitude can be: "rhoN-nominal", "rhoN-Qmodel"
-#fit, polesearch and plotting are mutually exclusive actions
+#"Fit", "Polesearch" and "Plot" are mutually exclusive actions

@@ -179,6 +179,16 @@ void filereader::SetExclChi2Weight(){
     }
 }
 
+void filereader::SetActionCmd(){
+	regex reg_action("ChooseAnAction\\(\\s*\"(.*?)\"\\s*\\)");
+	smatch cmdmatch;
+	for(int i = 0; i < commands.size(); i++){
+		if(regex_search(commands.at(i), cmdmatch, reg_action)){
+            ActionFlagCmd = commands[i];
+		}
+    }
+}
+
 void filereader::SetFitFlag(){
 	regex reg_FitFlag("DoFit\\(\\s*(.*?)\\s*\\)");
 	smatch cmdmatch;
@@ -327,9 +337,10 @@ void filereader::SetAllCommandLists(){
 	SetChi2CutOff();
 	SetInclChi2Weight();
 	SetExclChi2Weight();
-	SetFitFlag();
-	SetPlotFlag();
-	SetPolesearchFlag();
+	SetActionCmd();
+	//SetFitFlag();
+	//SetPlotFlag();
+	//SetPolesearchFlag();
 	setExpInclCrossSec();
 	SetInclCrossSecFlag();
 	SetRandomizeFlag();
@@ -354,17 +365,17 @@ double filereader::GetExclChi2Weight(){
 }
 
 bool filereader::getFitFlag(){
-	readFitFlag(FitFlagCmd);
+	readActionCmd(ActionFlagCmd);
 	return FitFlag;
 }
 
 bool filereader::getPlotFlag(){
-	readPlotFlag(PlotFlagCmd);
+	readActionCmd(ActionFlagCmd);
 	return PlotFlag;
 }
 
 bool filereader::getPolesearchFlag(){
-	readPolesearchFlag(PolesearchFlagCmd);
+	readActionCmd(ActionFlagCmd);
 	return PolesearchFlag;
 }
 
@@ -426,6 +437,25 @@ int filereader::readSeed(string cmd){
     }
 
 	return 0;
+}
+
+void filereader::readActionCmd(string cmd){
+	regex reg_action("ChooseAnAction\\(\\s*\"(.*?)\"\\s*\\)");
+
+	if(regex_search(cmd, match, reg_action)){
+		string my_str = match[1];
+		remove(my_str.begin(), my_str.end(), ' '); 
+		if (my_str == "Fit"){
+			FitFlag = true;
+		}
+		if (my_str == "Polesearch"){
+			PolesearchFlag = true;
+		}
+		if (my_str == "Plot"){
+			PlotFlag = true;
+		}
+	}
+
 }
 
 void filereader::readFitFlag(string cmd){
@@ -963,13 +993,15 @@ vector<string> filereader::getOutputCmds(){
 
 	output_cmds.push_back(ExclChi2WeightCmd);
 
-	output_cmds.push_back(FitFlagCmd);
+	output_cmds.push_back(ActionFlagCmd);
+
+	//output_cmds.push_back(FitFlagCmd);
 
 	output_cmds.push_back(RandomizeFlagCmd);
 
-	output_cmds.push_back(PolesearchFlagCmd);
+	//output_cmds.push_back(PolesearchFlagCmd);
 
-	output_cmds.push_back(PlotFlagCmd);
+	//output_cmds.push_back(PlotFlagCmd);
 
 	output_cmds.push_back(InclCrossSecFlagCmd);
 

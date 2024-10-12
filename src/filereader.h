@@ -125,6 +125,7 @@ public:
 	void SetInclChi2Weight();
 	void SetExclChi2Weight();
 	void SetChi2CutOff();
+	void SetActionCmd();
 	void SetFitFlag();
 	void SetPlotFlag();
 	void SetPolesearchFlag();
@@ -158,6 +159,7 @@ public:
 	double readChi2CutOffCmd(string cmd);
 	double ReadInclChi2WeightCmd(string cmd);
 	double ReadExclChi2WeightCmd(string cmd);
+	void readActionCmd(string cmd);
 	void readFitFlag(string cmd);
 	void readPlotFlag(string cmd);
 	void readInclCrossSecFlag(string cmd);
@@ -195,14 +197,14 @@ public:
 
 private:
 	bool RandomizeFlag = true;
-	bool FitFlag = true;
-	bool PlotFlag = true;
+	bool FitFlag = false;
+	bool PlotFlag = false;
 	bool InclCrossSecFlag = true; 
-	bool PolesearchFlag = true;
+	bool PolesearchFlag = false;
 	string NameOfFile;
 	vector<std::string> commands = {}, Math_output_cmds = {};
 	smatch match, testmatch;
-	string FitFlagCmd, PlotFlagCmd, PolesearchFlagCmd, SeedCmd, FitRegion, FitSequenceCmd, Chi2CutOffCmd, InclChi2WeightCmd, ExclChi2WeightCmd, RandomizeFlagCmd, ExpInclCrossSecCmd, ExpInclCrossSecFilename, InclCrossSecFlagCmd;
+	string ActionFlagCmd, FitFlagCmd, PlotFlagCmd, PolesearchFlagCmd, SeedCmd, FitRegion, FitSequenceCmd, Chi2CutOffCmd, InclChi2WeightCmd, ExclChi2WeightCmd, RandomizeFlagCmd, ExpInclCrossSecCmd, ExpInclCrossSecFilename, InclCrossSecFlagCmd;
 	vector<string> AddChannel_list, AddWave_list, Cheby_list, AddPole_list, Kmat_list,ExpData_list;
 	observable obsObject;
 	int seed;
