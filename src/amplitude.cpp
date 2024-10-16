@@ -82,6 +82,14 @@ amplitude::amplitude(string ampName, int Jj,double ssL, double ssmin, double ssm
 	rhoNtype = rhoN;
 }
 
+int amplitude::getJ(){
+	return J;
+}
+
+double amplitude::getEpsilon(){
+	return epsilon;
+}
+
 vector<channel> amplitude::getChannels(){
 
 	return channels;
@@ -152,6 +160,18 @@ VectorXcd amplitude::getValue(comp s) {
 	return (getNumerator(s, channels[0].getPoleType()).transpose() * (I - K * DispRhoN).inverse() * K) * phsp;
 	//poletype is the same for every wave and every channel, so I take the 0th
 	
+
+}
+
+VectorXcd amplitude::getValueForPoles(comp s, bool sheet) {
+
+	MatrixXcd phsp = MatrixXcd::Identity(numChannels,numChannels);
+
+	for(int i = 0; i < numChannels; i++){
+		phsp(i,i)= pow(getMomentum(i,s),J+0.5)/pow(s,.25);
+	}
+
+	return ((getNumerator(s, channels[0].getPoleType()).transpose())*(getDenominator(s, sheet).inverse()))*phsp;
 
 }
 

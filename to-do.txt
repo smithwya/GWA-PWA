@@ -3,13 +3,10 @@ Possible additions/to-do:
 2- Integral over a closed contour
 3- For Giorgio: Check the fact that the analytic continuation formula holds both with +- and -+
 4- Check the intKey to store the result of integrals also with the bool: not necessary
+5- Modify mathematica code to include a pole search algorithm for cross checking pole positions and residues
+6- add other sheets (in this moment we have the 1st and and the 4th), so we have to pass from a binary to a more complex way to name them
+7- For Giorgio: copy the good fits' input files in "BUONI"; then add input files to the farm's folder
+8- residues as a criterion to characterize a pole
 
-7- Modify mathematica code to include a pole search algorithm for cross checking pole positions and residues
-
-9- add other sheets (in this moment we have the 1st and and the 4th), so we have to pass from a binary to a more complex way to name them
-10- For Giorgio: copy the good fits' input files in "BUONI"; then add input files to the farm's folder
-11- Add a flag for just plotting and for the polesearch
-12- has the polesearch to be done also in each jobs' run automatically?
-13- change name of chisq functions and name of chisq values in the tree
-14- make the format in which you pass the name of the input files to poleasearch consistent
-15- calculation of residues: in development
+Remember:
+1- CDD Kmat has positive coeffs whose positions in the list of fit parameters is hardcoded counted

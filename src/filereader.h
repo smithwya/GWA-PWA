@@ -125,10 +125,14 @@ public:
 	void SetInclChi2Weight();
 	void SetExclChi2Weight();
 	void SetChi2CutOff();
+	void SetActionCmd();
 	void SetFitFlag();
+	void SetPlotFlag();
+	void SetPolesearchFlag();
 	void SetRandomizeFlag();
 	void SetSeed();
 	void SetFitRegion();
+	void SetFitSequence();
 	void SetInclCrossSecFlag();
 	void SetAddChannelList();
 	void SetAddWaveList();
@@ -138,12 +142,15 @@ public:
 	void SetAllCommandLists();
 	int getSeed();
 	bool getFitFlag();
+	bool getPlotFlag();
 	bool getInclCrossSecFlag();
+	bool getPolesearchFlag();
 	bool getRandomizeFlag();
 	double getChi2CutOff();
 	double GetInclChi2Weight();
 	double GetExclChi2Weight();
 	string getFitRegion();
+	string getFitSequence();
 	vector<string> getAddChannelList();
 	vector<string> getAddWaveList();
 	vector<string> getChebyList();
@@ -152,11 +159,12 @@ public:
 	double readChi2CutOffCmd(string cmd);
 	double ReadInclChi2WeightCmd(string cmd);
 	double ReadExclChi2WeightCmd(string cmd);
-	void readFitFlag(string cmd);
+	void readActionCmd(string cmd);
 	void readInclCrossSecFlag(string cmd);
 	void readRandomizeFlag(string cmd);
 	int readSeed(string cmd);
 	vector<double> readFitReg(string cmd);
+	vector<string> readFitSequence(string cmd);
 	chanDat readCh(string cmd);
 	ampDat readWave(string cmd);
 	chebyDat readCheby(string cmd);
@@ -186,12 +194,14 @@ public:
 
 private:
 	bool RandomizeFlag = true;
-	bool FitFlag = true;
+	bool FitFlag = false;
+	bool PlotFlag = false;
 	bool InclCrossSecFlag = true; 
+	bool PolesearchFlag = false;
 	string NameOfFile;
 	vector<std::string> commands = {}, Math_output_cmds = {};
 	smatch match, testmatch;
-	string FitFlagCmd, SeedCmd, FitRegion, Chi2CutOffCmd, InclChi2WeightCmd, ExclChi2WeightCmd, RandomizeFlagCmd, ExpInclCrossSecCmd, ExpInclCrossSecFilename, InclCrossSecFlagCmd;
+	string ActionFlagCmd, FitFlagCmd, PlotFlagCmd, PolesearchFlagCmd, SeedCmd, FitRegion, FitSequenceCmd, Chi2CutOffCmd, InclChi2WeightCmd, ExclChi2WeightCmd, RandomizeFlagCmd, ExpInclCrossSecCmd, ExpInclCrossSecFilename, InclCrossSecFlagCmd;
 	vector<string> AddChannel_list, AddWave_list, Cheby_list, AddPole_list, Kmat_list,ExpData_list;
 	observable obsObject;
 	int seed;

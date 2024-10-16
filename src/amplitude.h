@@ -55,6 +55,7 @@ public:
 	comp omega_p(comp s);
 	comp omega_ps(comp s);
 	VectorXcd getValue(comp s);
+	VectorXcd getValueForPoles(comp s, bool sheet);
     comp omega(comp s, int type);
     VectorXcd getNumerator(comp s, int type);
     comp getRhoN(comp s, int k, bool sheet);
@@ -92,6 +93,8 @@ public:
 	vector<double> getFittedSteps();
 	vector<double> getFitInterval();
 	string getKMatType();
+	int getJ();
+	double getEpsilon();
 
 private:
 	vector<channel> channels;

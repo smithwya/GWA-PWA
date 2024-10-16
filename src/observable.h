@@ -472,7 +472,6 @@ public:
   		gr1->GetYaxis()->CenterTitle(1);
   		gr1->GetXaxis()->SetTitleOffset(1.15);//definisce la distanza del titolo dell'asse dall'asse stesso
   		gr1->GetYaxis()->SetTitleOffset(1.15);
-  		gr1->SetTitle("");
   		gr1->GetXaxis()->SetTitle("#sqrt{s} (GeV)");
   		gr1->GetYaxis()->SetTitle("#sigma (pb)");
   		gr1->SetMarkerColor(mymarkercolor);
@@ -1416,7 +1415,7 @@ public:
 	};
 
 
-	double chisq(){
+	double excl_chisq(){
 
 		double result = 0;
 
@@ -1470,7 +1469,7 @@ public:
 	}
 
 
-	double chisq_with_InclCrossSec(){
+	double incl_chisq(){
 
 		double sum = 0;
 		double lower_bound = sqrt(amplitudes[0].getFitInterval()[0]);

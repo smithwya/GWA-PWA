@@ -1,0 +1,36 @@
+SetSeed(-890126156)
+FitRegion(10.65,11.2062)
+FittingSequence({"Simplex", "Migrad"})
+InclChi2Weight(1)
+ExclChi2Weight(10)
+ReducedChi2CutOff(10)
+
+ChooseAnAction("Plot")
+
+DoRandomize(No)
+IncludeAlsoInclusiveCrossSection(Yes)
+
+AddChannel("BB", {5.27925, 5.27925})
+AddChannel("BBstar", {5.27925, 5.32471})
+AddChannel("BstarBstar", {5.32471, 5.32471})
+AddChannel("B_sstarB_sstar", {5.4154, 5.4154})
+AddChannel("Dummy", {5.36689, 5.4154})
+AddWave("P","kmat-CDD","rhoN-nominal", 1, -81.)
+ChebyCoeffs("P", "BB","s = 1", {-0.303681 \pm 0.001000, 0.327209 \pm 0.001000, -0.321145 \pm 0.001000})
+ChebyCoeffs("P", "BBstar", "s = 1", {0.169493 \pm 0.001000, 0.918657 \pm 0.001000, 0.073268 \pm 0.001000})
+ChebyCoeffs("P", "BstarBstar", "s = 1", {0.316393 \pm 0.001000, 0.241567 \pm 0.001000, -0.134174 \pm 0.001000})
+ChebyCoeffs("P", "B_sstarB_sstar", "s = 1", {-0.359664 \pm 0.001000, -0.161747 \pm 0.001000, -0.085741 \pm 0.001000})
+ChebyCoeffs("P", "Dummy", "s = 1", {-0.382419 \pm 0.001000, 0.820740 \pm 0.001000, -0.563481 \pm 0.001000})
+AddPole("P", 1250.047030 \pm 0.001000, {"BB","BBstar","BstarBstar", "B_sstarB_sstar", "Dummy"}, {7.532972 \pm 0.001000, -6.601746 \pm 0.001000, 14.868284 \pm 0.001000, -5.307885 \pm 0.001000, -4.496132 \pm 0.001000})
+AddPole("P", 119.364045 \pm 0.001000, {"BB","BBstar","BstarBstar", "B_sstarB_sstar", "Dummy"}, {-7.014489 \pm 0.001000, -1.713634 \pm 0.001000, 1.818536 \pm 0.001000, 3.004996 \pm 0.001000, 3.790958 \pm 0.001000})
+AddKmatBackground("P", 0, {{7487.198343 \pm 0.001000, 2530.291194 \pm 0.001000, 204.586057 \pm 0.001000, 938.238670 \pm 0.001000, 1039.587411 \pm 0.001000}, {1264.262307 \pm 0.001000, -207.907932 \pm 0.001000, 270.200542 \pm 0.001000, 630.639456 \pm 0.001000}, {410.343159 \pm 0.001000, -156.067011 \pm 0.001000, -217.438026 \pm 0.001000}, {-185.419343 \pm 0.001000, 28.168817 \pm 0.001000}, {-72.413379 \pm 0.001000}})
+AddKmatBackground("P", 1, {{-63.249737 \pm 0.001000, -21.231222 \pm 0.001000, -1.944415 \pm 0.001000, -7.721460 \pm 0.001000, -8.628110 \pm 0.001000}, {-10.503396 \pm 0.001000, 1.882632 \pm 0.001000, -2.214550 \pm 0.001000, -5.312502 \pm 0.001000}, {-3.551445 \pm 0.001000, 1.409679 \pm 0.001000, 1.944087 \pm 0.001000}, {1.859449 \pm 0.001000, -0.224269 \pm 0.001000}, {0.813496 \pm 0.001000}})
+LoadExpData("P", "BB", "Data/BB-nominal.dat")
+LoadExpData("P", "BBstar", "Data/BBstar-nominal.dat")
+LoadExpData("P", "BstarBstar", "Data/BstarBstar-nominal.dat")
+LoadExpData("P", "B_sstarB_sstar", "Data/B_sstarB_sstar-nominal.dat")
+LoadExpInclusiveCrossSection("Data/inclusive-cross-section.dat")
+
+#the type of kmatrix for each amplitude can be: "kmat-nominal", "kmat-CDD"
+#the type of rhoN for each amplitude can be: "rhoN-nominal", "rhoN-Qmodel"
+#"Fit", "Polesearch" and "Plot" are mutually exclusive actions
