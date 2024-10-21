@@ -259,6 +259,8 @@ comp amplitude::getRhoN(comp sprime,int k,bool sheet)
 
 		comp x = legendreII(1. + sL/(2. * pow(channels[k].getMomentum(sprime), 2)), J) / (2. * channels[k].getMomentum(sprime));
 
+		if(sheet) x = pow(-1., dumbJ) * legendreII(1. + sL/(2. * pow(channels[k].getComplexMomentum(sprime), 2)), J) / (2. * channels[k].getComplexMomentum(sprime));
+		
 		return x;
 
 	}	
