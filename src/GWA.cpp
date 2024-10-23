@@ -406,12 +406,12 @@ int main(int argc, char ** argv)
 				//run the minimization
 				min[l]->Minimize();
 
-				if(min[l]->Status() == 0){//|| min[l]->IsValidError() == false
+				/*if(min[l]->Status() == 0){//|| min[l]->IsValidError() == false
 					cout << "The fit is not valid:" << endl;
 					cout << min[l]->Status() << endl;
 					//cout << min[l]->IsValidError() << endl;
 					return 0;
-				}
+				}*/
 
 				//extract the resulting fit parameters
 				for(int i = 0; i < nParams; i++){
