@@ -28,7 +28,11 @@
 
 
 using namespace std;
-typedef std::chrono::system_clock Clock;
+using std::chrono::high_resolution_clock;
+using std::chrono::duration_cast;
+using std::chrono::duration;
+using std::chrono::seconds;
+
 using Eigen::MatrixXcd;
 using Eigen::VectorXcd;
 typedef std::complex<double> comp;
@@ -122,9 +126,19 @@ int main(int argc, char ** argv)
 	//string fitsfolder = (string) argv[15];
 	string fitsfolder = "Fits/";
 	string polesfolder = "Poles/";
+	cout<<"[GWA] Initializing GWA..."<<endl;
 
-
+	auto t_start = high_resolution_clock::now();
+	cout<<"[IO] Reading inputfile...";
 	filereader formatReader(string("Data/") + inputfile + string(".txt"));
+
+	auto t_end = high_resolution_clock::now();
+	auto delta_t = duration_cast<seconds>(t_end-t_start);
+	cout<<"done ("<<delta_t.count()<<"s)\n";
+
+	cout<<"[GWA] Initializing objects...";
+	t_start = high_resolution_clock::now();
+	
 	formatReader.SetAllCommandLists();
 	formatReader.ConstructBareAmps();
 	formatReader.setChebys();
@@ -132,18 +146,20 @@ int main(int argc, char ** argv)
 	formatReader.setKmats();
 	formatReader.loadExpData();
 	if(formatReader.getInclCrossSecFlag()) formatReader.loadExpInclCrossSec();
-	
 	//gets chisq cutoff and weights
 	double cutoff = formatReader.getChi2CutOff();
 
 	//saves the observable object outside of filereader object
 	testObs = formatReader.getObs();
-
+	
+	t_end = high_resolution_clock::now();
+        delta_t = duration_cast<seconds>(t_end-t_start);
+        cout<<"done ("<<delta_t.count()<<"s)\n";
 
 	
 	//if you want just plotting: add a flag:
 	if(formatReader.getPlotFlag()){
-	
+		cout<<"[PLOT] Plotting..."<<endl;
 		double lower_bound = testObs.amplitudes[0].getFitInterval()[0];
 		double upper_bound = testObs.amplitudes[0].getFitInterval()[1];
 
@@ -191,22 +207,28 @@ int main(int argc, char ** argv)
 	
 
 	if(formatReader.getFitFlag()){
+		cout<<"[GWA] Fit flag detected"<<endl;
 		//saves original starting parameters
 		vector<double> startparams = testObs.getFitParams();
 		vector<double> steps = testObs.getStepSizes();
-		
 		//gets degrees of freedom
 		string fittype = "excl";
-		int dof = testObs.getNumData()-steps.size();
-		
+		int dof = testObs.getNumData()-steps.size();		
+		cout<<"[FIT] Using inclusive data...";
 		if(formatReader.getInclCrossSecFlag()){
+			cout<<"YES\n";
 			dof+=testObs.getNumInclData();
 			fittype = "incl";
+		}else{
+		cout<<"NO\n";
 		}
 		
+		cout<<"[FIT] Degrees of freedom: "<<dof<<endl;
+		
+		t_start = high_resolution_clock::now();
+		cout<<"[IO] Setting up TTrees...\n";
 		//Opens up the fit files and sets up TTrees
 		string fname = fitsfolder+"run"+to_string(jobnum)+".root";
-		//fname="prova.root";
 
 		TFile *file;
 		TTree *t1;
@@ -233,15 +255,17 @@ int main(int argc, char ** argv)
 		int npolej = 0;
 		int polgradej = 0;
 		int gradej = 0;
-		
+		cout<<"[IO] Checking if .root file exists...";
 		//if the file exists, update the ttree on file. otherwise, make it.
 		if(!(gSystem->AccessPathName(fname.c_str(),kFileExists))){
-			//cout<<"sono qua!1\n";
+			
+			cout<<"No. Generating .root file...\n"<<endl;
 			file=TFile::Open(fname.c_str(),"update");
 			t1 = (TTree*)file->Get("fits");
 			t1->SetBranchAddress("Commands", &tree_cmds);
 			t1->SetBranchAddress("Red_chi", &red_chi_squared);
-
+			
+			cout<<"Setting up TTree branches...\n"<<endl;
 			if(formatReader.getInclCrossSecFlag()){
 				t1->SetBranchAddress("Inclusive_red_chi", &red_chi_squared_incl);
 				t1->SetBranchAddress("Exclusive_red_chi", &red_chi_squared_excl);
@@ -290,7 +314,7 @@ int main(int argc, char ** argv)
 			}	
 			
 		} else {
-			//cout<<"sono qua!2\n";
+			cout<<"Yes. Loading in TTree from .root file..."<<endl;
 			file = TFile::Open(fname.c_str(),"recreate");
 			t1 = new TTree("fits", ("Fits from code instance "+to_string(jobnum)).c_str());
 			t1->Branch("Commands", &cmds);
@@ -346,25 +370,43 @@ int main(int argc, char ** argv)
 
 		}
 
+		cout<<"[IO] TTrees connected ";
+		t_end = high_resolution_clock::now();
+		delta_t = duration_cast<seconds>(t_end-t_start);
+		cout<<"("<<delta_t.count()<<"s)\n";
+
+		cout<<"[FIT] Getting fit sequence"<<endl;
 		vector<string> fitseq = formatReader.readFitSequence(formatReader.getFitSequence());
 		
 		//does the fitting
+		cout<<"[FIT] Fitting "<<numfits<<" times"<<endl;
 		for (int j = 0; j < numfits; j++){
+			cout<<endl<<endl<<"[FIT] Beginning fit #"<<j+1<<endl;
+			t_start = high_resolution_clock::now();
+			cout<<"[FIT] Resetting parameters to initial values...";
 			//resets the observable
 			testObs.setFitParams(startparams);
 			formatReader.setObs(testObs);
 			auto now = std::chrono::system_clock::now();
 			int seed = now.time_since_epoch().count()+jobnum;
 			//randomizes the parameters
-			if(formatReader.getRandomizeFlag()) formatReader.randomize(seed);
+			if(formatReader.getRandomizeFlag()){
+			cout<<"randomizing starting parameters..."<<endl;
+			formatReader.randomize(seed);
+			}
 			testObs = formatReader.getObs();
-
+			
+			t_end = high_resolution_clock::now();
+			delta_t = duration_cast<seconds>(t_end-t_start);
+			cout<<"done ("<<delta_t.count()<<"s)\n";
 			//make the minimzer
 			ROOT::Math::Minimizer* min[fitseq.size()];
 
 			for(int l = 0; l < fitseq.size(); l++){
 				min[l] = ROOT::Math::Factory::CreateMinimizer("Minuit2",fitseq[l]);
 			}
+			cout<<"[FIT] Wrapping chisquared function for MINUIT...";
+			t_start = high_resolution_clock::now();
 
 			//get the initial parameters and steps from the constructed observable object
 			vector<double> fitparams = testObs.getFitParams();
@@ -377,14 +419,18 @@ int main(int argc, char ** argv)
 			int numKmatbgcoeffs = formatReader.getKmatList().size() * testObs.numChans * (testObs.numChans + 1)/2.;
 			int numremainingparamsperamp = nParams/testObs.getNumAmps() - numKmatbgcoeffs;
 			int numresmasses = formatReader.getAddPoleList().size();
-
+			t_end = high_resolution_clock::now();
+			delta_t = duration_cast<seconds>(t_end-t_start);
+			cout<<"done ("<<delta_t.count()<<"s)\n";
 			for(int l = 0; l < sizeof(min)/sizeof(ROOT::Math::Minimizer*); l++){
 
 				//Set some criteria for the minimzer to stop
+				cout<<"[FIT] Initializing MINUIT...";
+				t_start = high_resolution_clock::now();
 
-				min[l]->SetMaxFunctionCalls(100000);
-				min[l]->SetMaxIterations(10000);
-				min[l]->SetTolerance(0.001);
+				min[l]->SetMaxFunctionCalls(10000);
+				min[l]->SetMaxIterations(1000);
+				min[l]->SetTolerance(0.1);
 				min[l]->SetPrintLevel(1);
 
 				if(formatReader.getInclCrossSecFlag()) min[l]->SetFunction(g);
@@ -402,17 +448,16 @@ int main(int argc, char ** argv)
 						}
 					}
 				}
-
+				t_end = high_resolution_clock::now();
+				delta_t = duration_cast<seconds>(t_end-t_start);
+				cout<<"done ("<<delta_t.count()<<"s)\n";
 				//run the minimization
+				cout<<"[FIT] Minimizing..."<<endl;
+				t_start = high_resolution_clock::now();
 				min[l]->Minimize();
-
-				/*if(min[l]->Status() == 0){//|| min[l]->IsValidError() == false
-					cout << "The fit is not valid:" << endl;
-					cout << min[l]->Status() << endl;
-					//cout << min[l]->IsValidError() << endl;
-					return 0;
-				}*/
-
+				t_end = high_resolution_clock::now();
+				delta_t = duration_cast<seconds>(t_end-t_start);
+				cout<<"done ("<<delta_t.count()<<"s)\n";
 				//extract the resulting fit parameters
 				for(int i = 0; i < nParams; i++){
 					fitparams[i] = min[l]->X()[i];
@@ -433,6 +478,8 @@ int main(int argc, char ** argv)
 
 			//if the chisquared is less than the cutoff, add it as a leaf to the ttree
 			if(chisq[fitseq.size() - 1]<cutoff){
+				cout<<"[FIT] Reduced chisq is less than cutoff, saving fit...";
+				t_start = high_resolution_clock::now();
 				testObs.setFitParams(finalParams);
 
 				for(int j = 0; j < namp; j++){
@@ -500,13 +547,21 @@ int main(int argc, char ** argv)
 				formatReader.setObs(testObs);
 				cmds = formatReader.getOutputCmds();
 				t1->Fill();
+				
+				t_end = high_resolution_clock::now();
+				delta_t = duration_cast<seconds>(t_end-t_start);
+				cout<<"done ("<<delta_t.count()<<"s)\n";
 			}
 		
 		}
+		cout<<"[IO] Writing fits to file...";
+		t_start = high_resolution_clock::now();
 
-		t1->Write(0,TObject::kWriteDelete,0);
+		t1->Write(0,TObject::kWriteDelete,0);		
 		file->Close("R");
-
+		t_end = high_resolution_clock::now();
+		delta_t = duration_cast<seconds>(t_end-t_start);
+		cout<<"done ("<<delta_t.count()<<"s)\n";
 	}		
 
 

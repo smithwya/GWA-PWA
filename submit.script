@@ -2,15 +2,15 @@
 
 #SBATCH -J "btmonium"
 #SBATCH -p general
-#SBATCH -o output.txt
-#SBATCH -e error.err
+#SBATCH -o logs/slurm-%j.out
+#SBATCH -e logs/slurm-$j.out
 #SBATCH --mail-type=END,FAIL
 #SBATCH --mail-user=smithwya@iu.edu
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=1
 #SBATCH -A r00215
 
-./bin/GWA $1 $2 $3 $4
+./bin/GWA $1 $2 $3 $4 $5 $6 $7 $8 $9 ${10} ${11} ${12} ${13}
 
 # $1 job number
 # $2 number of fits to perform
