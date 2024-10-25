@@ -457,7 +457,7 @@ int main(int argc, char ** argv)
 				min[l]->Minimize();
 				t_end = high_resolution_clock::now();
 				delta_t = duration_cast<seconds>(t_end-t_start);
-				cout<<"done ("<<delta_t.count()<<"s)\n";
+				cout<<"done ("<<fitseq[l]<<": "<<delta_t.count()<<"s)\n";
 				//extract the resulting fit parameters
 				for(int i = 0; i < nParams; i++){
 					fitparams[i] = min[l]->X()[i];
