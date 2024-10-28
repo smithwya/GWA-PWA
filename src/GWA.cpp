@@ -107,17 +107,17 @@ int main(int argc, char ** argv)
 {
 	string inputfile = (string) argv[1]; //just the core e.g. "fit73-36", without the path nor the extension
 	string polefile = (string) argv[2];
-	string pWave = (string) argv[3];
-	double grid_Re_sx = stod(argv[4]);
-	double grid_Re_dx = stod(argv[5]);
-	int grid_Re_numpts = atoi(argv[6]);
-	double grid_Im_sx = stod(argv[7]);
-	double grid_Im_dx = stod(argv[8]);
-	int grid_Im_numpts = atoi(argv[9]);
-	double func_cutoff = stod(argv[10]);
-	string sheet = (string) argv[11]; // NB: "false" = physical sheet; "true" = first unphysical sheet;
-	int jobnum = atoi(argv[12]);
-	int numfits = atoi(argv[13]);
+	//string pWave = (string) argv[3];
+	double grid_Re_sx = stod(argv[3]);
+	double grid_Re_dx = stod(argv[4]);
+	int grid_Re_numpts = atoi(argv[5]);
+	double grid_Im_sx = stod(argv[6]);
+	double grid_Im_dx = stod(argv[7]);
+	int grid_Im_numpts = atoi(argv[8]);
+	double func_cutoff = stod(argv[9]);
+	//int sheet = atoi(argv[11]); 
+	int jobnum = atoi(argv[10]);
+	int numfits = atoi(argv[11]);
 	//string inputfile = (string) argv[14];
 	//string fitsfolder = (string) argv[15];
 	string fitsfolder = "Fits/";
@@ -513,77 +513,20 @@ int main(int argc, char ** argv)
 	//if you want to add a polesearch flag:
 	if(formatReader.getPolesearchFlag()){
 
+		// NB: "0" = 0 threshold passed: we are in the physical sheet; 
+		// "1" = unphysical sheet connected to the real axis in correspondence to the segment between the 1st and the 2nd threshold;
+		// "2" = unphysical sheet connected to the real axis in correspondence to the segment between the 2nd and the 3rd threshold;
+		// "t" = unphysical sheet connected to the real axis in correspondence to the segment between the t-th and the (t+1)-th threshold (if there is);
+		// ...
+
 		//initialize the polesearcher object
-		ps.settestObs(testObs); 
-		ps.setAmpIndex(pWave); 
-		int ampindex = ps.getAmpIndex(); 
-		ps.SetSheet(false);
-		if(sheet == "true") ps.SetSheet(true);
-		
-		ofstream letwrite(polefile);
-		
-		//make the minimizer
-		ROOT::Math::Minimizer* minpoles = ROOT::Math::Factory::CreateMinimizer("Minuit2","Simplex");
-		//Set some criteria for the minimizer to stop
-		minpoles->SetMaxFunctionCalls(10000);
-		minpoles->SetMaxIterations(1000);
-		//minpoles->SetTolerance(0.001);
-		//minpoles->SetPrecision(1.e-7);
-		minpoles->SetStrategy(1);
-		minpoles->SetPrintLevel(0);
-		
-		nParams = 2;//real and imaginary part of the pole
-		//make a function wrapper to minimize the function minfuncforpoles
-		ROOT::Math::Functor f(&minfunc_for_poles,nParams);
-		minpoles->SetFunction(f);
-		//set the initial conditions and step sizes
+		ps.settestObs(testObs);
 
-		//change these numbers to parameters to pass into from command line
-		vector<double> grid_Re = linspace(grid_Re_sx, grid_Re_dx, grid_Re_numpts);
-		vector<double> grid_Im = linspace(grid_Im_sx, grid_Im_dx, grid_Im_numpts);
-		vector<double> fitparamspoles = {};
-		double steppoles[2] = {1.e-2, 1.e-2};
-		
-		for(int i = 0; i < grid_Re.size(); i++){
-			for(int j = 0; j < grid_Im.size(); j++){
-				
-				fitparamspoles = {grid_Re[i], grid_Im[j]};
-			
-				for(int l = 0; l < nParams; l++){
-					minpoles->SetVariable(l,to_string(l),fitparamspoles[l],steppoles[l]);
-				}
+		ofstream letwrite(polefile); 
 
-				ps.setPoles(poles);
-
-				//run the minimization
-				minpoles->Minimize();
-
-				//cout << "calls = " << ps.calls_counter_poles << endl;
-
-				//extract the resulting fit parameters
-				comp finalParams = comp(minpoles->X()[0], -abs(minpoles->X()[1]));
-				long double aux = minpoles->MinValue();
-				for (int j=0; j < poles.size(); j++) aux += log(abs((finalParams - poles[j])*(finalParams - conj(poles[j]))));
-				if(aux < func_cutoff){
-					poles.push_back(finalParams);
-					f_val_poles.push_back(aux);
-				}
-				minpoles->Clear();
-
-			}
-
-		}
-
-		for(comp x : poles) temp_Re.push_back(x.real());
-		for(comp x : poles) temp_Im.push_back(x.imag());
-
-		for(int k = 0; k < poles.size(); k++){
-			letwrite << poles[k].real() << "	" << poles[k].imag() << "	" << f_val_poles[k] << endl; 
-			//cout << temp_Re[k] << temp_Im[k] << endl;
-			//cout << poles[k] << endl;
-		}
-
-		//////
+		vector<int> pole_sheet = {};
+		vector<int> wave_pole = {};
+		int ampindex = 0;
 
 		vector<double> ampres_mod[testObs.numChans];
 		vector<double> ampres_phase[testObs.numChans];
@@ -591,53 +534,142 @@ int main(int argc, char ** argv)
 		vector<double> denomres_mod[testObs.numChans][testObs.numChans];
 		vector<double> denomres_phase[testObs.numChans][testObs.numChans];
 
-		MatrixXcd phsp = MatrixXcd::Identity(testObs.numChans,testObs.numChans);
+		for(string pWave: testObs.getAmpNames()){
+		
+			ps.setAmpIndex(pWave);
+			ampindex = testObs.getampindex(pWave); 	
 
-		for(int k = 0; k < testObs.numChans; k++){	
-			
-			for(int i = 0; i < poles.size(); i++){
+			//letwrite << "*Poles of the " << pWave << " amplitude:" << endl;
 
-				comp x = comp(poles[i].real(),poles[i].imag());
+			for(int sheet = 0; sheet < testObs.numChans + 1; sheet++){
 
-				amplitude tempamp = testObs.amplitudes[testObs.getampindex(pWave)]; 
+				//letwrite << "-" << to_string(sheet) << "-th sheet:" << endl;
 
-				int J = tempamp.getJ(); 
-
-				double eps = tempamp.getEpsilon(); 
-
-				for(int i = 0; i < testObs.numChans; i++){
-					phsp(i,i)= pow(tempamp.getMomentum(i,x),J+0.5)/pow(x,.25);
-				}
-
-				bool sh = true;
-				//VectorXcd tempvec = eps * tempamp.getValueForPoles(x, false); // order O(eps)
-				VectorXcd tempvec = 0.25 * eps * (tempamp.getValueForPoles(x + eps, sh) - tempamp.getValueForPoles(x - eps, sh) + comp(0.,1.) * tempamp.getValueForPoles(x + comp(0.,1.) * eps, sh) - comp(0.,1.) * tempamp.getValueForPoles(x - comp(0.,1.) * eps, sh)); // order O(eps^2)
-
-				if(abs(poles[i].imag()) < 2 * tempamp.getEpsilon()){
-					tempvec = 0.5 * eps * (tempamp.getValueForPoles(x + eps, sh) - tempamp.getValueForPoles(x - eps, sh));
-				}
+				ps.SetSheet(sheet);
 				
-				ampres_mod[k].push_back(abs(tempvec(k))); 
-				ampres_phase[k].push_back(arg(tempvec(k))); 
+				//make the minimizer
+				ROOT::Math::Minimizer* minpoles = ROOT::Math::Factory::CreateMinimizer("Minuit2","Simplex");
+				//Set some criteria for the minimizer to stop
+				minpoles->SetMaxFunctionCalls(10000);
+				minpoles->SetMaxIterations(1000);
+				//minpoles->SetTolerance(0.001);
+				//minpoles->SetPrecision(1.e-7);
+				minpoles->SetStrategy(1);
+				minpoles->SetPrintLevel(0);
+				
+				nParams = 2;//real and imaginary part of the pole
+				//make a function wrapper to minimize the function minfuncforpoles
+				ROOT::Math::Functor f(&minfunc_for_poles,nParams);
+				minpoles->SetFunction(f);
+				//set the initial conditions and step sizes
 
-				//MatrixXcd tempmat = eps * tempamp.getDenominator(x, false).inverse();
-				MatrixXcd tempmat = 0.25 * eps * (tempamp.getDenominator(x + eps, sh).inverse() - tempamp.getDenominator(x - eps, sh).inverse() + comp(0.,1.) * tempamp.getDenominator(x + comp(0.,1.) * eps, sh).inverse() - comp(0.,1.) * tempamp.getDenominator(x - comp(0.,1.) * eps, sh).inverse()); 
+				//change these numbers to parameters to pass into from command line
+				vector<double> grid_Re = linspace(grid_Re_sx, grid_Re_dx, grid_Re_numpts);
+				vector<double> grid_Im = linspace(grid_Im_sx, grid_Im_dx, grid_Im_numpts);
+				vector<double> fitparamspoles = {};
+				double steppoles[2] = {1.e-2, 1.e-2};
+				
+				for(int i = 0; i < grid_Re.size(); i++){
+					for(int j = 0; j < grid_Im.size(); j++){
+						
+						fitparamspoles = {grid_Re[i], grid_Im[j]};
+					
+						for(int l = 0; l < nParams; l++){
+							minpoles->SetVariable(l,to_string(l),fitparamspoles[l],steppoles[l]);
+						}
 
-				if(abs(poles[i].imag()) < 2 * tempamp.getEpsilon()){
-					tempmat = 0.5 * eps * (tempamp.getDenominator(x + eps, sh).inverse() - tempamp.getDenominator(x - eps, sh).inverse());
+						ps.setPoles(poles);
+
+						//run the minimization
+						minpoles->Minimize();
+
+						//cout << "calls = " << ps.calls_counter_poles << endl;
+
+						//extract the resulting fit parameters
+						comp finalParams = comp(minpoles->X()[0], -abs(minpoles->X()[1]));
+						long double aux = minpoles->MinValue();
+						for (int j=0; j < poles.size(); j++) aux += log(abs((finalParams - poles[j])*(finalParams - conj(poles[j]))));
+						if(aux < func_cutoff){
+							poles.push_back(finalParams);
+							f_val_poles.push_back(aux);
+						}
+						minpoles->Clear();
+
+					}
+
 				}
 
-				for(int j = 0; j < testObs.numChans; j++){
-					denomres_mod[k][j].push_back(abs(tempmat(k,j)));
-					denomres_phase[k][j].push_back(arg(tempmat(k,j)));
+				for(comp x : poles) temp_Re.push_back(x.real());
+				for(comp x : poles) temp_Im.push_back(x.imag());
+
+				for(int k = 0; k < poles.size(); k++){
+					pole_sheet.push_back(ampindex);
+					wave_pole.push_back(sheet);
 				}
+
+				for(int k = 0; k < poles.size(); k++){
+					letwrite << poles[k].real() << "	" << poles[k].imag() << "	" << f_val_poles[k] << endl; 
+					//cout << temp_Re[k] << temp_Im[k] << endl;
+					//cout << poles[k] << endl;
+				}
+
+				//////
+
+				MatrixXcd phsp = MatrixXcd::Identity(testObs.numChans,testObs.numChans);
+
+				for(int k = 0; k < testObs.numChans; k++){	
+					
+					for(int i = 0; i < poles.size(); i++){
+
+						comp x = comp(poles[i].real(),poles[i].imag());
+
+						amplitude tempamp = testObs.amplitudes[testObs.getampindex(pWave)]; 
+
+						int J = tempamp.getJ(); 
+
+						double eps = tempamp.getEpsilon(); 
+
+						for(int i = 0; i < testObs.numChans; i++){
+							phsp(i,i)= pow(tempamp.getMomentum(i,x),J+0.5)/pow(x,.25);
+						}
+
+						int sh = 0;
+						//VectorXcd tempvec = eps * tempamp.getValueForPoles(x, false); // order O(eps)
+						VectorXcd tempvec = 0.25 * eps * (tempamp.getValueForPoles(x + eps, sh) - tempamp.getValueForPoles(x - eps, sh) + comp(0.,1.) * tempamp.getValueForPoles(x + comp(0.,1.) * eps, sh) - comp(0.,1.) * tempamp.getValueForPoles(x - comp(0.,1.) * eps, sh)); // order O(eps^2)
+
+						if(abs(poles[i].imag()) < 2 * tempamp.getEpsilon()){
+							tempvec = 0.5 * eps * (tempamp.getValueForPoles(x + eps, sh) - tempamp.getValueForPoles(x - eps, sh));
+						}
+						
+						ampres_mod[k].push_back(abs(tempvec(k))); 
+						ampres_phase[k].push_back(arg(tempvec(k))); 
+
+						//MatrixXcd tempmat = eps * tempamp.getDenominator(x, false).inverse();
+						MatrixXcd tempmat = 0.25 * eps * (tempamp.getDenominator(x + eps, sh).inverse() - tempamp.getDenominator(x - eps, sh).inverse() + comp(0.,1.) * tempamp.getDenominator(x + comp(0.,1.) * eps, sh).inverse() - comp(0.,1.) * tempamp.getDenominator(x - comp(0.,1.) * eps, sh).inverse()); 
+
+						if(abs(poles[i].imag()) < 2 * tempamp.getEpsilon()){
+							tempmat = 0.5 * eps * (tempamp.getDenominator(x + eps, sh).inverse() - tempamp.getDenominator(x - eps, sh).inverse());
+						}
+
+						for(int j = 0; j < testObs.numChans; j++){
+							denomres_mod[k][j].push_back(abs(tempmat(k,j)));
+							denomres_phase[k][j].push_back(arg(tempmat(k,j)));
+						}
+
+					}
+
+				}	
+
+				//for(VectorXcd h: ampresidues) cout << h << endl << endl;
+				//for(MatrixXcd h: denomresidues) cout << h << endl << endl;
+
+				poles = {};
 
 			}
 
-		}	
+			poles = {};
 
-		//for(VectorXcd h: ampresidues) cout << h << endl << endl;
-		//for(MatrixXcd h: denomresidues) cout << h << endl << endl;
+		}
 
 		//////
 
@@ -671,6 +703,8 @@ int main(int argc, char ** argv)
 			t1_poles->SetBranchAddress("Poles_Re", &tree_poles_Re);
 			t1_poles->SetBranchAddress("Poles_Im", &tree_poles_Im);
 			t1_poles->SetBranchAddress("FVAL_Poles", &tree_f_val_poles);
+			//t1_poles->SetBranchAddress("amp", &tree_amp);
+			//t1_poles->SetBranchAddress("sh", &tree_sh);
 			for(int i = 0; i < testObs.numChans; i++){
 				t1_poles->SetBranchAddress(("amp_res_ch" + to_string(i) + "_mod").c_str(), &tree_ampres_mod[i]);
 				t1_poles->SetBranchAddress(("amp_res_ch" + to_string(i) + "_phase").c_str(), &tree_ampres_phase[i]);
@@ -700,55 +734,29 @@ int main(int argc, char ** argv)
 
 		//////
 
-		auto abs_det = [&](double* x, double* p){
-			return abs(testObs.amplitudes[ampindex].getDenominator(comp(x[0], x[1]),false).determinant());
-			//MatrixXcd temp = (comp(x[0], x[1]) - comp(115,0.5)) * (comp(x[0], x[1]) - comp(118,0.7)) * (comp(x[0], x[1]) - comp(115,-0.5)) * (comp(x[0], x[1]) - comp(118,-0.7)) * MatrixXcd({{1}});
-			//return abs(temp.determinant());
-		};
-
-		auto log_abs_det = [&](double* x, double* p){
-			return log10(abs(testObs.amplitudes[ampindex].getDenominator(comp(x[0], x[1]),false).determinant()));
-			//MatrixXcd temp = (comp(x[0], x[1]) - comp(115,0.5)) * (comp(x[0], x[1]) - comp(118,0.7)) * (comp(x[0], x[1]) - comp(115,-0.5)) * (comp(x[0], x[1]) - comp(118,-0.7)) * MatrixXcd({{1}});
-			//return log(abs(temp.determinant()));
-		};
-
-		auto abs_det_II = [&](double* x, double* p){
-			return abs(testObs.amplitudes[ampindex].getDenominator(comp(x[0], x[1]),true).determinant());
-			//MatrixXcd temp = (comp(x[0], x[1]) - comp(115,0.5)) * (comp(x[0], x[1]) - comp(118,0.7)) * (comp(x[0], x[1]) - comp(115,-0.5)) * (comp(x[0], x[1]) - comp(118,-0.7)) * MatrixXcd({{1}});
-			//return abs(temp.determinant());
-		};
-
-		auto log_abs_det_II = [&](double* x, double* p){
-			return log10(abs(testObs.amplitudes[ampindex].getDenominator(comp(x[0], x[1]),true).determinant()));
-			//MatrixXcd temp = (comp(x[0], x[1]) - comp(115,0.5)) * (comp(x[0], x[1]) - comp(118,0.7)) * (comp(x[0], x[1]) - comp(115,-0.5)) * (comp(x[0], x[1]) - comp(118,-0.7)) * MatrixXcd({{1}});
-			//return log(abs(temp.determinant()));
-		};
-
-		if(ps.GetSheet()){
-
-			testObs.PolePlotGraph2D(inputfile, polefile, sheet, grid_Re_sx, grid_Re_dx, grid_Im_sx, grid_Im_dx);
-
-			testObs.PolePlotGraph1D(inputfile, polefile, sheet, grid_Re_sx, grid_Re_dx, grid_Im_sx, grid_Im_dx);
-
-			testObs.PoleColormapPlotFunc2D(inputfile, abs_det_II, "abs_det_II", grid_Re_sx, grid_Re_dx, grid_Im_sx, grid_Im_dx);
-
-			testObs.PoleColormapPlotFunc2D(inputfile, log_abs_det_II, "log_abs_det_II", grid_Re_sx, grid_Re_dx, grid_Im_sx, grid_Im_dx);
-
-		}else{
-
-			testObs.PolePlotGraph2D(inputfile, polefile, sheet, grid_Re_sx, grid_Re_dx, grid_Im_sx, grid_Im_dx);
-
-			testObs.PolePlotGraph1D(inputfile, polefile, sheet, grid_Re_sx, grid_Re_dx, grid_Im_sx, grid_Im_dx);
-
-			testObs.PoleColormapPlotFunc2D(inputfile, abs_det, "abs_det", grid_Re_sx, grid_Re_dx, grid_Im_sx, grid_Im_dx);
-
-			testObs.PoleColormapPlotFunc2D(inputfile, log_abs_det, "log_abs_det", grid_Re_sx, grid_Re_dx, grid_Im_sx, grid_Im_dx);
-
-		} 
-
 		t1_poles->Fill();
 		t1_poles->Write(0,TObject::kWriteDelete,0);
 		file_poles->Close("R");
+
+		/*////////
+
+		for(int sheet = 0; sheet < testObs.numChans + 1; sheet++){
+
+			auto log_abs_det = [&](double* x, double* p){
+				return log10(abs(testObs.amplitudes[ampindex].getDenominator(comp(x[0], x[1]), sheet).determinant()));
+				//MatrixXcd temp = (comp(x[0], x[1]) - comp(115,0.5)) * (comp(x[0], x[1]) - comp(118,0.7)) * (comp(x[0], x[1]) - comp(115,-0.5)) * (comp(x[0], x[1]) - comp(118,-0.7)) * MatrixXcd({{1}});
+				//return log(abs(temp.determinant()));
+			};
+
+			testObs.PolePlotGraph2D(inputfile, polefile, sheet, grid_Re_sx, grid_Re_dx, grid_Im_sx, grid_Im_dx);
+
+			testObs.PolePlotGraph1D(inputfile, polefile, sheet, grid_Re_sx, grid_Re_dx, grid_Im_sx, grid_Im_dx);
+
+			testObs.PoleColormapPlotFunc2D(inputfile, log_abs_det, sheet, "log_abs_det", grid_Re_sx, grid_Re_dx, grid_Im_sx, grid_Im_dx); 
+
+		}
+		
+		////////*/
 
 	}
 

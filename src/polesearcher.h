@@ -25,7 +25,7 @@ class polesearcher {
     observable testObs;
     vector<comp> poles = {};
     int wvindex;
-    bool sh = false;
+    int sh = 0;
 
     public:
 
@@ -51,7 +51,7 @@ class polesearcher {
         poles = xx;
     }
 
-    void SetSheet(bool sheet){
+    void SetSheet(int sheet){
         sh = sheet;
     }
 
