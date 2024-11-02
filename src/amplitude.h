@@ -91,6 +91,7 @@ public:
 	string getKMatType();
 	int getJ();
 	double getEpsilon();
+	double getSl();
 
 private:
 	vector<channel> channels;

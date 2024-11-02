@@ -90,6 +90,10 @@ double amplitude::getEpsilon(){
 	return epsilon;
 }
 
+double amplitude::getSl(){
+	return sL;
+}
+
 vector<channel> amplitude::getChannels(){
 
 	return channels;

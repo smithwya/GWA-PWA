@@ -138,8 +138,6 @@ int main(int argc, char ** argv)
 
 	//saves the observable object outside of filereader object
 	testObs = formatReader.getObs();
-
-
 	
 	//if you want just plotting: add a flag:
 	if(formatReader.getPlotFlag()){
@@ -157,7 +155,7 @@ int main(int argc, char ** argv)
 			return (value*conj(value)).real();
 		};
 		
-		auto intensityP_BstarBstar = [&](double x){
+		/*auto intensityP_BstarBstar = [&](double x){
 			comp value = testObs.amplitudes[0].getValue(pow(x,2))(2);
 			return (value*conj(value)).real();
 		};
@@ -165,20 +163,25 @@ int main(int argc, char ** argv)
 		auto intensityP_B_sstarB_sstar = [&](double x){
 			comp value = testObs.amplitudes[0].getValue(pow(x,2))(3);
 			return (value*conj(value)).real();
-		};
+		};*/
 		
 		auto intensityP_Dummy = [&](double x){
-			comp value = testObs.amplitudes[0].getValue(pow(x,2))(4);
+			comp value = testObs.amplitudes[0].getValue(pow(x,2))(2);
 			return (value*conj(value)).real();
 		};
 
 		testObs.makePlotGraphWithExp("P", "BB", inputfile+"_BB", intensityP_BB, 10.6322,11.0208);
+		//comp value = testObs.amplitudes[0].getValue(pow(11.,2))(0);
+		//cout << (value*conj(value)).real() << endl;
+		//value = testObs.amplitudes[0].getValue(pow(11.,2))(2);
+		//cout << (value*conj(value)).real() << endl;
+		//for(double x: testObs.getFitParams()) cout << x << endl;
 		testObs.makePlotGraphWithExp("P", "BBstar", inputfile+"_BBstar", intensityP_BBstar, 10.6322,11.0208);
-		testObs.makePlotGraphWithExp("P", "BstarBstar", inputfile+"_BstarBstar", intensityP_BstarBstar, 10.6322,11.0208);
-		testObs.makePlotGraphWithExp("P", "B_sstarB_sstar", inputfile+"_B_sstarB_sstar", intensityP_B_sstarB_sstar, 10.6322,11.0208);
+		//testObs.makePlotGraphWithExp("P", "BstarBstar", inputfile+"_BstarBstar", intensityP_BstarBstar, 10.6322,11.0208);
+		//testObs.makePlotGraphWithExp("P", "B_sstarB_sstar", inputfile+"_B_sstarB_sstar", intensityP_B_sstarB_sstar, 10.6322,11.0208);
 		testObs.makePlotGraphDummy(inputfile+"_Dummy", intensityP_Dummy, 10.6322,11.0208);
 		if(formatReader.getInclCrossSecFlag()){
-			testObs.plotInclCrossSecVsSumOfExcl(inputfile+"_InclCrossSecVsSumOfExcl", 10.6322,11.2062);
+			//testObs.plotInclCrossSecVsSumOfExcl(inputfile+"_InclCrossSecVsSumOfExcl", 10.6322,11.2062);
 			testObs.plotInclCrossSecWithExp(inputfile+"_InclCrossSecWithExp", 10.6322,11.2062);
 		}
 
@@ -191,6 +194,10 @@ int main(int argc, char ** argv)
 	
 
 	if(formatReader.getFitFlag()){
+		//load the weights
+		testObs.setexclchi2weight(formatReader.GetExclChi2Weight());
+		if(formatReader.getInclCrossSecFlag()) testObs.setinclchi2weight(formatReader.GetInclChi2Weight());
+
 		//saves original starting parameters
 		vector<double> startparams = testObs.getFitParams();
 		vector<double> steps = testObs.getStepSizes();

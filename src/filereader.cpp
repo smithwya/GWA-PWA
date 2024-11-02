@@ -1015,7 +1015,8 @@ void filereader::writeMathematicaOutputFile(string outname){
 	Math_output_cmds.push_back(temp);
 
 	for(int i = 0; i < obsObject.getNumAmps(); i++){
-		temp = "0.59999999999999998                1   0.0000000000000000      ! Scale parameter in CM for wave            " + to_string(i + 1);//check
+		temp = to_string(obsObject.amplitudes[i].getSl());
+		temp += "                1   0.0000000000000000      ! Scale parameter in CM for wave            " + to_string(i + 1);//check
 		Math_output_cmds.push_back(temp);
 	}
 
