@@ -113,6 +113,44 @@ struct expdataDat{
 
 };
 
+struct gridDat{
+
+	double grid_Re_sx;
+	double grid_Re_dx;
+	int grid_Re_numpts;
+	double grid_Im_sx;
+	double grid_Im_dx;
+	int grid_Im_numpts;
+
+	gridDat(double resx, double redx, int repts, double imsx, double imdx, int impts){
+		grid_Re_sx = resx;
+		grid_Re_dx = redx;
+		grid_Re_numpts = repts;
+		grid_Im_sx = imsx;
+		grid_Im_dx = imdx;
+		grid_Im_numpts = impts;
+	}
+
+
+};
+
+struct fitparamsDat{
+
+	int maxfuncalls = 0;
+	int maxiter = 0;
+	int tol = 0;
+	int verbose = 0;
+
+	fitparamsDat(int mfc, int mi, double t, int ver){
+		maxfuncalls = mfc;
+		maxiter = mi;
+		tol = t;
+		verbose = ver;
+	}
+
+
+};
+
 class filereader {
 
 public:
@@ -126,12 +164,15 @@ public:
 	void SetExclChi2Weight();
 	void SetChi2CutOff();
 	void SetActionCmd();
-	void SetFitFlag();
-	void SetPlotFlag();
-	void SetPolesearchFlag();
+	//void SetFitFlag();
+	//void SetPlotFlag();
+	//void SetPolesearchFlag();
 	void SetRandomizeFlag();
 	void SetSeed();
 	void SetFitRegion();
+	void SetGrid();
+	void SetZeroCmd();
+	void SetFitParamsCmd();
 	void SetFitSequence();
 	void SetInclCrossSecFlag();
 	void SetAddChannelList();
@@ -164,6 +205,9 @@ public:
 	void readRandomizeFlag(string cmd);
 	int readSeed(string cmd);
 	vector<double> readFitReg(string cmd);
+	gridDat getGrid();
+	double getZero();
+	vector <fitparamsDat> getFitParams();
 	vector<string> readFitSequence(string cmd);
 	chanDat readCh(string cmd);
 	ampDat readWave(string cmd);
@@ -201,8 +245,9 @@ private:
 	string NameOfFile;
 	vector<std::string> commands = {}, Math_output_cmds = {};
 	smatch match, testmatch;
-	string ActionFlagCmd, FitFlagCmd, PlotFlagCmd, PolesearchFlagCmd, SeedCmd, FitRegion, FitSequenceCmd, Chi2CutOffCmd, InclChi2WeightCmd, ExclChi2WeightCmd, RandomizeFlagCmd, ExpInclCrossSecCmd, ExpInclCrossSecFilename, InclCrossSecFlagCmd;
+	string ActionFlagCmd, FitFlagCmd, PlotFlagCmd, PolesearchFlagCmd, SeedCmd, FitRegion, GridCmd, ZeroCmd, fitparamsCmd, FitSequenceCmd, Chi2CutOffCmd, InclChi2WeightCmd, ExclChi2WeightCmd, RandomizeFlagCmd, ExpInclCrossSecCmd, ExpInclCrossSecFilename, InclCrossSecFlagCmd;
 	vector<string> AddChannel_list, AddWave_list, Cheby_list, AddPole_list, Kmat_list,ExpData_list;
 	observable obsObject;
 	int seed;
+	
 };

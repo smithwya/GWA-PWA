@@ -1,14 +1,18 @@
 SetSeed(-890126156)
 FitRegion(10.65,11.2062)
 FittingSequence({"Simplex", "Migrad"})
+FittingParameters({10000, 1000, 0.1, 1}, {100000, 10000, 0.001, 1})
 InclChi2Weight(1)
 ExclChi2Weight(10)
 ReducedChi2CutOff(10)
 
-ChooseAnAction("Polesearch")
+ChooseAnAction("Fit")
 
 DoRandomize(No)
 IncludeAlsoInclusiveCrossSection(Yes)
+
+PolesearchGrid(113., 121., 31, -1.5, 1.5, 31)
+PolesearchZero(-7)
 
 AddChannel("BB", {5.27925, 5.27925})
 AddChannel("BBstar", {5.27925, 5.32471})
@@ -34,3 +38,6 @@ LoadExpInclusiveCrossSection("Data/inclusive-cross-section.dat")
 #the type of kmatrix for each amplitude can be: "kmat-nominal", "kmat-CDD"
 #the type of rhoN for each amplitude can be: "rhoN-nominal", "rhoN-Qmodel"
 #"Fit", "Polesearch" and "Plot" are mutually exclusive actions
+#"polesearchzero(-n)" means that the Polesearch algorithm will consider numbers < 10^-7 as zeros 
+#grid(double resx, double redx, int repts, double imsx, double imdx, int impts)
+#in fitparams for each call we specify the parameters SetMaxFunctionCalls, SetMaxIterations, SetTolerance, SetPrintLevel;

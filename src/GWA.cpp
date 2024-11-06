@@ -106,20 +106,11 @@ vector<double> linspace(T start_in, T end_in, int num_in)
 int main(int argc, char ** argv)
 {
 	string inputfile = (string) argv[1]; //just the core e.g. "fit73-36", without the path nor the extension
-	string polefile = (string) argv[2];
-	//string pWave = (string) argv[3];
-	double grid_Re_sx = stod(argv[3]);
-	double grid_Re_dx = stod(argv[4]);
-	int grid_Re_numpts = atoi(argv[5]);
-	double grid_Im_sx = stod(argv[6]);
-	double grid_Im_dx = stod(argv[7]);
-	int grid_Im_numpts = atoi(argv[8]);
-	double func_cutoff = stod(argv[9]);
-	//int sheet = atoi(argv[11]); 
-	int jobnum = atoi(argv[10]);
-	int numfits = atoi(argv[11]);
-	//string inputfile = (string) argv[14];
-	//string fitsfolder = (string) argv[15];
+	string polefile = "Poles/" + inputfile + "_poles.txt";
+	int jobnum = atoi(argv[2]);
+	int numfits = atoi(argv[3]);
+	//string inputfile = (string) argv[4];
+	//string fitsfolder = (string) argv[5];
 	string fitsfolder = "Fits/";
 	string polesfolder = "Poles/";
 
@@ -194,6 +185,7 @@ int main(int argc, char ** argv)
 	
 
 	if(formatReader.getFitFlag()){
+
 		//load the weights
 		testObs.setexclchi2weight(formatReader.GetExclChi2Weight());
 		if(formatReader.getInclCrossSecFlag()) testObs.setinclchi2weight(formatReader.GetInclChi2Weight());
@@ -354,9 +346,10 @@ int main(int argc, char ** argv)
 		}
 
 		vector<string> fitseq = formatReader.readFitSequence(formatReader.getFitSequence());
+		vector<fitparamsDat> fitpar = formatReader.getFitParams(); 
 		
 		//does the fitting
-		for (int j = 0; j < numfits; j++){
+		for (int j = 0; j < numfits; j++){cout << "ciao" << endl; 
 			//resets the observable
 			testObs.setFitParams(startparams);
 			formatReader.setObs(testObs);
@@ -389,10 +382,10 @@ int main(int argc, char ** argv)
 
 				//Set some criteria for the minimzer to stop
 
-				min[l]->SetMaxFunctionCalls(100000);
-				min[l]->SetMaxIterations(10000);
-				min[l]->SetTolerance(0.001);
-				min[l]->SetPrintLevel(1);
+				min[l]->SetMaxFunctionCalls(fitpar[l].maxfuncalls);
+				min[l]->SetMaxIterations(fitpar[l].maxiter);
+				min[l]->SetTolerance(fitpar[l].tol);
+				min[l]->SetPrintLevel(fitpar[l].verbose);
 
 				if(formatReader.getInclCrossSecFlag()) min[l]->SetFunction(g);
 				else min[l]->SetFunction(f);
@@ -526,6 +519,15 @@ int main(int argc, char ** argv)
 		// "t" = unphysical sheet connected to the real axis in correspondence to the segment between the t-th and the (t+1)-th threshold (if there is);
 		// ...
 
+		double grid_Re_sx = formatReader.getGrid().grid_Re_sx;
+		double grid_Re_dx = formatReader.getGrid().grid_Re_dx;
+		int grid_Re_numpts = formatReader.getGrid().grid_Re_numpts;
+		double grid_Im_sx = formatReader.getGrid().grid_Im_sx;
+		double grid_Im_dx = formatReader.getGrid().grid_Im_dx;
+		int grid_Im_numpts = formatReader.getGrid().grid_Im_numpts;
+
+		double func_cutoff = formatReader.getZero();
+
 		//initialize the polesearcher object
 		ps.settestObs(testObs);
 
@@ -610,12 +612,12 @@ int main(int argc, char ** argv)
 				for(comp x : poles) temp_Im.push_back(x.imag());
 
 				for(int k = 0; k < poles.size(); k++){
-					pole_sheet.push_back(ampindex);
-					wave_pole.push_back(sheet);
+					pole_sheet.push_back(sheet);
+					wave_pole.push_back(ampindex);
 				}
 
 				for(int k = 0; k < poles.size(); k++){
-					letwrite << poles[k].real() << "	" << poles[k].imag() << "	" << f_val_poles[k] << endl; 
+					letwrite << poles[k].real() << "	" << poles[k].imag() << "	" << f_val_poles[k] << "	" << pole_sheet[k] << "	" << wave_pole[k] << endl; 
 					//cout << temp_Re[k] << temp_Im[k] << endl;
 					//cout << poles[k] << endl;
 				}
@@ -688,6 +690,8 @@ int main(int argc, char ** argv)
 		vector<double> *tree_poles_Re = &temp_Re;
 		vector<double> *tree_poles_Im = &temp_Im;
 		vector<double> *tree_f_val_poles = &f_val_poles;
+		vector<int> *tree_wave_pole = &wave_pole;
+		vector<int> *tree_pole_sheet = &pole_sheet;		
 		vector<double> *tree_ampres_mod[testObs.numChans];
 		vector<double> *tree_ampres_phase[testObs.numChans];
 		vector<double> *tree_denomres_mod[testObs.numChans][testObs.numChans];
@@ -710,8 +714,8 @@ int main(int argc, char ** argv)
 			t1_poles->SetBranchAddress("Poles_Re", &tree_poles_Re);
 			t1_poles->SetBranchAddress("Poles_Im", &tree_poles_Im);
 			t1_poles->SetBranchAddress("FVAL_Poles", &tree_f_val_poles);
-			//t1_poles->SetBranchAddress("amp", &tree_amp);
-			//t1_poles->SetBranchAddress("sh", &tree_sh);
+			t1_poles->SetBranchAddress("Wave", &tree_wave_pole);
+			t1_poles->SetBranchAddress("Sheet", &tree_pole_sheet);
 			for(int i = 0; i < testObs.numChans; i++){
 				t1_poles->SetBranchAddress(("amp_res_ch" + to_string(i) + "_mod").c_str(), &tree_ampres_mod[i]);
 				t1_poles->SetBranchAddress(("amp_res_ch" + to_string(i) + "_phase").c_str(), &tree_ampres_phase[i]);
@@ -728,6 +732,8 @@ int main(int argc, char ** argv)
 			t1_poles->Branch("Poles_Re", &temp_Re);
 			t1_poles->Branch("Poles_Im", &temp_Im);
 			t1_poles->Branch("FVAL_Poles", &f_val_poles);
+			t1_poles->Branch("Wave", &wave_pole);
+			t1_poles->Branch("Sheet", &pole_sheet);
 			for(int i = 0; i < testObs.numChans; i++){
 				t1_poles->Branch(("amp_res_ch" + to_string(i) + "_mod").c_str(), &ampres_mod[i]);
 				t1_poles->Branch(("amp_res_ch" + to_string(i) + "_phase").c_str(), &ampres_phase[i]);
