@@ -240,7 +240,7 @@ int main(int argc, char ** argv)
 
 		t_end = high_resolution_clock::now();
         delta_t = duration_cast<nanoseconds>(t_end-t_start);
-        cout<<"Precalculation of the integral ended ("<<delta_t.count()<<"nanos)\n";
+        cout<<"Precalculation of the integrals ended ("<<delta_t.count()<<"nanos)\n";
 
 		/////////
 
@@ -253,6 +253,9 @@ int main(int argc, char ** argv)
 		vector<double> steps = testObs.getStepSizes();
 
 		/*///////
+
+		// Costruisci la lista di combinazioni (amp_index, chan_index)
+	    testObs.amp_chan_pairs = testObs.buildAmpChanPairs(testObs.amplitudes);
 
 		cout<<"[GWA] Starting first calculation of the chisq..."<<endl;
 
@@ -289,6 +292,35 @@ int main(int argc, char ** argv)
 
 		//double stest = 10.6518*10.6518;
 		//comp valtest = testObs.amplitudes[0].getValue(stest)(0);
+		valtest = testObs.excl_chisqPAR();
+
+		t_end = high_resolution_clock::now();
+        delta_t = duration_cast<nanoseconds>(t_end-t_start);
+		cout << valtest << endl;
+        cout<<"First calculation of the chisq ended ("<<delta_t.count()<<"nanos)\n"; 
+
+		cout<<"[GWA] Starting second calculation of the chisq..."<<endl;
+
+        t_start = high_resolution_clock::now();
+
+		//valtest = testObs.amplitudes[0].getValue(pow(10.6518,2))(0);
+		valtest = testObs.excl_chisqPAR();
+
+		t_end = high_resolution_clock::now();
+        delta_t = duration_cast<nanoseconds>(t_end-t_start);
+		cout << valtest << endl;
+        cout<<"Second calculation of the chisq ended ("<<delta_t.count()<<"nanos)\n";
+
+		///////
+
+		///////
+
+		cout<<"[GWA] Starting first calculation of the chisq..."<<endl;
+
+        t_start = high_resolution_clock::now();
+
+		//double stest = 10.6518*10.6518;
+		//comp valtest = testObs.amplitudes[0].getValue(stest)(0);
 		valtest = testObs.incl_chisq();
 
 		t_end = high_resolution_clock::now();
@@ -302,6 +334,35 @@ int main(int argc, char ** argv)
 
 		//valtest = testObs.amplitudes[0].getValue(pow(10.6518,2))(0);
 		valtest = testObs.incl_chisq();
+
+		t_end = high_resolution_clock::now();
+        delta_t = duration_cast<nanoseconds>(t_end-t_start);
+		cout << valtest << endl;
+        cout<<"Second calculation of the chisq ended ("<<delta_t.count()<<"nanos)\n"; 
+
+		///////
+
+		///////
+
+		cout<<"[GWA] Starting first calculation of the chisq..."<<endl;
+
+        t_start = high_resolution_clock::now();
+
+		//double stest = 10.6518*10.6518;
+		//comp valtest = testObs.amplitudes[0].getValue(stest)(0);
+		valtest = testObs.incl_chisqTRUE();
+
+		t_end = high_resolution_clock::now();
+        delta_t = duration_cast<nanoseconds>(t_end-t_start);
+		cout << valtest << endl;
+        cout<<"First calculation of the chisq ended ("<<delta_t.count()<<"nanos)\n"; 
+
+		cout<<"[GWA] Starting second calculation of the chisq..."<<endl;
+
+        t_start = high_resolution_clock::now();
+
+		//valtest = testObs.amplitudes[0].getValue(pow(10.6518,2))(0);
+		valtest = testObs.incl_chisqTRUE();
 
 		t_end = high_resolution_clock::now();
         delta_t = duration_cast<nanoseconds>(t_end-t_start);

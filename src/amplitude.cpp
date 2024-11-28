@@ -315,7 +315,7 @@ comp amplitude::getIntegral(comp s,int k,int sheet){
 	auto mapit = integralList.find(skpair);
 
 	if(mapit!=integralList.end()) { return mapit->second;} //anyway for the polesearch there's no need to store the result 
-	//cout << "ciao" << endl; 
+	cout << "ciao" << endl; 
 	if(abs(s.imag()) < 2 * epsilon){
 		double sreal = s.real();//cout << "integral[" << sreal << ", " << k << "]" << endl;
 		//result += getIntegral(sreal, k);

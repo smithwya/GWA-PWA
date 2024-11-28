@@ -6,6 +6,7 @@ LD = $(shell root-config --ld)
 #compiling flags
 CPPFLAGS := $(shell root-config --cflags) $(STDINCDIR) -I/usr/local/include/eigen3 -I/home/smithwya/eigen
 CPPFLAGS += -O3
+CPPFLAGS += -fopenmp
 #CPPFLAGS += -g
 #CPPFLAGS += -pg
 #CPPFLAGS += -march=native

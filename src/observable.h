@@ -17,6 +17,7 @@
 #include <TROOT.h>
 #include <chrono>
 #include <ctime>
+#include <omp.h>
 
 using namespace std;
 using Eigen::MatrixXcd;
@@ -79,6 +80,7 @@ public:
 	vector<amplitude> amplitudes;
 	int numChans;
 	int nParams;
+	std::vector<std::pair<size_t, size_t>> amp_chan_pairs;
 	observable(){
 		amplitudes = {};
 		data = {};
@@ -1421,6 +1423,64 @@ public:
 	};
 
 
+	std::vector<std::pair<size_t, size_t>> buildAmpChanPairs(std::vector<amplitude>& amplitudes) {
+	    std::vector<std::pair<size_t, size_t>> amp_chan_pairs_temp;
+
+	    for (size_t amp_index = 0; amp_index < amplitudes.size(); ++amp_index) {
+	        for (size_t chan_index = 0; chan_index < amplitudes[amp_index].getChanNames().size(); ++chan_index) {
+	            amp_chan_pairs_temp.emplace_back(amp_index, chan_index);
+	        }
+	    }
+
+	    return amp_chan_pairs_temp;
+	}
+
+
+	double excl_chisqPAR() {
+	    double result = 0;
+
+	    // Iterazione parallela
+	    #pragma omp parallel
+	    {
+	        double local_result = 0;  // Somma locale per ogni thread
+
+	        #pragma omp for nowait
+	        for (size_t pair_idx = 0; pair_idx < amp_chan_pairs.size(); ++pair_idx) {
+	            size_t amp_index = amp_chan_pairs[pair_idx].first;
+	            size_t chan_index = amp_chan_pairs[pair_idx].second;
+
+	            // Tutte le operazioni specifiche per amp_index e chan_index
+	            double sum = 0;
+	            double lower_bound = sqrt(amplitudes[amp_index].getFitInterval()[0]);
+	            double upper_bound = sqrt(amplitudes[amp_index].getFitInterval()[1]);
+	            std::vector<double> sqrts_vals = data[amp_index * numChans + chan_index].sqrts;
+
+	            if (!sqrts_vals.empty()) {  // Canale non vuoto
+	                for (size_t i = 0; i < sqrts_vals.size(); ++i) {
+	                    double x = sqrts_vals[i];
+	                    if (x >= lower_bound && x <= upper_bound) {
+	                        comp val = amplitudes[amp_index].getValue(x * x)(chan_index);
+	                        double y = (val * std::conj(val)).real();
+	                        double stat_err = data[numChans * amp_index + chan_index].amp_expval_stat_err[i];
+	                        double sist_err = data[numChans * amp_index + chan_index].amp_expval_sist_err[i];
+	                        double std = std::sqrt(std::pow(stat_err, 2) + std::pow(sist_err, 2));
+	                        sum += std::pow(((y - data[numChans * amp_index + chan_index].amp_expval[i]) / std), 2);
+	                    }
+	                }
+	                local_result += sum;
+	            }
+	        }
+
+	        // Accumula la somma locale nel risultato globale
+	        #pragma omp atomic
+	        result += local_result;
+	    }
+
+	    return excl_weight * result;
+	}
+
+	
+
 	double excl_chisq(){
 
 		//cout<<"[observable] Starting calculating excl chi2..."<<endl;
@@ -1503,7 +1563,7 @@ public:
 	}
 
 
-	double incl_chisq(){
+	double incl_chisqTRUE(){
 
 		//cout<<"[observable] Starting calculating incl chi2..."<<endl;
 
@@ -1566,6 +1626,50 @@ public:
 
 		return incl_weight * sum;
 
+	}
+
+	double incl_chisq() {
+		double sum = 0;
+		double lower_bound = sqrt(amplitudes[0].getFitInterval()[0]);
+		double upper_bound = sqrt(amplitudes[0].getFitInterval()[1]);
+
+		// To ensure thread-safe accumulation of `sum`
+		#pragma omp parallel
+		{
+			double local_sum = 0;  // Each thread has its local sum
+
+			#pragma omp for nowait
+			for (int i = 0; i < data_InclCrossSec.sqrts.size(); i++) {
+				double x = data_InclCrossSec.sqrts[i];
+				double aux = 0;
+
+				if (x >= lower_bound && x <= upper_bound) {
+					for (const std::string& ampname : getAmpNames()) {
+						int amp_index = getampindex(ampname);
+
+						for (const std::string& channame : amplitudes[amp_index].getChanNames()) {
+							int chan_index = getchanindex(ampname, channame);
+							comp temp = amplitudes[amp_index].getValue(x * x)(chan_index);
+							aux += (temp * std::conj(temp)).real();
+						}
+					}
+
+					double y = data_InclCrossSec.amp_expval[i];
+					double stat_err = data_InclCrossSec.amp_expval_stat_err[i];
+					//double sist_err = data_InclCrossSec.amp_expval_sist_err[i];
+					double std = stat_err; //uncorrelated inclusive data
+					//double std = sqrt(pow(stat_err, 2) + pow(sist_err, 2)); //correlated inclusive data
+					
+					local_sum += std::pow((aux - y) / std, 2);
+				}
+			}
+
+			// Accumulate local sums into the global sum
+			#pragma omp atomic
+			sum += local_sum;
+		}
+
+		return incl_weight * sum;
 	}
 
 	friend ostream& operator<<(std::ostream& os, observable const& m){
