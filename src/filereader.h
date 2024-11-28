@@ -168,7 +168,7 @@ public:
 	//void SetPlotFlag();
 	//void SetPolesearchFlag();
 	void SetRandomizeFlag();
-	void SetSeed();
+	void SetSeedCmd();
 	void SetFitRegion();
 	void SetGrid();
 	void SetZeroCmd();
@@ -181,6 +181,7 @@ public:
 	void SetAddPoleList();
 	void SetKmatList();
 	void SetAllCommandLists();
+	//void setSeed();
 	int getSeed();
 	bool getFitFlag();
 	bool getPlotFlag();
@@ -203,7 +204,7 @@ public:
 	void readActionCmd(string cmd);
 	void readInclCrossSecFlag(string cmd);
 	void readRandomizeFlag(string cmd);
-	int readSeed(string cmd);
+	int readSeed();
 	vector<double> readFitReg(string cmd);
 	gridDat getGrid();
 	double getZero();
@@ -225,7 +226,7 @@ public:
 	void readExpInclCrossSecCmd(string cmd);
 	void SetExpDataList();
 	vector<string> getExpDataList();
-	void randomize();
+	//void randomize();
 	void randomize(int newseed);
 	void writeOutputFile(string outfile);
 	vector<string> getOutputCmds();
@@ -233,7 +234,6 @@ public:
 	vector<string> RewriteChebyList();
 	vector<string> RewriteAddPoleList();
 	vector<string> RewriteKmatList();
-	void setSeed(int newseed);
 	void setExpInclCrossSec();
 
 private:

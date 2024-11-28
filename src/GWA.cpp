@@ -25,10 +25,17 @@
 #include "TBranch.h"
 #include "TObject.h"
 #include "TSystem.h"
-
+//#include <ROOT/RConfig.hxx>
+//#include <ROOT/RDataFrame.hxx>
+//#include <ROOT/TThreadExecutor.hxx>
 
 using namespace std;
-typedef std::chrono::system_clock Clock;
+using std::chrono::high_resolution_clock;
+using std::chrono::duration_cast;
+using std::chrono::duration;
+using std::chrono::seconds;
+using std::chrono::nanoseconds;
+//typedef std::chrono::system_clock Clock;
 using Eigen::MatrixXcd;
 using Eigen::VectorXcd;
 typedef std::complex<double> comp;
@@ -105,6 +112,13 @@ vector<double> linspace(T start_in, T end_in, int num_in)
 
 int main(int argc, char ** argv)
 {
+	//ROOT::EnableImplicitMT();
+
+	auto t_start = high_resolution_clock::now();
+    auto t_end = high_resolution_clock::now();
+    auto delta_t = duration_cast<nanoseconds>(t_end-t_start);
+	auto delta_t_sec = duration_cast<seconds>(t_end-t_start);
+
 	string inputfile = (string) argv[1]; //just the core e.g. "fit73-36", without the path nor the extension
 	string polefile = "Poles/" + inputfile + "_poles.txt";
 	int jobnum = atoi(argv[2]);
@@ -123,15 +137,25 @@ int main(int argc, char ** argv)
 	formatReader.setKmats();
 	formatReader.loadExpData();
 	if(formatReader.getInclCrossSecFlag()) formatReader.loadExpInclCrossSec();
+	int seed = formatReader.readSeed(); 
 	
 	//gets chisq cutoff and weights
 	double cutoff = formatReader.getChi2CutOff();
 
 	//saves the observable object outside of filereader object
 	testObs = formatReader.getObs();
+	//for(amp a: amplitudes) a.calcintegrals
+	//testobs.setintlistvectors
 	
 	//if you want just plotting: add a flag:
 	if(formatReader.getPlotFlag()){
+		
+		//testObs.setexclchi2weight(formatReader.GetExclChi2Weight());
+		vector<double> steps = testObs.getStepSizes();
+		cout << testObs.getNumData()-steps.size() << endl;
+		cout << testObs.excl_chisq()/(testObs.getNumData()-steps.size()) << endl;return 0;
+
+		//formatReader.writeMathematicaOutputFile("Math_2024-11-19_fit3.txt");return 0;
 	
 		double lower_bound = testObs.amplitudes[0].getFitInterval()[0];
 		double upper_bound = testObs.amplitudes[0].getFitInterval()[1];
@@ -186,6 +210,40 @@ int main(int argc, char ** argv)
 
 	if(formatReader.getFitFlag()){
 
+		/////////
+		
+		vector<double> slist = {};
+
+		for(expchan expdata: testObs.getData()){
+			for (double r: expdata.sqrts){
+				slist.push_back(r);
+			}
+			//slist.insert(slist.end(), expdata.sqrts.begin(), expdata.sqrts.end());
+		}
+
+		//slist.insert(slist.end(), testObs.getData_InclCrossSec().sqrts.begin(), testObs.getData_InclCrossSec().sqrts.end());
+		
+		for (double r: testObs.getData_InclCrossSec().sqrts){
+			slist.push_back(r);
+		}
+
+		//for(double f: slist) cout << f << endl;
+
+		cout<<"[GWA] Starting precalculation of the integrals..."<<endl;
+		t_start = high_resolution_clock::now();
+		
+		for(int l = 0; l < testObs.amplitudes.size(); l++){
+			for(int i = 0; i < testObs.amplitudes[l].getChannels().size(); i++){
+				testObs.amplitudes[l].calcIntegrals(slist,i);
+			}
+		}
+
+		t_end = high_resolution_clock::now();
+        delta_t = duration_cast<nanoseconds>(t_end-t_start);
+        cout<<"Precalculation of the integral ended ("<<delta_t.count()<<"nanos)\n";
+
+		/////////
+
 		//load the weights
 		testObs.setexclchi2weight(formatReader.GetExclChi2Weight());
 		if(formatReader.getInclCrossSecFlag()) testObs.setinclchi2weight(formatReader.GetInclChi2Weight());
@@ -193,6 +251,76 @@ int main(int argc, char ** argv)
 		//saves original starting parameters
 		vector<double> startparams = testObs.getFitParams();
 		vector<double> steps = testObs.getStepSizes();
+
+		/*///////
+
+		cout<<"[GWA] Starting first calculation of the chisq..."<<endl;
+
+        t_start = high_resolution_clock::now();
+
+		//double stest = 10.6518*10.6518;
+		//comp valtest = testObs.amplitudes[0].getValue(stest)(0);
+		double valtest = testObs.excl_chisq();
+
+		t_end = high_resolution_clock::now();
+        delta_t = duration_cast<nanoseconds>(t_end-t_start);
+		cout << valtest << endl;
+        cout<<"First calculation of the chisq ended ("<<delta_t.count()<<"nanos)\n"; 
+
+		cout<<"[GWA] Starting second calculation of the chisq..."<<endl;
+
+        t_start = high_resolution_clock::now();
+
+		//valtest = testObs.amplitudes[0].getValue(pow(10.6518,2))(0);
+		valtest = testObs.excl_chisq();
+
+		t_end = high_resolution_clock::now();
+        delta_t = duration_cast<nanoseconds>(t_end-t_start);
+		cout << valtest << endl;
+        cout<<"Second calculation of the chisq ended ("<<delta_t.count()<<"nanos)\n";
+
+		///////
+
+		///////
+
+		cout<<"[GWA] Starting first calculation of the chisq..."<<endl;
+
+        t_start = high_resolution_clock::now();
+
+		//double stest = 10.6518*10.6518;
+		//comp valtest = testObs.amplitudes[0].getValue(stest)(0);
+		valtest = testObs.incl_chisq();
+
+		t_end = high_resolution_clock::now();
+        delta_t = duration_cast<nanoseconds>(t_end-t_start);
+		cout << valtest << endl;
+        cout<<"First calculation of the chisq ended ("<<delta_t.count()<<"nanos)\n"; 
+
+		cout<<"[GWA] Starting second calculation of the chisq..."<<endl;
+
+        t_start = high_resolution_clock::now();
+
+		//valtest = testObs.amplitudes[0].getValue(pow(10.6518,2))(0);
+		valtest = testObs.incl_chisq();
+
+		t_end = high_resolution_clock::now();
+        delta_t = duration_cast<nanoseconds>(t_end-t_start);
+		cout << valtest << endl;
+        cout<<"Second calculation of the chisq ended ("<<delta_t.count()<<"nanos)\n"; return 0;
+
+		///////*/
+
+		//for (int i = 0; i < startparams.size(); ++i) {
+		//    if (startparams[i] > 0) {
+		//        cout << startparams[i] << endl;
+		//    }
+		//}
+//
+		//for (const auto& val : startparams) {  // Usa una reference const
+		//    if (val > 0) {
+		//        cout << val << endl;
+		//    }
+		//}return 0;
 		
 		//gets degrees of freedom
 		string fittype = "excl";
@@ -348,15 +476,18 @@ int main(int argc, char ** argv)
 		vector<string> fitseq = formatReader.readFitSequence(formatReader.getFitSequence());
 		vector<fitparamsDat> fitpar = formatReader.getFitParams(); 
 		
+		//cout << formatReader.getSeed() << endl << endl;
 		//does the fitting
-		for (int j = 0; j < numfits; j++){cout << "ciao" << endl; 
+		for (int j = 0; j < numfits; j++){//cout << "ciao" << endl; 
 			//resets the observable
 			testObs.setFitParams(startparams);
 			formatReader.setObs(testObs);
 			auto now = std::chrono::system_clock::now();
-			int seed = now.time_since_epoch().count()+jobnum;
+			//int seed = now.time_since_epoch().count()+jobnum;
+			seed = now.time_since_epoch().count()%50000 + pow(j,2); 
 			//randomizes the parameters
-			if(formatReader.getRandomizeFlag()) formatReader.randomize(seed);
+			if(formatReader.getRandomizeFlag()) formatReader.randomize(seed); //cout << formatReader.getSeed() << endl;
+			//formatReader.setSeed(seed);
 			testObs = formatReader.getObs();
 
 			//make the minimzer
@@ -386,6 +517,7 @@ int main(int argc, char ** argv)
 				min[l]->SetMaxIterations(fitpar[l].maxiter);
 				min[l]->SetTolerance(fitpar[l].tol);
 				min[l]->SetPrintLevel(fitpar[l].verbose);
+				min[l]->SetStrategy(0);
 
 				if(formatReader.getInclCrossSecFlag()) min[l]->SetFunction(g);
 				else min[l]->SetFunction(f);
@@ -403,8 +535,15 @@ int main(int argc, char ** argv)
 					}
 				}
 
+
 				//run the minimization
-				min[l]->Minimize();
+                cout<<"[FIT] Minimizing..."<<endl;
+                t_start = high_resolution_clock::now();
+                min[l]->Minimize();
+                t_end = high_resolution_clock::now();
+                delta_t_sec = duration_cast<seconds>(t_end-t_start);
+                cout<<"done ("<<fitseq[l]<<": "<<delta_t_sec.count()<<"s)\n";
+
 
 				if(min[l]->Status() == 0){//|| min[l]->IsValidError() == false
 					cout << "The fit is not valid:" << endl;
@@ -506,7 +645,7 @@ int main(int argc, char ** argv)
 
 		t1->Write(0,TObject::kWriteDelete,0);
 		file->Close("R");
-
+		return 0;
 	}		
 
 

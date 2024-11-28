@@ -15,11 +15,17 @@
 #include "TString.h"
 #include <Math/ParamFunctor.h>
 #include <TROOT.h>
+#include <chrono>
+#include <ctime>
+
 using namespace std;
 using Eigen::MatrixXcd;
 using Eigen::VectorXcd;
 typedef std::complex<double> comp;
-
+using std::chrono::high_resolution_clock;
+using std::chrono::duration_cast;
+using std::chrono::duration;
+using std::chrono::microseconds;
 
 struct expchan{//this has to be modify according to the format of the exp data file
 
@@ -67,6 +73,7 @@ private:
 	expInclCrossSec data_InclCrossSec = expInclCrossSec({},{},{},{});
 	double incl_weight = 1.;
 	double excl_weight = 1.;
+	vector<map<intKey, comp>> intlistvector = {};
 
 public:
 	vector<amplitude> amplitudes;
@@ -1416,39 +1423,60 @@ public:
 
 	double excl_chisq(){
 
+		//cout<<"[observable] Starting calculating excl chi2..."<<endl;
+
+        //auto t_start = high_resolution_clock::now();
+
 		double result = 0;
+		int amp_index = 0;
+		//amplitude amp = amplitudes[amp_index];
+		//if(intlistvector.size() == numAmps) amp.SetintegralList(intlistvector[amp_index]);
+		//read out the start and end of the fit interval
+		double lower_bound = 0;
+		double upper_bound = 0;
+		int chan_index = 0;
+		double sum = 0;
+		vector<double> sqrts_vals = {};
+		double x = 0;
+		comp val = 0;
+		double y = 0;
+		double stat_err = 0;
+		double sist_err = 0;
+		double std = 0;
 
 		//for every amplitude in the list
 		for(string ampname : getAmpNames()){
 
 			//locate the amplitude
-			int amp_index = getampindex(ampname);
-			amplitude amp = amplitudes[amp_index];
+			amp_index = getampindex(ampname);
+			//amplitude amp = amplitudes[amp_index];
+			//if(intlistvector.size() == numAmps) amp.SetintegralList(intlistvector[amp_index]);
 			//read out the start and end of the fit interval
-			double lower_bound = sqrt(amp.getFitInterval()[0]);
-			double upper_bound = sqrt(amp.getFitInterval()[1]);	
+			lower_bound = sqrt(amplitudes[amp_index].getFitInterval()[0]);
+			upper_bound = sqrt(amplitudes[amp_index].getFitInterval()[1]);	
 
 			//for every channel
-			for(string channame : amp.getChanNames()){
+			for(string channame : amplitudes[amp_index].getChanNames()){
 
-				int chan_index = getchanindex(ampname, channame);
-				double sum = 0;
-				vector<double> sqrts_vals = data[amp_index * numChans + chan_index].sqrts;
+				chan_index = getchanindex(ampname, channame);
+				sum = 0;
+				sqrts_vals = data[amp_index * numChans + chan_index].sqrts;
 
 				if(sqrts_vals.size() > 0){//i.e. if the j-th channel is NOT a dummy channel
 
 					for(int i = 0; i < sqrts_vals.size(); i++){
 
-						double x = sqrts_vals[i];
+						x = sqrts_vals[i];
 
 						//for sqrts in the fitting range, calculate relevant quantities
-						if(x >= lower_bound && x <= upper_bound){
-
-							comp val = amp.getValue(pow(x, 2))(chan_index);
-							double y = (val*conj(val)).real();
-							double stat_err = data[numChans * amp_index + chan_index].amp_expval_stat_err[i];
-							double sist_err = data[numChans * amp_index + chan_index].amp_expval_sist_err[i];
-							double std = sqrt(pow(stat_err, 2) + pow(sist_err, 2));
+						if(x >= lower_bound && x <= upper_bound){//cout << "excl" << x << endl;
+							//cout << pow(x, 2) << "	" << x*x << endl;
+							//double temp = x*x;
+							val = amplitudes[amp_index].getValue(x*x)(chan_index);
+							y = (val*conj(val)).real();
+							stat_err = data[numChans * amp_index + chan_index].amp_expval_stat_err[i];
+							sist_err = data[numChans * amp_index + chan_index].amp_expval_sist_err[i];
+							std = sqrt(pow(stat_err, 2) + pow(sist_err, 2));
 							sum += pow(((y - data[numChans * amp_index + chan_index].amp_expval[i])/std), 2);
 
 						}
@@ -1461,7 +1489,14 @@ public:
 
 			}
 
+			//if(intlistvector.size() < numAmps) intlistvector.push_back(amp.GetintegralList());
+
 		}
+
+		//auto t_end = high_resolution_clock::now();
+        //auto delta_t = duration_cast<microseconds>(t_end-t_start);
+		//cout << excl_weight * result << endl;
+        //cout<<"excl chi2 calculation ended ("<<delta_t.count()<<"micros)\n";
 
 		return excl_weight * result;
 
@@ -1470,40 +1505,52 @@ public:
 
 	double incl_chisq(){
 
+		//cout<<"[observable] Starting calculating incl chi2..."<<endl;
+
+        //auto t_start = high_resolution_clock::now();
+
 		double sum = 0;
 		double lower_bound = sqrt(amplitudes[0].getFitInterval()[0]);
 		double upper_bound = sqrt(amplitudes[0].getFitInterval()[1]);
 		comp temp = 0;
+		double aux = 0;
+		double x = 0;
+		int amp_index = 0;
+		int chan_index = 0;
+		double y = 0;
+		double stat_err = 0;
+		double sist_err = 0;
+		double std = 0;
 
 		for(int i = 0; i < data_InclCrossSec.sqrts.size(); i++){
 
-			double x = data_InclCrossSec.sqrts[i];
+			x = data_InclCrossSec.sqrts[i];
 			
-			double aux = 0;
+			aux = 0;
 			
-			if(x >= lower_bound && x <= upper_bound){
-
+			if(x >= lower_bound && x <= upper_bound){//cout << "incl" << x << endl;
+				//cout << pow(x, 2) << "	" << x*x << endl; exit(0);
 				for(string ampname : getAmpNames()){
 
-					int amp_index = getampindex(ampname);
-					amplitude amp = amplitudes[amp_index];
+					amp_index = getampindex(ampname);
+					//amplitude amp = amplitudes[amp_index];
 
-					for(string channame : amp.getChanNames()){
+					for(string channame : amplitudes[amp_index].getChanNames()){
 
-						int chan_index = getchanindex(ampname, channame);
-						temp = amp.getValue(pow(x,2))(chan_index);
+						chan_index = getchanindex(ampname, channame);//cout << pow(x,2) << endl;
+						temp = amplitudes[amp_index].getValue(x*x)(chan_index);
 						aux += (temp*conj(temp)).real();
 
 					}
 
 				}
 
-				double y = data_InclCrossSec.amp_expval[i];
-				double stat_err = data_InclCrossSec.amp_expval_stat_err[i];
+				y = data_InclCrossSec.amp_expval[i];
+				stat_err = data_InclCrossSec.amp_expval_stat_err[i];
 
-				double sist_err = data_InclCrossSec.amp_expval_sist_err[i];
+				sist_err = data_InclCrossSec.amp_expval_sist_err[i];
 				//uncorrelated inclusive data
-				double std = stat_err;
+				std = stat_err;
 				//correlated inclusive data
 				//double std = sqrt(pow(stat_err, 2) + pow(sist_err, 2));
 				sum += pow(((aux - y)/std), 2);
@@ -1511,6 +1558,11 @@ public:
 			}
 
 		}
+
+		//auto t_end = high_resolution_clock::now();
+        //auto delta_t = duration_cast<microseconds>(t_end-t_start);
+		//cout << incl_weight * sum << endl;
+        //cout<<"incl chi2 calculation ended ("<<delta_t.count()<<"micros)\n"; exit(0);
 
 		return incl_weight * sum;
 

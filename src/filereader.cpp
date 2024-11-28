@@ -209,7 +209,7 @@ void filereader::SetInclCrossSecFlag(){
     }
 }
 
-void filereader::SetSeed(){
+void filereader::SetSeedCmd(){
 	regex reg_Seed("SetSeed\\(\\s*([0-9]+)\\s*\\)");
 	smatch cmdmatch;
 	for(int i = 0; i < commands.size(); i++){
@@ -331,7 +331,7 @@ void filereader::SetKmatList(){
 }
 
 void filereader::SetAllCommandLists(){
-	SetSeed();
+	SetSeedCmd();
 	SetFitRegion();
 	SetGrid();
 	SetZeroCmd();
@@ -393,9 +393,9 @@ int filereader::getSeed(){
 	return seed;
 }
 
-void filereader::setSeed(int newseed){
-	seed = newseed;
-}
+//void filereader::setSeed(int newseed){
+//	seed=newseed;
+//}
 
 string filereader::getFitRegion(){
 	return FitRegion;
@@ -429,14 +429,14 @@ vector<string> filereader::getExpDataList(){
 	return ExpData_list;
 }
 
-int filereader::readSeed(string cmd){
+int filereader::readSeed(){
 	regex reg_Seed("SetSeed\\(\\s*([0-9]+)\\s*\\)");
 
-	if(regex_search(cmd, match, reg_Seed)){
-        return stoi(string(match[1]));
+	if(regex_search(SeedCmd, match, reg_Seed)){
+        seed = stoi(string(match[1]));
     }
 
-	return 0;
+	return seed;
 }
 
 void filereader::readActionCmd(string cmd){
@@ -971,13 +971,13 @@ void filereader::SetExpDataList(){
 }
 
 
-void filereader::randomize(){
+/*void filereader::randomize(){
 	vector<double> params = obsObject.getFitParams();
 	vector<double> stepsizes = obsObject.getStepSizes();
 
 	TRandom3 gen(getSeed());
 
-	//might need to make sure pole masses are positive somehow
+	//might need to make sure pole masses are positive somehow 
 	for(int i = 0; i < params.size(); i++){
 		params[i]= gen.Uniform(params[i] - stepsizes[i], params[i] + stepsizes[i]);
 	}
@@ -985,15 +985,15 @@ void filereader::randomize(){
 	obsObject.setFitParams(params);
 
 	return;
-}
+}*/
 
 void filereader::randomize(int new_seed){
 	vector<double> params = obsObject.getFitParams();
 	vector<double> stepsizes = obsObject.getStepSizes();
 	seed = new_seed;
-	TRandom3 gen(seed);
+	TRandom3 gen(new_seed);
 
-	//might need to make sure pole masses are positive somehow
+	//might need to make sure pole masses are positive somehow 
 	for(int i = 0; i < params.size(); i++){
 		params[i]= gen.Uniform(params[i] - stepsizes[i], params[i] + stepsizes[i]);
 	}
@@ -1045,7 +1045,7 @@ void filereader::writeOutputFile(string outname){
 vector<string> filereader::getOutputCmds(){
 	vector<string> output_cmds = {};
 
-	output_cmds.push_back("SetSeed("+to_string(seed)+")");
+	output_cmds.push_back("SetSeed("+to_string(getSeed())+")");
 
 	output_cmds.push_back(FitRegion);
 

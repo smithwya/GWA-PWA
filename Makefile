@@ -6,6 +6,9 @@ LD = $(shell root-config --ld)
 #compiling flags
 CPPFLAGS := $(shell root-config --cflags) $(STDINCDIR) -I/usr/local/include/eigen3 -I/home/smithwya/eigen
 CPPFLAGS += -O3
+#CPPFLAGS += -g
+#CPPFLAGS += -pg
+#CPPFLAGS += -march=native
 
 #linking flags
 LDFLAGS := -Xlinker -rpath . $(shell root-config --glibs ) $(STDLIBDIR)

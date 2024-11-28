@@ -33,7 +33,7 @@ amplitude::amplitude() {
 	s0 = 0;
 	smin = 0;
 	smax = 0;
-	integralList = {};
+	//integralList = {};
 	resmasses_steps = {};
 	kParameters_steps = {};
 
@@ -51,7 +51,7 @@ amplitude::amplitude(int j, double alp, double ssl, vector<channel> chans, vecto
 	smin = ssmin;
 	smax = ssmax;
 	resmasses = rmasses;
-	integralList = {};
+	//integralList = {};
 	resmasses_steps = {};
 	kParameters_steps = {};
 
@@ -69,7 +69,7 @@ amplitude::amplitude(string ampName, int Jj,double ssL, double ssmin, double ssm
 	alpha = 1.0;
 	sL = ssL;
 	s0 = 1.0;
-	integralList = {};
+	//integralList = {};
 	resmasses_steps = {};
 	kParameters_steps = {};
 
@@ -80,6 +80,14 @@ amplitude::amplitude(string ampName, int Jj,double ssL, double ssmin, double ssm
 
 	kmattype = kmat;
 	rhoNtype = rhoN;
+}
+
+void amplitude::SetintegralList(map<intKey, comp> intlist){
+	integralList = intlist;
+}
+
+map<intKey, comp> amplitude::GetintegralList(){
+	return integralList;
 }
 
 int amplitude::getJ(){
@@ -237,9 +245,12 @@ VectorXcd amplitude::getNumerator(comp s, int type){
 
 	VectorXcd numerator = VectorXcd::Zero(numChannels);
 
+	comp n_k = comp(0,0);
+	int ncoeffs = 0;
+
 	for(int k = 0; k< numChannels; k++){
-		comp n_k = comp(0,0);
-		int ncoeffs = channels[k].getChebyCoeffs().size();
+		n_k = comp(0,0);
+		ncoeffs = channels[k].getChebyCoeffs().size();
 
 		for(int n = 0; n<ncoeffs; n++){
 			s0 = channels[k].getS0();
@@ -303,10 +314,10 @@ comp amplitude::getIntegral(comp s,int k,int sheet){
 	intKey skpair = intKey(s,k);
 	auto mapit = integralList.find(skpair);
 
-	//if(mapit!=integralList.end()) return mapit->second; //anyway for the polesearch there's no need to store the result 
-
+	if(mapit!=integralList.end()) { return mapit->second;} //anyway for the polesearch there's no need to store the result 
+	//cout << "ciao" << endl; 
 	if(abs(s.imag()) < 2 * epsilon){
-		double sreal = s.real();
+		double sreal = s.real();//cout << "integral[" << sreal << ", " << k << "]" << endl;
 		//result += getIntegral(sreal, k);
 		comp result = getIntegral(sreal, k);
 		integralList[skpair] = result;
@@ -325,8 +336,8 @@ comp amplitude::getIntegral(comp s,int k,int sheet){
 	ROOT::Math::Functor1D re(realIntegrand);
 	ROOT::Math::Functor1D im(imagIntegrand);
 
-	ROOT::Math::Integrator intRe(re,ROOT::Math::IntegrationOneDim::kGAUSS,1.E-9,1.E-6);
-	ROOT::Math::Integrator intIm(im,ROOT::Math::IntegrationOneDim::kGAUSS,1.E-9,1.E-6);
+	ROOT::Math::Integrator intRe(re,ROOT::Math::IntegrationOneDim::kGAUSS,1.E-5,1.E-5);
+	ROOT::Math::Integrator intIm(im,ROOT::Math::IntegrationOneDim::kGAUSS,1.E-5,1.E-5);
 	
 	double threshold = channels[k].getThreshold();
 
@@ -359,7 +370,8 @@ comp amplitude::getIntegral(double s,int k){
 
 	ROOT::Math::Functor1D integrand_fun(integrand);
 
-	ROOT::Math::Integrator integral(integrand_fun,ROOT::Math::IntegrationOneDim::kGAUSS,1.E-9,1.E-6);
+	//ROOT::Math::Integrator integral(integrand_fun,ROOT::Math::IntegrationOneDim::kGAUSS,1.E-9,1.E-6);
+	ROOT::Math::Integrator integral(integrand_fun,ROOT::Math::IntegrationOneDim::kGAUSS,1.E-5,1.E-5);
 
 	double threshold = channels[k].getThreshold();
 
@@ -378,10 +390,10 @@ comp amplitude::getIntegral(double s,int k){
 }
 
 
-void amplitude::calcIntegrals(vector<comp> slist,int k,int sheet){
+void amplitude::calcIntegrals(vector<double> slist,int k){//to precalculate the integrals?
 
-	for(comp s : slist){
-		integralList[intKey(s,k)]=getIntegral(s,k,sheet);
+	for(double s : slist){
+		integralList[intKey(s*s,k)]=getIntegral(s*s,k,0);
 	}
 	
 
@@ -427,16 +439,23 @@ void amplitude::setResMasses(vector<double> rm){
 MatrixXcd amplitude::getKMatrix(comp s) {
 
 	MatrixXcd kmat = MatrixXcd::Zero(numChannels, numChannels);
+	comp tempMatrixTerm = 0;
 
 	if(kmattype == "kmat-CDD"){
 
 		for (int k = 0; k < numChannels; k++) {
 			for (int i = 0; i <= k; i++) {
-				comp tempMatrixTerm = 0;
+				tempMatrixTerm = 0;
 
 				for (int R = 0; R < resmasses.size(); R++) {
 					tempMatrixTerm += channels[k].getCoupling(R) * channels[i].getCoupling(R) / (resmasses[R] - s);
 				}
+
+				//int counter = 0;
+				//for (const auto& val : resmasses) {  // Usa una reference const
+				//	tempMatrixTerm += channels[k].getCoupling(counter) * channels[i].getCoupling(counter) / (val - s);				    
+				//	counter++;
+				//}
 
 				kmat(k, i) = - tempMatrixTerm;
 				kmat(i, k) = - tempMatrixTerm;
@@ -454,7 +473,7 @@ MatrixXcd amplitude::getKMatrix(comp s) {
 
 	for (int k = 0; k < numChannels; k++) {
 		for (int i = 0; i <= k; i++) {
-			comp tempMatrixTerm = 0;
+			tempMatrixTerm = 0;
 
 			for (int R = 0; R < resmasses.size(); R++) {
 				tempMatrixTerm += channels[k].getCoupling(R) * channels[i].getCoupling(R) / (resmasses[R] - s);

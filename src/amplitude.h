@@ -72,7 +72,7 @@ public:
 	void addPole(double mass,double mass_step,vector<string> chan_names, vector<double> couplings, vector<double> steps);
 	vector<string> getChanNames();
 	int getNumOfChans();
-	void calcIntegrals(vector<comp> slist,int k,int sheet);
+	void calcIntegrals(vector<double> slist,int k);
 	vector<double> getParamList();
 	void setParamList(vector<double> params);
 	void setResMasses(vector<double> rm);
@@ -88,6 +88,8 @@ public:
 	vector<double> getStepSizes();
 	vector<double> getFittedSteps();
 	vector<double> getFitInterval();
+	void SetintegralList(map<intKey, comp> intlist);
+	map<intKey, comp> GetintegralList();
 	string getKMatType();
 	int getJ();
 	double getEpsilon();
