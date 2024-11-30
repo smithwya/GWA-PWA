@@ -1436,15 +1436,74 @@ public:
 	}
 
 
+	double excl_chisqTEST() {
+    // Pre-costruisci una lista di combinazioni (amp_index, chan_index)
+    std::vector<std::pair<size_t, size_t>> amp_chan_pairs2;
+    for (size_t amp_index = 0; amp_index < amplitudes.size(); ++amp_index) {
+        for (size_t chan_index = 0; chan_index < amplitudes[amp_index].getChanNames().size(); ++chan_index) {
+            amp_chan_pairs2.emplace_back(amp_index, chan_index);
+        }
+    }
+
+    double result = 0;
+
+    // Parallelizzazione del calcolo
+    #pragma omp parallel
+    {
+        double local_result = 0;  // Somma locale per ciascun thread
+
+        #pragma omp for schedule(dynamic)
+        for (size_t pair_index = 0; pair_index < amp_chan_pairs2.size(); ++pair_index) {
+            auto [amp_index, chan_index] = amp_chan_pairs2[pair_index];
+
+            // Ottieni i limiti di integrazione
+            double lower_bound = sqrt(amplitudes[amp_index].getFitInterval()[0]);
+            double upper_bound = sqrt(amplitudes[amp_index].getFitInterval()[1]);
+
+            // Valori sqrt(s) per il canale corrente
+            const auto& sqrts_vals = data[amp_index * numChans + chan_index].sqrts;
+            if (sqrts_vals.empty()) continue;  // Salta i canali dummy
+
+            double sum = 0;
+            for (size_t i = 0; i < sqrts_vals.size(); ++i) {
+                double x = sqrts_vals[i];
+                if (x >= lower_bound && x <= upper_bound) {
+                    // Calcola val e altri termini
+                    comp val = amplitudes[amp_index].getValue(x * x)(chan_index);
+                    double y = (val * conj(val)).real();
+                    double stat_err = data[amp_index * numChans + chan_index].amp_expval_stat_err[i];
+                    double sist_err = data[amp_index * numChans + chan_index].amp_expval_sist_err[i];
+                    double std = sqrt(pow(stat_err, 2) + pow(sist_err, 2));
+                    sum += pow((y - data[amp_index * numChans + chan_index].amp_expval[i]) / std, 2);
+                }
+            }
+
+            // Aggiungi al risultato locale
+            local_result += sum;
+        }
+
+        // Accumula i risultati locali nel risultato globale
+        #pragma omp atomic
+        result += local_result;
+    }
+
+    return excl_weight * result;
+}
+
+
 	double excl_chisqPAR() {
 	    double result = 0;
+
+		//int num_threads = omp_get_max_threads();
+		//int chunk_size = (amp_chan_pairs.size() + num_threads - 1) / num_threads; // Dividi il lavoro tra i thread
 
 	    // Iterazione parallela
 	    #pragma omp parallel
 	    {
 	        double local_result = 0;  // Somma locale per ogni thread
 
-	        #pragma omp for nowait
+	        //#pragma omp for schedule(dynamic, chunk_size)
+	        #pragma omp for schedule(dynamic)
 	        for (size_t pair_idx = 0; pair_idx < amp_chan_pairs.size(); ++pair_idx) {
 	            size_t amp_index = amp_chan_pairs[pair_idx].first;
 	            size_t chan_index = amp_chan_pairs[pair_idx].second;
@@ -1633,12 +1692,17 @@ public:
 		double lower_bound = sqrt(amplitudes[0].getFitInterval()[0]);
 		double upper_bound = sqrt(amplitudes[0].getFitInterval()[1]);
 
+		//int num_threads = omp_get_max_threads();
+		//int chunk_size = (amp_chan_pairs.size() + num_threads - 1) / num_threads; // Dividi il lavoro tra i thread
+
 		// To ensure thread-safe accumulation of `sum`
 		#pragma omp parallel
 		{
 			double local_sum = 0;  // Each thread has its local sum
 
-			#pragma omp for nowait
+			//#pragma omp for schedule(dynamic, chunk_size)
+			#pragma omp for schedule(dynamic)
+			//#pragma omp for nowait
 			for (int i = 0; i < data_InclCrossSec.sqrts.size(); i++) {
 				double x = data_InclCrossSec.sqrts[i];
 				double aux = 0;

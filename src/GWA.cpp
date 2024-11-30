@@ -124,8 +124,8 @@ int main(int argc, char ** argv)
 	int jobnum = atoi(argv[2]);
 	int numfits = atoi(argv[3]);
 	//string inputfile = (string) argv[4];
-	//string fitsfolder = (string) argv[5];
-	string fitsfolder = "Fits/";
+	string fitsfolder = (string) argv[4];
+	//string fitsfolder = "Fits/";
 	string polesfolder = "Poles/";
 
 
@@ -267,7 +267,7 @@ int main(int argc, char ** argv)
 
 		t_end = high_resolution_clock::now();
         delta_t = duration_cast<nanoseconds>(t_end-t_start);
-		cout << valtest << endl;
+		cout << "SER" << valtest << endl;
         cout<<"First calculation of the chisq ended ("<<delta_t.count()<<"nanos)\n"; 
 
 		cout<<"[GWA] Starting second calculation of the chisq..."<<endl;
@@ -279,7 +279,7 @@ int main(int argc, char ** argv)
 
 		t_end = high_resolution_clock::now();
         delta_t = duration_cast<nanoseconds>(t_end-t_start);
-		cout << valtest << endl;
+		cout << "SER" << valtest << endl;
         cout<<"Second calculation of the chisq ended ("<<delta_t.count()<<"nanos)\n";
 
 		///////
@@ -296,7 +296,7 @@ int main(int argc, char ** argv)
 
 		t_end = high_resolution_clock::now();
         delta_t = duration_cast<nanoseconds>(t_end-t_start);
-		cout << valtest << endl;
+		cout << "PAR" << valtest << endl;
         cout<<"First calculation of the chisq ended ("<<delta_t.count()<<"nanos)\n"; 
 
 		cout<<"[GWA] Starting second calculation of the chisq..."<<endl;
@@ -308,8 +308,37 @@ int main(int argc, char ** argv)
 
 		t_end = high_resolution_clock::now();
         delta_t = duration_cast<nanoseconds>(t_end-t_start);
-		cout << valtest << endl;
+		cout << "PAR" << valtest << endl;
         cout<<"Second calculation of the chisq ended ("<<delta_t.count()<<"nanos)\n";
+
+		///////
+
+		///////
+
+		cout<<"[GWA] Starting first calculation of the chisq..."<<endl;
+
+        t_start = high_resolution_clock::now();
+
+		//double stest = 10.6518*10.6518;
+		//comp valtest = testObs.amplitudes[0].getValue(stest)(0);
+		valtest = testObs.excl_chisqTEST();
+
+		t_end = high_resolution_clock::now();
+        delta_t = duration_cast<nanoseconds>(t_end-t_start);
+		cout << "TEST" << valtest << endl;
+        cout<<"First calculation of the chisq ended ("<<delta_t.count()<<"nanos)\n"; 
+
+		cout<<"[GWA] Starting second calculation of the chisq..."<<endl;
+
+        t_start = high_resolution_clock::now();
+
+		//valtest = testObs.amplitudes[0].getValue(pow(10.6518,2))(0);
+		valtest = testObs.excl_chisqTEST();
+
+		t_end = high_resolution_clock::now();
+        delta_t = duration_cast<nanoseconds>(t_end-t_start);
+		cout << "TEST" << valtest << endl;
+        cout<<"Second calculation of the chisq ended ("<<delta_t.count()<<"nanos)\n"; 
 
 		///////
 
@@ -606,12 +635,12 @@ int main(int argc, char ** argv)
                 cout<<"done ("<<fitseq[l]<<": "<<delta_t_sec.count()<<"s)\n";
 
 
-				if(min[l]->Status() == 0){//|| min[l]->IsValidError() == false
-					cout << "The fit is not valid:" << endl;
-					cout << min[l]->Status() << endl;
-					//cout << min[l]->IsValidError() << endl;
-					return 0;
-				}
+				//if(min[l]->Status() == 0){//|| min[l]->IsValidError() == false
+				//	cout << "The fit is not valid:" << endl;
+				//	cout << min[l]->Status() << endl;
+				//	//cout << min[l]->IsValidError() << endl;
+				//	return 0;
+				//}
 
 				//extract the resulting fit parameters
 				for(int i = 0; i < nParams; i++){
