@@ -209,7 +209,7 @@ void filereader::SetInclCrossSecFlag(){
     }
 }
 
-void filereader::SetSeed(){
+void filereader::SetSeedCmd(){
 	regex reg_Seed("SetSeed\\(\\s*([0-9]+)\\s*\\)");
 	smatch cmdmatch;
 	for(int i = 0; i < commands.size(); i++){
@@ -227,6 +227,36 @@ void filereader::SetFitRegion(){
             FitRegion = commands[i];
 		}
     }		
+}
+
+void filereader::SetGrid(){
+	regex reg_grid("PolesearchGrid\\(\\s*([0-9\\.-]+)\\s*,\\s*([0-9\\.-]+)\\s*,\\s*([0-9\\.-]+)\\s*,\\s*([0-9\\.-]+)\\s*,\\s*([0-9\\.-]+)\\s*,\\s*([0-9\\.-]+)\\s*\\)"); //PolesearchGrid(113., 121., 31, -1.5, 1.5, 31)
+	smatch cmdmatch;
+	for(int i = 0; i < commands.size(); i++){
+		if(regex_search(commands.at(i), cmdmatch, reg_grid)){
+            GridCmd = commands[i]; 
+		}
+    }
+}
+
+void filereader::SetZeroCmd(){
+	regex reg_polezero("\\s*PolesearchZero\\(\\s*([0-9\\.-]+)\\s*\\)\\s*"); //PolesearchZero(-7)
+	smatch cmdmatch;
+	for(int i = 0; i < commands.size(); i++){
+		if(regex_search(commands.at(i), cmdmatch, reg_polezero)){
+            ZeroCmd = commands[i]; 
+		}
+    }
+}
+
+void filereader::SetFitParamsCmd(){
+	regex reg_fitparams("\\s*FittingParameters\\(((\\s*\\{((\\s*[0-9\\.-]+\\s*,?\\s*)+)\\}\\s*,?\\s*)+)\\)\\s*"); //FittingParameters({100000, 10000, 0.001, 1}, {100000, 10000, 0.001, 1})
+	smatch cmdmatch;//((\\s*\\{(.*?)\\}\\s*,?\\s*)+)
+	for(int i = 0; i < commands.size(); i++){
+		if(regex_search(commands.at(i), cmdmatch, reg_fitparams)){
+            fitparamsCmd = commands[i]; 
+		}
+    }
 }
 
 void filereader::SetFitSequence(){
@@ -301,8 +331,11 @@ void filereader::SetKmatList(){
 }
 
 void filereader::SetAllCommandLists(){
-	SetSeed();
+	SetSeedCmd();
 	SetFitRegion();
+	SetGrid();
+	SetZeroCmd();
+	SetFitParamsCmd();
 	SetFitSequence();
 	SetChi2CutOff();
 	SetInclChi2Weight();
@@ -360,9 +393,9 @@ int filereader::getSeed(){
 	return seed;
 }
 
-void filereader::setSeed(int newseed){
-	seed = newseed;
-}
+//void filereader::setSeed(int newseed){
+//	seed=newseed;
+//}
 
 string filereader::getFitRegion(){
 	return FitRegion;
@@ -396,14 +429,14 @@ vector<string> filereader::getExpDataList(){
 	return ExpData_list;
 }
 
-int filereader::readSeed(string cmd){
+int filereader::readSeed(){
 	regex reg_Seed("SetSeed\\(\\s*([0-9]+)\\s*\\)");
 
-	if(regex_search(cmd, match, reg_Seed)){
-        return stoi(string(match[1]));
+	if(regex_search(SeedCmd, match, reg_Seed)){
+        seed = stoi(string(match[1]));
     }
 
-	return 0;
+	return seed;
 }
 
 void filereader::readActionCmd(string cmd){
@@ -489,6 +522,106 @@ vector<double> filereader::readFitReg(string cmd){
     }
 
 	return {smin,smax};
+}
+
+gridDat filereader::getGrid(){
+	regex reg_grid("PolesearchGrid\\(\\s*([0-9\\.-]+)\\s*,\\s*([0-9\\.-]+)\\s*,\\s*([0-9\\.-]+)\\s*,\\s*([0-9\\.-]+)\\s*,\\s*([0-9\\.-]+)\\s*,\\s*([0-9\\.-]+)\\s*\\)"); //PolesearchGrid(113., 121., 31, -1.5, 1.5, 31)
+	double grid_Re_sx = 0;
+	double grid_Re_dx = 0;
+	int grid_Re_numpts = 0;
+	double grid_Im_sx = 0;
+	double grid_Im_dx = 0;
+	int grid_Im_numpts = 0;
+	if(regex_search(GridCmd, match, reg_grid)){
+		grid_Re_sx = stod(string(match[1]));
+		grid_Re_dx = stod(string(match[2]));
+		grid_Re_numpts = stod(string(match[3]));
+		grid_Im_sx = stod(string(match[4]));
+		grid_Im_dx = stod(string(match[5]));
+		grid_Im_numpts = stod(string(match[6]));
+    }
+
+	return gridDat(grid_Re_sx, grid_Re_dx, grid_Re_numpts, grid_Im_sx, grid_Im_dx, grid_Im_numpts);
+}
+
+double filereader::getZero(){
+	regex reg_polezero("\\s*PolesearchZero\\(\\s*([0-9\\.-]+)\\s*\\)\\s*"); //PolesearchZero(-7)
+	double zero = 0;
+	
+	if(regex_search(ZeroCmd, match, reg_polezero)){
+		zero = stod(string(match[1]));
+    }
+
+	return zero;
+}
+
+vector<fitparamsDat> filereader::getFitParams(){
+
+	regex reg_fitparams("\\s*FittingParameters\\(((\\s*\\{((\\s*[0-9\\.-]+\\s*,?\\s*)+)\\}\\s*,?\\s*)+)\\)\\s*"); //FittingParameters({100000, 10000, 0.001, 1}, {100000, 10000, 0.001, 1})
+	regex testreg_number("([+-]{0,1}?(?=\\.\\d|\\d)(?:\\d+)?(?:\\.?\\d*))(?:[Ee]([+-]{0,1}?\\d+))?");
+
+	vector<string> test = {};
+
+	vector<fitparamsDat> vec = {};
+
+	int cou = 0;
+	
+	if(regex_search(fitparamsCmd, match, reg_fitparams)){
+
+		string mySuffix, temp;
+		mySuffix = match[1];
+
+		//cout << match[1] << endl;
+		//cout << match[2] << endl;
+		//cout << match[3] << endl;
+		//cout << match[4] << endl;
+
+		fitparamsDat aux(0,0,0.0,0);
+
+        while(regex_search(mySuffix, testmatch, testreg_number))
+        {
+            temp = testmatch[0];
+            mySuffix = testmatch.suffix();
+            //if (cou%4 == 0){
+            //    aux.maxfuncalls = stoi(string(temp));cout << aux.maxfuncalls << endl;
+            //}
+			//if (cou%4 == 1){
+            //    aux.maxiter = stoi(string(temp));cout << aux.maxiter << endl;
+            //}
+			//if (cou%4 == 2){
+            //    aux.tol = stod(string(temp));cout << aux.tol << endl;
+            //}
+			//if (cou%4 == 3){
+            //    aux.verbose = stoi(string(temp));cout << aux.verbose << endl;
+            //}
+			//vec.push_back(aux);
+            //cou++;
+			switch (cou % 4) {
+                case 0:
+                    aux.maxfuncalls = stoi(temp);
+                    //std::cout << "maxfuncalls: " << aux.maxfuncalls << std::endl;
+                    break;
+                case 1:
+                    aux.maxiter = stoi(temp);
+                    //std::cout << "maxiter: " << aux.maxiter << std::endl;
+                    break;
+                case 2:
+                    aux.tol = stod(temp);  // usa stod per gestire il tipo double
+                    //std::cout << "tol: " << aux.tol << std::endl;
+                    break;
+                case 3:
+                    aux.verbose = stoi(temp);
+                    //std::cout << "verbose: " << aux.verbose << std::endl;
+                    vec.push_back(aux);  // Aggiungi solo quando tutti i campi sono popolati
+                    aux = fitparamsDat(0, 0, 0.0, 0);  // Reinizializza
+                    break;
+            }
+            cou++;
+        }
+
+    }
+
+	return vec;
 }
 
 vector<string> filereader::readFitSequence(string cmd){
@@ -838,13 +971,13 @@ void filereader::SetExpDataList(){
 }
 
 
-void filereader::randomize(){
+/*void filereader::randomize(){
 	vector<double> params = obsObject.getFitParams();
 	vector<double> stepsizes = obsObject.getStepSizes();
 
 	TRandom3 gen(getSeed());
 
-	//might need to make sure pole masses are positive somehow
+	//might need to make sure pole masses are positive somehow 
 	for(int i = 0; i < params.size(); i++){
 		params[i]= gen.Uniform(params[i] - stepsizes[i], params[i] + stepsizes[i]);
 	}
@@ -852,15 +985,15 @@ void filereader::randomize(){
 	obsObject.setFitParams(params);
 
 	return;
-}
+}*/
 
 void filereader::randomize(int new_seed){
 	vector<double> params = obsObject.getFitParams();
 	vector<double> stepsizes = obsObject.getStepSizes();
 	seed = new_seed;
-	TRandom3 gen(seed);
+	TRandom3 gen(new_seed);
 
-	//might need to make sure pole masses are positive somehow
+	//might need to make sure pole masses are positive somehow 
 	for(int i = 0; i < params.size(); i++){
 		params[i]= gen.Uniform(params[i] - stepsizes[i], params[i] + stepsizes[i]);
 	}
@@ -912,24 +1045,30 @@ void filereader::writeOutputFile(string outname){
 vector<string> filereader::getOutputCmds(){
 	vector<string> output_cmds = {};
 
-	output_cmds.push_back("SetSeed("+to_string(seed)+")");
+	output_cmds.push_back("SetSeed("+to_string(getSeed())+")");
 
 	output_cmds.push_back(FitRegion);
 
 	output_cmds.push_back(FitSequenceCmd);
 
-	output_cmds.push_back(Chi2CutOffCmd);
+	output_cmds.push_back(fitparamsCmd);
 
 	output_cmds.push_back(InclChi2WeightCmd);
 
 	output_cmds.push_back(ExclChi2WeightCmd);
 
+	output_cmds.push_back(Chi2CutOffCmd);
+
+
 	output_cmds.push_back(ActionFlagCmd);
 
-	output_cmds.push_back(RandomizeFlagCmd);
 
+	output_cmds.push_back(RandomizeFlagCmd);
 	output_cmds.push_back(InclCrossSecFlagCmd);
 
+	output_cmds.push_back(GridCmd);
+	output_cmds.push_back(ZeroCmd);
+	
 	for(string s: AddChannel_list) output_cmds.push_back(s);
 
 
@@ -1015,7 +1154,8 @@ void filereader::writeMathematicaOutputFile(string outname){
 	Math_output_cmds.push_back(temp);
 
 	for(int i = 0; i < obsObject.getNumAmps(); i++){
-		temp = "0.59999999999999998                1   0.0000000000000000      ! Scale parameter in CM for wave            " + to_string(i + 1);//check
+		temp = to_string(obsObject.amplitudes[i].getSl());
+		temp += "                1   0.0000000000000000      ! Scale parameter in CM for wave            " + to_string(i + 1);//check
 		Math_output_cmds.push_back(temp);
 	}
 

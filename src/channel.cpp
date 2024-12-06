@@ -77,10 +77,12 @@ vector<double> channel::getMasses()
 
 comp channel::getMomentum(comp s){
 	double masssq =0;
-	for(double m : masses){
+	for(const auto& m : masses){
+	//for(double m : masses){
 		masssq +=m;
 	}
-return 0.5*sqrt(s-pow(masssq,2));
+return 0.5*sqrt(s-masssq*masssq);
+//return 0.5*sqrt(s-pow(masssq,2));
 }
 
 comp channel::getComplexMomentum(comp s){

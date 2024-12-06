@@ -14,11 +14,19 @@
 #include "TFile.h"
 #include "TString.h"
 #include <Math/ParamFunctor.h>
+#include <TROOT.h>
+#include <chrono>
+#include <ctime>
+#include <omp.h>
+
 using namespace std;
 using Eigen::MatrixXcd;
 using Eigen::VectorXcd;
 typedef std::complex<double> comp;
-
+using std::chrono::high_resolution_clock;
+using std::chrono::duration_cast;
+using std::chrono::duration;
+using std::chrono::microseconds;
 
 struct expchan{//this has to be modify according to the format of the exp data file
 
@@ -66,11 +74,13 @@ private:
 	expInclCrossSec data_InclCrossSec = expInclCrossSec({},{},{},{});
 	double incl_weight = 1.;
 	double excl_weight = 1.;
+	vector<map<intKey, comp>> intlistvector = {};
 
 public:
 	vector<amplitude> amplitudes;
 	int numChans;
 	int nParams;
+	std::vector<std::pair<size_t, size_t>> amp_chan_pairs;
 	observable(){
 		amplitudes = {};
 		data = {};
@@ -1200,24 +1210,23 @@ public:
 	}
 
 
-	void PolePlotGraph2D(string inputfile, string polefile, string sheet, double Re_sx, double Re_dx, double Im_sx, double Im_dx){
+	void PolePlotGraph2D(string inputfile, string polefile, int sheet, double Re_sx, double Re_dx, double Im_sx, double Im_dx){
 
-		string temp = "Plots/" + inputfile + "_poles_graph2D.pdf";
-		if (sheet == "true") temp = "Plots/" + inputfile + "_poles_graph2D_II.pdf";
+		string temp = "Plots/" + to_string(sheet) + inputfile + "_poles_graph2D.pdf";
 
-		TCanvas *box = new TCanvas("box","box",600,500); //costruttore 600pt x 550 pt
+		TCanvas box = TCanvas("box","box",600,500); //costruttore 600pt x 550 pt
   		//gStyle->SetOptStat(0); //non voglio che mi metti il riquadro con la statistica
-  		box->SetFillColor(0);//il fondo del grafico con 0 è bianco...in teoria lo potete cambiare
-  		box->SetBorderMode(0);//mette dei bordi attorno alla figura...0 nessun bordo
-  		box->SetBorderSize(2); //spessore del bordo
-  		box->SetLeftMargin(0.18); //spazio a sinistra della figura ...20% della larghezza
-  		box->SetRightMargin(0.11);// 5% della larghezza a destra
-  		box->SetTopMargin(0.07); //3% della altezza lato superiore
-  		box->SetBottomMargin(0.14); //12% dell'altezza lato inferiore
-  		box->SetTickx(1);
-  		box->SetTicky(1);
+  		box.SetFillColor(0);//il fondo del grafico con 0 è bianco...in teoria lo potete cambiare
+  		box.SetBorderMode(0);//mette dei bordi attorno alla figura...0 nessun bordo
+  		box.SetBorderSize(2); //spessore del bordo
+  		box.SetLeftMargin(0.18); //spazio a sinistra della figura ...20% della larghezza
+  		box.SetRightMargin(0.11);// 5% della larghezza a destra
+  		box.SetTopMargin(0.07); //3% della altezza lato superiore
+  		box.SetBottomMargin(0.14); //12% dell'altezza lato inferiore
+  		box.SetTickx(1);
+  		box.SetTicky(1);
 		
-		TGraph2D *gr = new TGraph2D(polefile.c_str());
+		TGraph2D gr = TGraph2D(polefile.c_str());
 
 		int mymarkerstyle=20;
   		float mymarkersize=1.;
@@ -1225,65 +1234,64 @@ public:
   		float mytextsize=0.05;
   		int mytextfont=132;
 
-		gr->SetTitle("");
-		gr->SetMarkerColor(mymarkercolor);
-  		gr->SetMarkerSize(mymarkersize);
-  		gr->SetMarkerStyle(mymarkerstyle);
-  		gr->SetLineColor(1);
-  		gr->SetLineWidth(0);
+		gr.SetTitle("");
+		gr.SetMarkerColor(mymarkercolor);
+  		gr.SetMarkerSize(mymarkersize);
+  		gr.SetMarkerStyle(mymarkerstyle);
+  		gr.SetLineColor(1);
+  		gr.SetLineWidth(0);
 
-		gr->GetYaxis()->SetTitleSize(mytextsize); //controllo sulla dimension del titolo dell'asse
-  		gr->GetXaxis()->SetTitleSize(mytextsize);
-		gr->GetZaxis()->SetTitleSize(mytextsize);
-  		gr->GetXaxis()->SetLabelSize(mytextsize);//cotrollo sulla dimensione dei numeretti dell'asse
-  		gr->GetYaxis()->SetLabelSize(mytextsize);
-		gr->GetZaxis()->SetLabelSize(mytextsize);	
-  		gr->GetXaxis()->SetTitleFont(mytextfont);//controllo sul carattere usato per il titolo dell'asse
-  		gr->GetYaxis()->SetTitleFont(mytextfont);
-		gr->GetZaxis()->SetTitleFont(mytextfont);
-  		gr->GetXaxis()->SetLabelFont(mytextfont);//controllo sul carattere usato per i numeretti dell'asse
-  		gr->GetYaxis()->SetLabelFont(mytextfont);
-		gr->GetZaxis()->SetLabelFont(mytextfont);
-  		gr->GetXaxis()->SetNdivisions(908); //suddivisione dei numeri sull'asse x---es 0 a 10 a passo di 1, e ogni passo diviso in 5
+		gr.GetYaxis()->SetTitleSize(mytextsize); //controllo sulla dimension del titolo dell'asse
+  		gr.GetXaxis()->SetTitleSize(mytextsize);
+		gr.GetZaxis()->SetTitleSize(mytextsize);
+  		gr.GetXaxis()->SetLabelSize(mytextsize);//cotrollo sulla dimensione dei numeretti dell'asse
+  		gr.GetYaxis()->SetLabelSize(mytextsize);
+		gr.GetZaxis()->SetLabelSize(mytextsize);	
+  		gr.GetXaxis()->SetTitleFont(mytextfont);//controllo sul carattere usato per il titolo dell'asse
+  		gr.GetYaxis()->SetTitleFont(mytextfont);
+		gr.GetZaxis()->SetTitleFont(mytextfont);
+  		gr.GetXaxis()->SetLabelFont(mytextfont);//controllo sul carattere usato per i numeretti dell'asse
+  		gr.GetYaxis()->SetLabelFont(mytextfont);
+		gr.GetZaxis()->SetLabelFont(mytextfont);
+  		gr.GetXaxis()->SetNdivisions(908); //suddivisione dei numeri sull'asse x---es 0 a 10 a passo di 1, e ogni passo diviso in 5
   		
-		gr->GetXaxis()->CenterTitle(1);//che il titolo dell'asse lo voglio quindi 1, se non lo volessi metterei 0
-  		gr->GetYaxis()->CenterTitle(1);
-  		gr->GetZaxis()->CenterTitle(1);
-		gr->GetXaxis()->SetTitleOffset(1.20);//definisce la distanza del titolo dell'asse dall'asse stesso
-  		gr->GetYaxis()->SetTitleOffset(1.70);
-  		gr->GetZaxis()->SetTitleOffset(1.15);
+		gr.GetXaxis()->CenterTitle(1);//che il titolo dell'asse lo voglio quindi 1, se non lo volessi metterei 0
+  		gr.GetYaxis()->CenterTitle(1);
+  		gr.GetZaxis()->CenterTitle(1);
+		gr.GetXaxis()->SetTitleOffset(1.20);//definisce la distanza del titolo dell'asse dall'asse stesso
+  		gr.GetYaxis()->SetTitleOffset(1.70);
+  		gr.GetZaxis()->SetTitleOffset(1.15);
 		
-  		gr->GetXaxis()->SetTitle("Re(s) (GeV^{2})");
-  		gr->GetYaxis()->SetTitle("Im(s) (GeV^{2})");
-  		gr->GetZaxis()->SetTitle("log_{10}|det(D_{l}(s))|");
+  		gr.GetXaxis()->SetTitle("Re(s) (GeV^{2})");
+  		gr.GetYaxis()->SetTitle("Im(s) (GeV^{2})");
+  		gr.GetZaxis()->SetTitle("log_{10}|det(D_{l}(s))|");
 		
-		gr->GetXaxis()->SetLimits(Re_sx, Re_dx);
-		gr->GetYaxis()->SetLimits(Im_sx, 0);
+		gr.GetXaxis()->SetLimits(Re_sx, Re_dx);
+		gr.GetYaxis()->SetLimits(Im_sx, 0);
 
-		gr->Draw("p");
+		gr.Draw("p");
 
-		box->SaveAs(temp.c_str());
+		box.SaveAs(temp.c_str());
 		
 	};
 
-	void PolePlotGraph1D(string inputfile, string polefile, string sheet, double Re_sx, double Re_dx, double Im_sx, double Im_dx){
+	void PolePlotGraph1D(string inputfile, string polefile, int sheet, double Re_sx, double Re_dx, double Im_sx, double Im_dx){
 
-		string temp = "Plots/" + inputfile + "_poles_graph.pdf";
-		if (sheet == "true") temp = "Plots/" + inputfile + "_poles_graph_II.pdf";
+		string temp = "Plots/" + to_string(sheet) + inputfile + "_poles_graph.pdf";
 
-		TCanvas *box = new TCanvas("box","box",600,500); //costruttore 600pt x 550 pt
+		TCanvas box = TCanvas("box","box",600,500); //costruttore 600pt x 550 pt
   		//gStyle->SetOptStat(0); //non voglio che mi metti il riquadro con la statistica
-  		box->SetFillColor(0);//il fondo del grafico con 0 è bianco...in teoria lo potete cambiare
-  		box->SetBorderMode(0);//mette dei bordi attorno alla figura...0 nessun bordo
-  		box->SetBorderSize(2); //spessore del bordo
-  		box->SetLeftMargin(0.18); //spazio a sinistra della figura ...20% della larghezza
-  		box->SetRightMargin(0.11);// 5% della larghezza a destra
-  		box->SetTopMargin(0.07); //3% della altezza lato superiore
-  		box->SetBottomMargin(0.14); //12% dell'altezza lato inferiore
-  		box->SetTickx(1);
-  		box->SetTicky(1);
-		
-		TGraph *gr = new TGraph(polefile.c_str());
+  		box.SetFillColor(0);//il fondo del grafico con 0 è bianco...in teoria lo potete cambiare
+  		box.SetBorderMode(0);//mette dei bordi attorno alla figura...0 nessun bordo
+  		box.SetBorderSize(2); //spessore del bordo
+  		box.SetLeftMargin(0.18); //spazio a sinistra della figura ...20% della larghezza
+  		box.SetRightMargin(0.11);// 5% della larghezza a destra
+  		box.SetTopMargin(0.07); //3% della altezza lato superiore
+  		box.SetBottomMargin(0.14); //12% dell'altezza lato inferiore
+  		box.SetTickx(1);
+  		box.SetTicky(1);
+
+		TGraph2D gr = TGraph2D(polefile.c_str());
 
 		int mymarkerstyle=20;
   		float mymarkersize=1.;
@@ -1291,52 +1299,52 @@ public:
   		float mytextsize=0.05;
   		int mytextfont=132;
 
-		gr->GetYaxis()->SetTitleSize(mytextsize); //controllo sulla dimension del titolo dell'asse
-  		gr->GetXaxis()->SetTitleSize(mytextsize);
-  		gr->GetXaxis()->SetLabelSize(mytextsize);//cotrollo sulla dimensione dei numeretti dell'asse
-  		gr->GetYaxis()->SetLabelSize(mytextsize);
-  		gr->GetXaxis()->SetTitleFont(mytextfont);//controllo sul carattere usato per il titolo dell'asse
-  		gr->GetYaxis()->SetTitleFont(mytextfont);
-  		gr->GetXaxis()->SetLabelFont(mytextfont);//controllo sul carattere usato per i numeretti dell'asse
-  		gr->GetYaxis()->SetLabelFont(mytextfont);
+		gr.GetYaxis()->SetTitleSize(mytextsize); //controllo sulla dimension del titolo dell'asse
+  		gr.GetXaxis()->SetTitleSize(mytextsize);
+  		gr.GetXaxis()->SetLabelSize(mytextsize);//cotrollo sulla dimensione dei numeretti dell'asse
+  		gr.GetYaxis()->SetLabelSize(mytextsize);
+  		gr.GetXaxis()->SetTitleFont(mytextfont);//controllo sul carattere usato per il titolo dell'asse
+  		gr.GetYaxis()->SetTitleFont(mytextfont);
+  		gr.GetXaxis()->SetLabelFont(mytextfont);//controllo sul carattere usato per i numeretti dell'asse
+  		gr.GetYaxis()->SetLabelFont(mytextfont);
 
-  		gr->GetXaxis()->SetNdivisions(908); //suddivisione dei numeri sull'asse x---es 0 a 10 a passo di 1, e ogni passo diviso in 5
+  		gr.GetXaxis()->SetNdivisions(908); //suddivisione dei numeri sull'asse x---es 0 a 10 a passo di 1, e ogni passo diviso in 5
   		
-		gr->GetXaxis()->CenterTitle(1);//che il titolo dell'asse lo voglio quindi 1, se non lo volessi metterei 0
-  		gr->GetYaxis()->CenterTitle(1);
-		gr->GetXaxis()->SetTitleOffset(1.15);//definisce la distanza del titolo dell'asse dall'asse stesso
-  		gr->GetYaxis()->SetTitleOffset(1.15);
-		gr->SetTitle("");
-  		gr->GetXaxis()->SetTitle("Re(s) (GeV^{2})");
-  		gr->GetYaxis()->SetTitle("Im(s) (GeV^{2})");
-		gr->GetXaxis()->SetRangeUser(Re_sx, Re_dx);
-		gr->GetYaxis()->SetRangeUser(Im_sx, 0);
-		gr->SetMarkerColor(mymarkercolor);
-  		gr->SetMarkerSize(mymarkersize);
-  		gr->SetMarkerStyle(mymarkerstyle);
-  		gr->SetLineColor(1);
-  		gr->SetLineWidth(0);
-		gr->Draw("AP");
+		gr.GetXaxis()->CenterTitle(1);//che il titolo dell'asse lo voglio quindi 1, se non lo volessi metterei 0
+  		gr.GetYaxis()->CenterTitle(1);
+		gr.GetXaxis()->SetTitleOffset(1.15);//definisce la distanza del titolo dell'asse dall'asse stesso
+  		gr.GetYaxis()->SetTitleOffset(1.15);
+		gr.SetTitle("");
+  		gr.GetXaxis()->SetTitle("Re(s) (GeV^{2})");
+  		gr.GetYaxis()->SetTitle("Im(s) (GeV^{2})");
+		gr.GetXaxis()->SetRangeUser(Re_sx, Re_dx);
+		gr.GetYaxis()->SetRangeUser(Im_sx, 0);
+		gr.SetMarkerColor(mymarkercolor);
+  		gr.SetMarkerSize(mymarkersize);
+  		gr.SetMarkerStyle(mymarkerstyle);
+  		gr.SetLineColor(1);
+  		gr.SetLineWidth(0);
+		gr.Draw("AP");
 
-		box->SaveAs(temp.c_str());
+		box.SaveAs(temp.c_str());
 		
 	};
 
-	void PoleColormapPlotFunc2D(string inputfile, function <double(double*,double*)> func, string funcname, double Re_sx, double Re_dx, double Im_sx, double Im_dx){
+	void PoleColormapPlotFunc2D(string inputfile, function <double(double*,double*)> func, int sheet, string funcname, double Re_sx, double Re_dx, double Im_sx, double Im_dx){
 
-		string temp = "Plots/" + inputfile + "_" + funcname + ".pdf";
+		string temp = "Plots/" + to_string(sheet) + inputfile + "_" + funcname + ".pdf";
 
-		TCanvas *box = new TCanvas("box","box",600,500); //costruttore 600pt x 550 pt
+		TCanvas box = TCanvas("box","box",600,500); //costruttore 600pt x 550 pt
   		//gStyle->SetOptStat(0); //non voglio che mi metti il riquadro con la statistica
-  		box->SetFillColor(0);//il fondo del grafico con 0 è bianco...in teoria lo potete cambiare
-  		box->SetBorderMode(0);//mette dei bordi attorno alla figura...0 nessun bordo
-  		box->SetBorderSize(2); //spessore del bordo
-  		box->SetLeftMargin(0.18); //spazio a sinistra della figura ...20% della larghezza
-  		box->SetRightMargin(0.11);// 5% della larghezza a destra
-  		box->SetTopMargin(0.07); //3% della altezza lato superiore
-  		box->SetBottomMargin(0.14); //12% dell'altezza lato inferiore
-  		box->SetTickx(1);
-  		box->SetTicky(1);
+  		box.SetFillColor(0);//il fondo del grafico con 0 è bianco...in teoria lo potete cambiare
+  		box.SetBorderMode(0);//mette dei bordi attorno alla figura...0 nessun bordo
+  		box.SetBorderSize(2); //spessore del bordo
+  		box.SetLeftMargin(0.18); //spazio a sinistra della figura ...20% della larghezza
+  		box.SetRightMargin(0.11);// 5% della larghezza a destra
+  		box.SetTopMargin(0.07); //3% della altezza lato superiore
+  		box.SetBottomMargin(0.14); //12% dell'altezza lato inferiore
+  		box.SetTickx(1);
+  		box.SetTicky(1);
 
 		//TF2 *tf = new TF2("tf", detD, 113, 121, -1, 1, 2);
 		//TF2 tf("tf", [](double* x, double* p) { return abs(testObs.amplitudes[0].getDenominator(comp(x[0], x[1])).determinant()); }, 113., 121., -1., 1.);
@@ -1371,7 +1379,7 @@ public:
   		tf.SetLineWidth(0);
 
 		tf.Draw("COLZ");
-		box->SaveAs(temp.c_str());
+		box.SaveAs(temp.c_str());
 
 	};
 
@@ -1415,41 +1423,179 @@ public:
 	};
 
 
+	std::vector<std::pair<size_t, size_t>> buildAmpChanPairs(std::vector<amplitude>& amplitudes) {
+	    std::vector<std::pair<size_t, size_t>> amp_chan_pairs_temp;
+
+	    for (size_t amp_index = 0; amp_index < amplitudes.size(); ++amp_index) {
+	        for (size_t chan_index = 0; chan_index < amplitudes[amp_index].getChanNames().size(); ++chan_index) {
+	            amp_chan_pairs_temp.emplace_back(amp_index, chan_index);
+	        }
+	    }
+
+	    return amp_chan_pairs_temp;
+	}
+
+
+	double excl_chisqTEST() {
+    // Pre-costruisci una lista di combinazioni (amp_index, chan_index)
+    std::vector<std::pair<size_t, size_t>> amp_chan_pairs2;
+    for (size_t amp_index = 0; amp_index < amplitudes.size(); ++amp_index) {
+        for (size_t chan_index = 0; chan_index < amplitudes[amp_index].getChanNames().size(); ++chan_index) {
+            amp_chan_pairs2.emplace_back(amp_index, chan_index);
+        }
+    }
+
+    double result = 0;
+
+    // Parallelizzazione del calcolo
+    #pragma omp parallel
+    {
+        double local_result = 0;  // Somma locale per ciascun thread
+
+        #pragma omp for schedule(dynamic)
+        for (size_t pair_index = 0; pair_index < amp_chan_pairs2.size(); ++pair_index) {
+            auto [amp_index, chan_index] = amp_chan_pairs2[pair_index];
+
+            // Ottieni i limiti di integrazione
+            double lower_bound = sqrt(amplitudes[amp_index].getFitInterval()[0]);
+            double upper_bound = sqrt(amplitudes[amp_index].getFitInterval()[1]);
+
+            // Valori sqrt(s) per il canale corrente
+            const auto& sqrts_vals = data[amp_index * numChans + chan_index].sqrts;
+            if (sqrts_vals.empty()) continue;  // Salta i canali dummy
+
+            double sum = 0;
+            for (size_t i = 0; i < sqrts_vals.size(); ++i) {
+                double x = sqrts_vals[i];
+                if (x >= lower_bound && x <= upper_bound) {
+                    // Calcola val e altri termini
+                    comp val = amplitudes[amp_index].getValue(x * x)(chan_index);
+                    double y = (val * conj(val)).real();
+                    double stat_err = data[amp_index * numChans + chan_index].amp_expval_stat_err[i];
+                    double sist_err = data[amp_index * numChans + chan_index].amp_expval_sist_err[i];
+                    double std = sqrt(pow(stat_err, 2) + pow(sist_err, 2));
+                    sum += pow((y - data[amp_index * numChans + chan_index].amp_expval[i]) / std, 2);
+                }
+            }
+
+            // Aggiungi al risultato locale
+            local_result += sum;
+        }
+
+        // Accumula i risultati locali nel risultato globale
+        #pragma omp atomic
+        result += local_result;
+    }
+
+    return excl_weight * result;
+}
+
+
+	double excl_chisqPAR() {
+	    double result = 0;
+
+		//int num_threads = omp_get_max_threads();
+		//int chunk_size = (amp_chan_pairs.size() + num_threads - 1) / num_threads; // Dividi il lavoro tra i thread
+
+	    // Iterazione parallela
+	    #pragma omp parallel
+	    {
+	        double local_result = 0;  // Somma locale per ogni thread
+
+	        //#pragma omp for schedule(dynamic, chunk_size)
+	        #pragma omp for schedule(dynamic)
+	        for (size_t pair_idx = 0; pair_idx < amp_chan_pairs.size(); ++pair_idx) {
+	            size_t amp_index = amp_chan_pairs[pair_idx].first;
+	            size_t chan_index = amp_chan_pairs[pair_idx].second;
+
+	            // Tutte le operazioni specifiche per amp_index e chan_index
+	            double sum = 0;
+	            double lower_bound = sqrt(amplitudes[amp_index].getFitInterval()[0]);
+	            double upper_bound = sqrt(amplitudes[amp_index].getFitInterval()[1]);
+	            std::vector<double> sqrts_vals = data[amp_index * numChans + chan_index].sqrts;
+
+	            if (!sqrts_vals.empty()) {  // Canale non vuoto
+	                for (size_t i = 0; i < sqrts_vals.size(); ++i) {
+	                    double x = sqrts_vals[i];
+	                    if (x >= lower_bound && x <= upper_bound) {
+	                        comp val = amplitudes[amp_index].getValue(x * x)(chan_index);
+	                        double y = (val * std::conj(val)).real();
+	                        double stat_err = data[numChans * amp_index + chan_index].amp_expval_stat_err[i];
+	                        double sist_err = data[numChans * amp_index + chan_index].amp_expval_sist_err[i];
+	                        double std = std::sqrt(std::pow(stat_err, 2) + std::pow(sist_err, 2));
+	                        sum += std::pow(((y - data[numChans * amp_index + chan_index].amp_expval[i]) / std), 2);
+	                    }
+	                }
+	                local_result += sum;
+	            }
+	        }
+
+	        // Accumula la somma locale nel risultato globale
+	        #pragma omp atomic
+	        result += local_result;
+	    }
+
+	    return excl_weight * result;
+	}
+
+	
+
 	double excl_chisq(){
 
+		//cout<<"[observable] Starting calculating excl chi2..."<<endl;
+
+        //auto t_start = high_resolution_clock::now();
+
 		double result = 0;
+		int amp_index = 0;
+		//amplitude amp = amplitudes[amp_index];
+		//if(intlistvector.size() == numAmps) amp.SetintegralList(intlistvector[amp_index]);
+		//read out the start and end of the fit interval
+		double lower_bound = 0;
+		double upper_bound = 0;
+		int chan_index = 0;
+		double sum = 0;
+		vector<double> sqrts_vals = {};
+		double x = 0;
+		comp val = 0;
+		double y = 0;
+		double stat_err = 0;
+		double sist_err = 0;
+		double std = 0;
 
 		//for every amplitude in the list
 		for(string ampname : getAmpNames()){
 
 			//locate the amplitude
-			int amp_index = getampindex(ampname);
-			amplitude amp = amplitudes[amp_index];
+			amp_index = getampindex(ampname);
+			//amplitude amp = amplitudes[amp_index];
+			//if(intlistvector.size() == numAmps) amp.SetintegralList(intlistvector[amp_index]);
 			//read out the start and end of the fit interval
-			double lower_bound = sqrt(amp.getFitInterval()[0]);
-			double upper_bound = sqrt(amp.getFitInterval()[1]);	
+			lower_bound = sqrt(amplitudes[amp_index].getFitInterval()[0]);
+			upper_bound = sqrt(amplitudes[amp_index].getFitInterval()[1]);	
 
 			//for every channel
-			for(string channame : amp.getChanNames()){
+			for(string channame : amplitudes[amp_index].getChanNames()){
 
-				int chan_index = getchanindex(ampname, channame);
-				double sum = 0;
-				vector<double> sqrts_vals = data[amp_index * numChans + chan_index].sqrts;
+				chan_index = getchanindex(ampname, channame);
+				sum = 0;
+				sqrts_vals = data[amp_index * numChans + chan_index].sqrts;
 
 				if(sqrts_vals.size() > 0){//i.e. if the j-th channel is NOT a dummy channel
 
 					for(int i = 0; i < sqrts_vals.size(); i++){
 
-						double x = sqrts_vals[i];
+						x = sqrts_vals[i];
 
 						//for sqrts in the fitting range, calculate relevant quantities
-						if(x >= lower_bound && x <= upper_bound){
-
-							comp val = amp.getValue(pow(x, 2))(chan_index);
-							double y = (val*conj(val)).real();
-							double stat_err = data[numChans * amp_index + chan_index].amp_expval_stat_err[i];
-							double sist_err = data[numChans * amp_index + chan_index].amp_expval_sist_err[i];
-							double std = sqrt(pow(stat_err, 2) + pow(sist_err, 2));
+						if(x >= lower_bound && x <= upper_bound){//cout << "excl" << x << endl;
+							//cout << pow(x, 2) << "	" << x*x << endl;
+							//double temp = x*x;
+							val = amplitudes[amp_index].getValue(x*x)(chan_index);
+							y = (val*conj(val)).real();
+							stat_err = data[numChans * amp_index + chan_index].amp_expval_stat_err[i];
+							sist_err = data[numChans * amp_index + chan_index].amp_expval_sist_err[i];
+							std = sqrt(pow(stat_err, 2) + pow(sist_err, 2));
 							sum += pow(((y - data[numChans * amp_index + chan_index].amp_expval[i])/std), 2);
 
 						}
@@ -1462,49 +1608,68 @@ public:
 
 			}
 
+			//if(intlistvector.size() < numAmps) intlistvector.push_back(amp.GetintegralList());
+
 		}
+
+		//auto t_end = high_resolution_clock::now();
+        //auto delta_t = duration_cast<microseconds>(t_end-t_start);
+		//cout << excl_weight * result << endl;
+        //cout<<"excl chi2 calculation ended ("<<delta_t.count()<<"micros)\n";
 
 		return excl_weight * result;
 
 	}
 
 
-	double incl_chisq(){
+	double incl_chisqTRUE(){
+
+		//cout<<"[observable] Starting calculating incl chi2..."<<endl;
+
+        //auto t_start = high_resolution_clock::now();
 
 		double sum = 0;
 		double lower_bound = sqrt(amplitudes[0].getFitInterval()[0]);
 		double upper_bound = sqrt(amplitudes[0].getFitInterval()[1]);
 		comp temp = 0;
+		double aux = 0;
+		double x = 0;
+		int amp_index = 0;
+		int chan_index = 0;
+		double y = 0;
+		double stat_err = 0;
+		double sist_err = 0;
+		double std = 0;
 
 		for(int i = 0; i < data_InclCrossSec.sqrts.size(); i++){
 
-			double x = data_InclCrossSec.sqrts[i];
+			x = data_InclCrossSec.sqrts[i];
 			
-			double aux = 0;
+			aux = 0;
 			
-			if(x >= lower_bound && x <= upper_bound){
-
+			if(x >= lower_bound && x <= upper_bound){//cout << "incl" << x << endl;
+				//cout << pow(x, 2) << "	" << x*x << endl; exit(0);
 				for(string ampname : getAmpNames()){
 
-					int amp_index = getampindex(ampname);
-					amplitude amp = amplitudes[amp_index];
+					amp_index = getampindex(ampname);
+					//amplitude amp = amplitudes[amp_index];
 
-					for(string channame : amp.getChanNames()){
+					for(string channame : amplitudes[amp_index].getChanNames()){
 
-						int chan_index = getchanindex(ampname, channame);
-						temp = amp.getValue(pow(x,2))(chan_index);
+						chan_index = getchanindex(ampname, channame);//cout << pow(x,2) << endl;
+						temp = amplitudes[amp_index].getValue(x*x)(chan_index);
 						aux += (temp*conj(temp)).real();
 
 					}
 
 				}
 
-				double y = data_InclCrossSec.amp_expval[i];
-				double stat_err = data_InclCrossSec.amp_expval_stat_err[i];
+				y = data_InclCrossSec.amp_expval[i];
+				stat_err = data_InclCrossSec.amp_expval_stat_err[i];
 
-				double sist_err = data_InclCrossSec.amp_expval_sist_err[i];
+				sist_err = data_InclCrossSec.amp_expval_sist_err[i];
 				//uncorrelated inclusive data
-				double std = stat_err;
+				std = stat_err;
 				//correlated inclusive data
 				//double std = sqrt(pow(stat_err, 2) + pow(sist_err, 2));
 				sum += pow(((aux - y)/std), 2);
@@ -1513,8 +1678,62 @@ public:
 
 		}
 
+		//auto t_end = high_resolution_clock::now();
+        //auto delta_t = duration_cast<microseconds>(t_end-t_start);
+		//cout << incl_weight * sum << endl;
+        //cout<<"incl chi2 calculation ended ("<<delta_t.count()<<"micros)\n"; exit(0);
+
 		return incl_weight * sum;
 
+	}
+
+	double incl_chisq() {
+		double sum = 0;
+		double lower_bound = sqrt(amplitudes[0].getFitInterval()[0]);
+		double upper_bound = sqrt(amplitudes[0].getFitInterval()[1]);
+
+		//int num_threads = omp_get_max_threads();
+		//int chunk_size = (amp_chan_pairs.size() + num_threads - 1) / num_threads; // Dividi il lavoro tra i thread
+
+		// To ensure thread-safe accumulation of `sum`
+		#pragma omp parallel
+		{
+			double local_sum = 0;  // Each thread has its local sum
+
+			//#pragma omp for schedule(dynamic, chunk_size)
+			#pragma omp for schedule(dynamic)
+			//#pragma omp for nowait
+			for (int i = 0; i < data_InclCrossSec.sqrts.size(); i++) {
+				double x = data_InclCrossSec.sqrts[i];
+				double aux = 0;
+
+				if (x >= lower_bound && x <= upper_bound) {
+					for (const std::string& ampname : getAmpNames()) {
+						int amp_index = getampindex(ampname);
+
+						for (const std::string& channame : amplitudes[amp_index].getChanNames()) {
+							int chan_index = getchanindex(ampname, channame);
+							comp temp = amplitudes[amp_index].getValue(x * x)(chan_index);
+							aux += (temp * std::conj(temp)).real();
+						}
+					}
+
+					double y = data_InclCrossSec.amp_expval[i];
+					double stat_err = data_InclCrossSec.amp_expval_stat_err[i];
+					//double sist_err = data_InclCrossSec.amp_expval_sist_err[i];
+					double std = stat_err; //uncorrelated inclusive data
+					//double std = sqrt(pow(stat_err, 2) + pow(sist_err, 2)); //correlated inclusive data
+					
+					local_sum += std::pow((aux - y) / std, 2);
+				}
+			}
+
+			// Accumulate local sums into the global sum
+			#pragma omp atomic
+			sum += local_sum;
+		}
+
+		return incl_weight * sum;
 	}
 
 	friend ostream& operator<<(std::ostream& os, observable const& m){

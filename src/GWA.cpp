@@ -25,7 +25,9 @@
 #include "TBranch.h"
 #include "TObject.h"
 #include "TSystem.h"
-
+//#include <ROOT/RConfig.hxx>
+//#include <ROOT/RDataFrame.hxx>
+//#include <ROOT/TThreadExecutor.hxx>
 
 using namespace std;
 using std::chrono::high_resolution_clock;
@@ -33,6 +35,8 @@ using std::chrono::duration_cast;
 using std::chrono::duration;
 using std::chrono::seconds;
 
+using std::chrono::nanoseconds;
+//typedef std::chrono::system_clock Clock;
 using Eigen::MatrixXcd;
 using Eigen::VectorXcd;
 typedef std::complex<double> comp;
@@ -109,22 +113,20 @@ vector<double> linspace(T start_in, T end_in, int num_in)
 
 int main(int argc, char ** argv)
 {
+	//ROOT::EnableImplicitMT();
+
+	auto t_start = high_resolution_clock::now();
+    auto t_end = high_resolution_clock::now();
+    auto delta_t = duration_cast<nanoseconds>(t_end-t_start);
+	auto delta_t_sec = duration_cast<seconds>(t_end-t_start);
+
 	string inputfile = (string) argv[1]; //just the core e.g. "fit73-36", without the path nor the extension
-	string polefile = (string) argv[2];
-	string pWave = (string) argv[3];
-	double grid_Re_sx = stod(argv[4]);
-	double grid_Re_dx = stod(argv[5]);
-	int grid_Re_numpts = atoi(argv[6]);
-	double grid_Im_sx = stod(argv[7]);
-	double grid_Im_dx = stod(argv[8]);
-	int grid_Im_numpts = atoi(argv[9]);
-	double func_cutoff = stod(argv[10]);
-	string sheet = (string) argv[11]; // NB: "false" = physical sheet; "true" = first unphysical sheet;
-	int jobnum = atoi(argv[12]);
-	int numfits = atoi(argv[13]);
-	//string inputfile = (string) argv[14];
-	//string fitsfolder = (string) argv[15];
-	string fitsfolder = "Fits/";
+	string polefile = "Poles/" + inputfile + "_poles.txt";
+	int jobnum = atoi(argv[2]);
+	int numfits = atoi(argv[3]);
+	//string inputfile = (string) argv[4];
+	string fitsfolder = (string) argv[4];
+	//string fitsfolder = "Fits/";
 	string polesfolder = "Poles/";
 	cout<<"[GWA] Initializing GWA..."<<endl;
 
@@ -146,6 +148,9 @@ int main(int argc, char ** argv)
 	formatReader.setKmats();
 	formatReader.loadExpData();
 	if(formatReader.getInclCrossSecFlag()) formatReader.loadExpInclCrossSec();
+
+	int seed = formatReader.readSeed(); 
+	
 	//gets chisq cutoff and weights
 	double cutoff = formatReader.getChi2CutOff();
 
@@ -153,13 +158,20 @@ int main(int argc, char ** argv)
 	testObs = formatReader.getObs();
 	
 	t_end = high_resolution_clock::now();
-        delta_t = duration_cast<seconds>(t_end-t_start);
-        cout<<"done ("<<delta_t.count()<<"s)\n";
+    delta_t = duration_cast<seconds>(t_end-t_start);
+    cout<<"done ("<<delta_t.count()<<"s)\n";
 
 	
 	//if you want just plotting: add a flag:
 	if(formatReader.getPlotFlag()){
 		cout<<"[PLOT] Plotting..."<<endl;
+		//testObs.setexclchi2weight(formatReader.GetExclChi2Weight());
+		vector<double> steps = testObs.getStepSizes();
+		cout << testObs.getNumData()-steps.size() << endl;
+		cout << testObs.excl_chisq()/(testObs.getNumData()-steps.size()) << endl;return 0;
+
+		//formatReader.writeMathematicaOutputFile("Math_2024-11-19_fit3.txt");return 0;
+	
 		double lower_bound = testObs.amplitudes[0].getFitInterval()[0];
 		double upper_bound = testObs.amplitudes[0].getFitInterval()[1];
 
@@ -173,7 +185,7 @@ int main(int argc, char ** argv)
 			return (value*conj(value)).real();
 		};
 		
-		auto intensityP_BstarBstar = [&](double x){
+		/*auto intensityP_BstarBstar = [&](double x){
 			comp value = testObs.amplitudes[0].getValue(pow(x,2))(2);
 			return (value*conj(value)).real();
 		};
@@ -181,20 +193,25 @@ int main(int argc, char ** argv)
 		auto intensityP_B_sstarB_sstar = [&](double x){
 			comp value = testObs.amplitudes[0].getValue(pow(x,2))(3);
 			return (value*conj(value)).real();
-		};
+		};*/
 		
 		auto intensityP_Dummy = [&](double x){
-			comp value = testObs.amplitudes[0].getValue(pow(x,2))(4);
+			comp value = testObs.amplitudes[0].getValue(pow(x,2))(2);
 			return (value*conj(value)).real();
 		};
 
 		testObs.makePlotGraphWithExp("P", "BB", inputfile+"_BB", intensityP_BB, 10.6322,11.0208);
+		//comp value = testObs.amplitudes[0].getValue(pow(11.,2))(0);
+		//cout << (value*conj(value)).real() << endl;
+		//value = testObs.amplitudes[0].getValue(pow(11.,2))(2);
+		//cout << (value*conj(value)).real() << endl;
+		//for(double x: testObs.getFitParams()) cout << x << endl;
 		testObs.makePlotGraphWithExp("P", "BBstar", inputfile+"_BBstar", intensityP_BBstar, 10.6322,11.0208);
-		testObs.makePlotGraphWithExp("P", "BstarBstar", inputfile+"_BstarBstar", intensityP_BstarBstar, 10.6322,11.0208);
-		testObs.makePlotGraphWithExp("P", "B_sstarB_sstar", inputfile+"_B_sstarB_sstar", intensityP_B_sstarB_sstar, 10.6322,11.0208);
+		//testObs.makePlotGraphWithExp("P", "BstarBstar", inputfile+"_BstarBstar", intensityP_BstarBstar, 10.6322,11.0208);
+		//testObs.makePlotGraphWithExp("P", "B_sstarB_sstar", inputfile+"_B_sstarB_sstar", intensityP_B_sstarB_sstar, 10.6322,11.0208);
 		testObs.makePlotGraphDummy(inputfile+"_Dummy", intensityP_Dummy, 10.6322,11.0208);
 		if(formatReader.getInclCrossSecFlag()){
-			testObs.plotInclCrossSecVsSumOfExcl(inputfile+"_InclCrossSecVsSumOfExcl", 10.6322,11.2062);
+			//testObs.plotInclCrossSecVsSumOfExcl(inputfile+"_InclCrossSecVsSumOfExcl", 10.6322,11.2062);
 			testObs.plotInclCrossSecWithExp(inputfile+"_InclCrossSecWithExp", 10.6322,11.2062);
 		}
 
@@ -207,10 +224,46 @@ int main(int argc, char ** argv)
 	
 
 	if(formatReader.getFitFlag()){
-		cout<<"[GWA] Fit flag detected"<<endl;
+	cout<<"[GWA] Fit flag detected"<<endl;
+
+		vector<double> slist = {};
+
+		for(expchan expdata: testObs.getData()){
+			for (double r: expdata.sqrts){
+				slist.push_back(r);
+			}
+
+		}
+
+		for (double r: testObs.getData_InclCrossSec().sqrts){
+			slist.push_back(r);
+		}
+
+
+
+		cout<<"[GWA] Starting precalculation of the integrals..."<<endl;
+		t_start = high_resolution_clock::now();
+		
+		for(int l = 0; l < testObs.amplitudes.size(); l++){
+			for(int i = 0; i < testObs.amplitudes[l].getChannels().size(); i++){
+				testObs.amplitudes[l].calcIntegrals(slist,i);
+			}
+		}
+
+		t_end = high_resolution_clock::now();
+        delta_t = duration_cast<nanoseconds>(t_end-t_start);
+        cout<<"Precalculation of the integrals ended ("<<delta_t.count()<<"nanos)\n";
+
+		/////////
+
+		//load the weights
+		testObs.setexclchi2weight(formatReader.GetExclChi2Weight());
+		if(formatReader.getInclCrossSecFlag()) testObs.setinclchi2weight(formatReader.GetInclChi2Weight());
+
 		//saves original starting parameters
 		vector<double> startparams = testObs.getFitParams();
 		vector<double> steps = testObs.getStepSizes();
+		
 		//gets degrees of freedom
 		string fittype = "excl";
 		int dof = testObs.getNumData()-steps.size();		
@@ -377,23 +430,30 @@ int main(int argc, char ** argv)
 
 		cout<<"[FIT] Getting fit sequence"<<endl;
 		vector<string> fitseq = formatReader.readFitSequence(formatReader.getFitSequence());
+		vector<fitparamsDat> fitpar = formatReader.getFitParams(); 
 		
+		//cout << formatReader.getSeed() << endl << endl;
 		//does the fitting
+
 		cout<<"[FIT] Fitting "<<numfits<<" times"<<endl;
 		for (int j = 0; j < numfits; j++){
 			cout<<endl<<endl<<"[FIT] Beginning fit #"<<j+1<<endl;
 			t_start = high_resolution_clock::now();
 			cout<<"[FIT] Resetting parameters to initial values...";
+
 			//resets the observable
 			testObs.setFitParams(startparams);
 			formatReader.setObs(testObs);
 			auto now = std::chrono::system_clock::now();
-			int seed = now.time_since_epoch().count()+jobnum;
+			//int seed = now.time_since_epoch().count()+jobnum;
+			seed = now.time_since_epoch().count()%50000 + pow(j,2); 
 			//randomizes the parameters
+
 			if(formatReader.getRandomizeFlag()){
 			cout<<"randomizing starting parameters..."<<endl;
 			formatReader.randomize(seed);
 			}
+
 			testObs = formatReader.getObs();
 			
 			t_end = high_resolution_clock::now();
@@ -428,10 +488,13 @@ int main(int argc, char ** argv)
 				cout<<"[FIT] Initializing MINUIT...";
 				t_start = high_resolution_clock::now();
 
-				min[l]->SetMaxFunctionCalls(10000);
-				min[l]->SetMaxIterations(1000);
-				min[l]->SetTolerance(0.1);
-				min[l]->SetPrintLevel(1);
+
+				min[l]->SetMaxFunctionCalls(fitpar[l].maxfuncalls);
+				min[l]->SetMaxIterations(fitpar[l].maxiter);
+				min[l]->SetTolerance(fitpar[l].tol);
+				min[l]->SetPrintLevel(fitpar[l].verbose);
+				min[l]->SetStrategy(0);
+
 
 				if(formatReader.getInclCrossSecFlag()) min[l]->SetFunction(g);
 				else min[l]->SetFunction(f);
@@ -448,16 +511,23 @@ int main(int argc, char ** argv)
 						}
 					}
 				}
-				t_end = high_resolution_clock::now();
-				delta_t = duration_cast<seconds>(t_end-t_start);
-				cout<<"done ("<<delta_t.count()<<"s)\n";
+
 				//run the minimization
-				cout<<"[FIT] Minimizing..."<<endl;
-				t_start = high_resolution_clock::now();
-				min[l]->Minimize();
-				t_end = high_resolution_clock::now();
-				delta_t = duration_cast<seconds>(t_end-t_start);
-				cout<<"done ("<<fitseq[l]<<": "<<delta_t.count()<<"s)\n";
+                cout<<"[FIT] Minimizing..."<<endl;
+                t_start = high_resolution_clock::now();
+                min[l]->Minimize();
+                t_end = high_resolution_clock::now();
+                delta_t_sec = duration_cast<seconds>(t_end-t_start);
+                cout<<"done ("<<fitseq[l]<<": "<<delta_t_sec.count()<<"s)\n";
+
+
+				//if(min[l]->Status() == 0){//|| min[l]->IsValidError() == false
+				//	cout << "The fit is not valid:" << endl;
+				//	cout << min[l]->Status() << endl;
+				//	//cout << min[l]->IsValidError() << endl;
+				//	return 0;
+				//}
+
 				//extract the resulting fit parameters
 				for(int i = 0; i < nParams; i++){
 					fitparams[i] = min[l]->X()[i];
@@ -562,83 +632,37 @@ int main(int argc, char ** argv)
 		t_end = high_resolution_clock::now();
 		delta_t = duration_cast<seconds>(t_end-t_start);
 		cout<<"done ("<<delta_t.count()<<"s)\n";
+		
+		return 0;
 	}		
 
 
 	//if you want to add a polesearch flag:
 	if(formatReader.getPolesearchFlag()){
 
+		// NB: "0" = 0 threshold passed: we are in the physical sheet; 
+		// "1" = unphysical sheet connected to the real axis in correspondence to the segment between the 1st and the 2nd threshold;
+		// "2" = unphysical sheet connected to the real axis in correspondence to the segment between the 2nd and the 3rd threshold;
+		// "t" = unphysical sheet connected to the real axis in correspondence to the segment between the t-th and the (t+1)-th threshold (if there is);
+		// ...
+
+		double grid_Re_sx = formatReader.getGrid().grid_Re_sx;
+		double grid_Re_dx = formatReader.getGrid().grid_Re_dx;
+		int grid_Re_numpts = formatReader.getGrid().grid_Re_numpts;
+		double grid_Im_sx = formatReader.getGrid().grid_Im_sx;
+		double grid_Im_dx = formatReader.getGrid().grid_Im_dx;
+		int grid_Im_numpts = formatReader.getGrid().grid_Im_numpts;
+
+		double func_cutoff = formatReader.getZero();
+
 		//initialize the polesearcher object
-		ps.settestObs(testObs); 
-		ps.setAmpIndex(pWave); 
-		int ampindex = ps.getAmpIndex(); 
-		ps.SetSheet(false);
-		if(sheet == "true") ps.SetSheet(true);
-		
-		ofstream letwrite(polefile);
-		
-		//make the minimizer
-		ROOT::Math::Minimizer* minpoles = ROOT::Math::Factory::CreateMinimizer("Minuit2","Simplex");
-		//Set some criteria for the minimizer to stop
-		minpoles->SetMaxFunctionCalls(10000);
-		minpoles->SetMaxIterations(1000);
-		//minpoles->SetTolerance(0.001);
-		//minpoles->SetPrecision(1.e-7);
-		minpoles->SetStrategy(1);
-		minpoles->SetPrintLevel(0);
-		
-		nParams = 2;//real and imaginary part of the pole
-		//make a function wrapper to minimize the function minfuncforpoles
-		ROOT::Math::Functor f(&minfunc_for_poles,nParams);
-		minpoles->SetFunction(f);
-		//set the initial conditions and step sizes
+		ps.settestObs(testObs);
 
-		//change these numbers to parameters to pass into from command line
-		vector<double> grid_Re = linspace(grid_Re_sx, grid_Re_dx, grid_Re_numpts);
-		vector<double> grid_Im = linspace(grid_Im_sx, grid_Im_dx, grid_Im_numpts);
-		vector<double> fitparamspoles = {};
-		double steppoles[2] = {1.e-2, 1.e-2};
-		
-		for(int i = 0; i < grid_Re.size(); i++){
-			for(int j = 0; j < grid_Im.size(); j++){
-				
-				fitparamspoles = {grid_Re[i], grid_Im[j]};
-			
-				for(int l = 0; l < nParams; l++){
-					minpoles->SetVariable(l,to_string(l),fitparamspoles[l],steppoles[l]);
-				}
+		ofstream letwrite(polefile); 
 
-				ps.setPoles(poles);
-
-				//run the minimization
-				minpoles->Minimize();
-
-				//cout << "calls = " << ps.calls_counter_poles << endl;
-
-				//extract the resulting fit parameters
-				comp finalParams = comp(minpoles->X()[0], -abs(minpoles->X()[1]));
-				long double aux = minpoles->MinValue();
-				for (int j=0; j < poles.size(); j++) aux += log(abs((finalParams - poles[j])*(finalParams - conj(poles[j]))));
-				if(aux < func_cutoff){
-					poles.push_back(finalParams);
-					f_val_poles.push_back(aux);
-				}
-				minpoles->Clear();
-
-			}
-
-		}
-
-		for(comp x : poles) temp_Re.push_back(x.real());
-		for(comp x : poles) temp_Im.push_back(x.imag());
-
-		for(int k = 0; k < poles.size(); k++){
-			letwrite << poles[k].real() << "	" << poles[k].imag() << "	" << f_val_poles[k] << endl; 
-			//cout << temp_Re[k] << temp_Im[k] << endl;
-			//cout << poles[k] << endl;
-		}
-
-		//////
+		vector<int> pole_sheet = {};
+		vector<int> wave_pole = {};
+		int ampindex = 0;
 
 		vector<double> ampres_mod[testObs.numChans];
 		vector<double> ampres_phase[testObs.numChans];
@@ -646,53 +670,142 @@ int main(int argc, char ** argv)
 		vector<double> denomres_mod[testObs.numChans][testObs.numChans];
 		vector<double> denomres_phase[testObs.numChans][testObs.numChans];
 
-		MatrixXcd phsp = MatrixXcd::Identity(testObs.numChans,testObs.numChans);
+		for(string pWave: testObs.getAmpNames()){
+		
+			ps.setAmpIndex(pWave);
+			ampindex = testObs.getampindex(pWave); 	
 
-		for(int k = 0; k < testObs.numChans; k++){	
-			
-			for(int i = 0; i < poles.size(); i++){
+			//letwrite << "*Poles of the " << pWave << " amplitude:" << endl;
 
-				comp x = comp(poles[i].real(),poles[i].imag());
+			for(int sheet = 0; sheet < testObs.numChans + 1; sheet++){
 
-				amplitude tempamp = testObs.amplitudes[testObs.getampindex(pWave)]; 
+				//letwrite << "-" << to_string(sheet) << "-th sheet:" << endl;
 
-				int J = tempamp.getJ(); 
-
-				double eps = tempamp.getEpsilon(); 
-
-				for(int i = 0; i < testObs.numChans; i++){
-					phsp(i,i)= pow(tempamp.getMomentum(i,x),J+0.5)/pow(x,.25);
-				}
-
-				bool sh = true;
-				//VectorXcd tempvec = eps * tempamp.getValueForPoles(x, false); // order O(eps)
-				VectorXcd tempvec = 0.25 * eps * (tempamp.getValueForPoles(x + eps, sh) - tempamp.getValueForPoles(x - eps, sh) + comp(0.,1.) * tempamp.getValueForPoles(x + comp(0.,1.) * eps, sh) - comp(0.,1.) * tempamp.getValueForPoles(x - comp(0.,1.) * eps, sh)); // order O(eps^2)
-
-				if(abs(poles[i].imag()) < 2 * tempamp.getEpsilon()){
-					tempvec = 0.5 * eps * (tempamp.getValueForPoles(x + eps, sh) - tempamp.getValueForPoles(x - eps, sh));
-				}
+				ps.SetSheet(sheet);
 				
-				ampres_mod[k].push_back(abs(tempvec(k))); 
-				ampres_phase[k].push_back(arg(tempvec(k))); 
+				//make the minimizer
+				ROOT::Math::Minimizer* minpoles = ROOT::Math::Factory::CreateMinimizer("Minuit2","Simplex");
+				//Set some criteria for the minimizer to stop
+				minpoles->SetMaxFunctionCalls(10000);
+				minpoles->SetMaxIterations(1000);
+				//minpoles->SetTolerance(0.001);
+				//minpoles->SetPrecision(1.e-7);
+				minpoles->SetStrategy(1);
+				minpoles->SetPrintLevel(0);
+				
+				nParams = 2;//real and imaginary part of the pole
+				//make a function wrapper to minimize the function minfuncforpoles
+				ROOT::Math::Functor f(&minfunc_for_poles,nParams);
+				minpoles->SetFunction(f);
+				//set the initial conditions and step sizes
 
-				//MatrixXcd tempmat = eps * tempamp.getDenominator(x, false).inverse();
-				MatrixXcd tempmat = 0.25 * eps * (tempamp.getDenominator(x + eps, sh).inverse() - tempamp.getDenominator(x - eps, sh).inverse() + comp(0.,1.) * tempamp.getDenominator(x + comp(0.,1.) * eps, sh).inverse() - comp(0.,1.) * tempamp.getDenominator(x - comp(0.,1.) * eps, sh).inverse()); 
+				//change these numbers to parameters to pass into from command line
+				vector<double> grid_Re = linspace(grid_Re_sx, grid_Re_dx, grid_Re_numpts);
+				vector<double> grid_Im = linspace(grid_Im_sx, grid_Im_dx, grid_Im_numpts);
+				vector<double> fitparamspoles = {};
+				double steppoles[2] = {1.e-2, 1.e-2};
+				
+				for(int i = 0; i < grid_Re.size(); i++){
+					for(int j = 0; j < grid_Im.size(); j++){
+						
+						fitparamspoles = {grid_Re[i], grid_Im[j]};
+					
+						for(int l = 0; l < nParams; l++){
+							minpoles->SetVariable(l,to_string(l),fitparamspoles[l],steppoles[l]);
+						}
 
-				if(abs(poles[i].imag()) < 2 * tempamp.getEpsilon()){
-					tempmat = 0.5 * eps * (tempamp.getDenominator(x + eps, sh).inverse() - tempamp.getDenominator(x - eps, sh).inverse());
+						ps.setPoles(poles);
+
+						//run the minimization
+						minpoles->Minimize();
+
+						//cout << "calls = " << ps.calls_counter_poles << endl;
+
+						//extract the resulting fit parameters
+						comp finalParams = comp(minpoles->X()[0], -abs(minpoles->X()[1]));
+						long double aux = minpoles->MinValue();
+						for (int j=0; j < poles.size(); j++) aux += log(abs((finalParams - poles[j])*(finalParams - conj(poles[j]))));
+						if(aux < func_cutoff){
+							poles.push_back(finalParams);
+							f_val_poles.push_back(aux);
+						}
+						minpoles->Clear();
+
+					}
+
 				}
 
-				for(int j = 0; j < testObs.numChans; j++){
-					denomres_mod[k][j].push_back(abs(tempmat(k,j)));
-					denomres_phase[k][j].push_back(arg(tempmat(k,j)));
+				for(comp x : poles) temp_Re.push_back(x.real());
+				for(comp x : poles) temp_Im.push_back(x.imag());
+
+				for(int k = 0; k < poles.size(); k++){
+					pole_sheet.push_back(sheet);
+					wave_pole.push_back(ampindex);
 				}
+
+				for(int k = 0; k < poles.size(); k++){
+					letwrite << poles[k].real() << "	" << poles[k].imag() << "	" << f_val_poles[k] << "	" << pole_sheet[k] << "	" << wave_pole[k] << endl; 
+					//cout << temp_Re[k] << temp_Im[k] << endl;
+					//cout << poles[k] << endl;
+				}
+
+				//////
+
+				MatrixXcd phsp = MatrixXcd::Identity(testObs.numChans,testObs.numChans);
+
+				for(int k = 0; k < testObs.numChans; k++){	
+					
+					for(int i = 0; i < poles.size(); i++){
+
+						comp x = comp(poles[i].real(),poles[i].imag());
+
+						amplitude tempamp = testObs.amplitudes[testObs.getampindex(pWave)]; 
+
+						int J = tempamp.getJ(); 
+
+						double eps = tempamp.getEpsilon(); 
+
+						for(int i = 0; i < testObs.numChans; i++){
+							phsp(i,i)= pow(tempamp.getMomentum(i,x),J+0.5)/pow(x,.25);
+						}
+
+						int sh = 0;
+						//VectorXcd tempvec = eps * tempamp.getValueForPoles(x, false); // order O(eps)
+						VectorXcd tempvec = 0.25 * eps * (tempamp.getValueForPoles(x + eps, sh) - tempamp.getValueForPoles(x - eps, sh) + comp(0.,1.) * tempamp.getValueForPoles(x + comp(0.,1.) * eps, sh) - comp(0.,1.) * tempamp.getValueForPoles(x - comp(0.,1.) * eps, sh)); // order O(eps^2)
+
+						if(abs(poles[i].imag()) < 2 * tempamp.getEpsilon()){
+							tempvec = 0.5 * eps * (tempamp.getValueForPoles(x + eps, sh) - tempamp.getValueForPoles(x - eps, sh));
+						}
+						
+						ampres_mod[k].push_back(abs(tempvec(k))); 
+						ampres_phase[k].push_back(arg(tempvec(k))); 
+
+						//MatrixXcd tempmat = eps * tempamp.getDenominator(x, false).inverse();
+						MatrixXcd tempmat = 0.25 * eps * (tempamp.getDenominator(x + eps, sh).inverse() - tempamp.getDenominator(x - eps, sh).inverse() + comp(0.,1.) * tempamp.getDenominator(x + comp(0.,1.) * eps, sh).inverse() - comp(0.,1.) * tempamp.getDenominator(x - comp(0.,1.) * eps, sh).inverse()); 
+
+						if(abs(poles[i].imag()) < 2 * tempamp.getEpsilon()){
+							tempmat = 0.5 * eps * (tempamp.getDenominator(x + eps, sh).inverse() - tempamp.getDenominator(x - eps, sh).inverse());
+						}
+
+						for(int j = 0; j < testObs.numChans; j++){
+							denomres_mod[k][j].push_back(abs(tempmat(k,j)));
+							denomres_phase[k][j].push_back(arg(tempmat(k,j)));
+						}
+
+					}
+
+				}	
+
+				//for(VectorXcd h: ampresidues) cout << h << endl << endl;
+				//for(MatrixXcd h: denomresidues) cout << h << endl << endl;
+
+				poles = {};
 
 			}
 
-		}	
+			poles = {};
 
-		//for(VectorXcd h: ampresidues) cout << h << endl << endl;
-		//for(MatrixXcd h: denomresidues) cout << h << endl << endl;
+		}
 
 		//////
 
@@ -704,6 +817,8 @@ int main(int argc, char ** argv)
 		vector<double> *tree_poles_Re = &temp_Re;
 		vector<double> *tree_poles_Im = &temp_Im;
 		vector<double> *tree_f_val_poles = &f_val_poles;
+		vector<int> *tree_wave_pole = &wave_pole;
+		vector<int> *tree_pole_sheet = &pole_sheet;		
 		vector<double> *tree_ampres_mod[testObs.numChans];
 		vector<double> *tree_ampres_phase[testObs.numChans];
 		vector<double> *tree_denomres_mod[testObs.numChans][testObs.numChans];
@@ -726,6 +841,8 @@ int main(int argc, char ** argv)
 			t1_poles->SetBranchAddress("Poles_Re", &tree_poles_Re);
 			t1_poles->SetBranchAddress("Poles_Im", &tree_poles_Im);
 			t1_poles->SetBranchAddress("FVAL_Poles", &tree_f_val_poles);
+			t1_poles->SetBranchAddress("Wave", &tree_wave_pole);
+			t1_poles->SetBranchAddress("Sheet", &tree_pole_sheet);
 			for(int i = 0; i < testObs.numChans; i++){
 				t1_poles->SetBranchAddress(("amp_res_ch" + to_string(i) + "_mod").c_str(), &tree_ampres_mod[i]);
 				t1_poles->SetBranchAddress(("amp_res_ch" + to_string(i) + "_phase").c_str(), &tree_ampres_phase[i]);
@@ -742,6 +859,8 @@ int main(int argc, char ** argv)
 			t1_poles->Branch("Poles_Re", &temp_Re);
 			t1_poles->Branch("Poles_Im", &temp_Im);
 			t1_poles->Branch("FVAL_Poles", &f_val_poles);
+			t1_poles->Branch("Wave", &wave_pole);
+			t1_poles->Branch("Sheet", &pole_sheet);
 			for(int i = 0; i < testObs.numChans; i++){
 				t1_poles->Branch(("amp_res_ch" + to_string(i) + "_mod").c_str(), &ampres_mod[i]);
 				t1_poles->Branch(("amp_res_ch" + to_string(i) + "_phase").c_str(), &ampres_phase[i]);
@@ -755,55 +874,29 @@ int main(int argc, char ** argv)
 
 		//////
 
-		auto abs_det = [&](double* x, double* p){
-			return abs(testObs.amplitudes[ampindex].getDenominator(comp(x[0], x[1]),false).determinant());
-			//MatrixXcd temp = (comp(x[0], x[1]) - comp(115,0.5)) * (comp(x[0], x[1]) - comp(118,0.7)) * (comp(x[0], x[1]) - comp(115,-0.5)) * (comp(x[0], x[1]) - comp(118,-0.7)) * MatrixXcd({{1}});
-			//return abs(temp.determinant());
-		};
-
-		auto log_abs_det = [&](double* x, double* p){
-			return log10(abs(testObs.amplitudes[ampindex].getDenominator(comp(x[0], x[1]),false).determinant()));
-			//MatrixXcd temp = (comp(x[0], x[1]) - comp(115,0.5)) * (comp(x[0], x[1]) - comp(118,0.7)) * (comp(x[0], x[1]) - comp(115,-0.5)) * (comp(x[0], x[1]) - comp(118,-0.7)) * MatrixXcd({{1}});
-			//return log(abs(temp.determinant()));
-		};
-
-		auto abs_det_II = [&](double* x, double* p){
-			return abs(testObs.amplitudes[ampindex].getDenominator(comp(x[0], x[1]),true).determinant());
-			//MatrixXcd temp = (comp(x[0], x[1]) - comp(115,0.5)) * (comp(x[0], x[1]) - comp(118,0.7)) * (comp(x[0], x[1]) - comp(115,-0.5)) * (comp(x[0], x[1]) - comp(118,-0.7)) * MatrixXcd({{1}});
-			//return abs(temp.determinant());
-		};
-
-		auto log_abs_det_II = [&](double* x, double* p){
-			return log10(abs(testObs.amplitudes[ampindex].getDenominator(comp(x[0], x[1]),true).determinant()));
-			//MatrixXcd temp = (comp(x[0], x[1]) - comp(115,0.5)) * (comp(x[0], x[1]) - comp(118,0.7)) * (comp(x[0], x[1]) - comp(115,-0.5)) * (comp(x[0], x[1]) - comp(118,-0.7)) * MatrixXcd({{1}});
-			//return log(abs(temp.determinant()));
-		};
-
-		if(ps.GetSheet()){
-
-			testObs.PolePlotGraph2D(inputfile, polefile, sheet, grid_Re_sx, grid_Re_dx, grid_Im_sx, grid_Im_dx);
-
-			testObs.PolePlotGraph1D(inputfile, polefile, sheet, grid_Re_sx, grid_Re_dx, grid_Im_sx, grid_Im_dx);
-
-			testObs.PoleColormapPlotFunc2D(inputfile, abs_det_II, "abs_det_II", grid_Re_sx, grid_Re_dx, grid_Im_sx, grid_Im_dx);
-
-			testObs.PoleColormapPlotFunc2D(inputfile, log_abs_det_II, "log_abs_det_II", grid_Re_sx, grid_Re_dx, grid_Im_sx, grid_Im_dx);
-
-		}else{
-
-			testObs.PolePlotGraph2D(inputfile, polefile, sheet, grid_Re_sx, grid_Re_dx, grid_Im_sx, grid_Im_dx);
-
-			testObs.PolePlotGraph1D(inputfile, polefile, sheet, grid_Re_sx, grid_Re_dx, grid_Im_sx, grid_Im_dx);
-
-			testObs.PoleColormapPlotFunc2D(inputfile, abs_det, "abs_det", grid_Re_sx, grid_Re_dx, grid_Im_sx, grid_Im_dx);
-
-			testObs.PoleColormapPlotFunc2D(inputfile, log_abs_det, "log_abs_det", grid_Re_sx, grid_Re_dx, grid_Im_sx, grid_Im_dx);
-
-		} 
-
 		t1_poles->Fill();
 		t1_poles->Write(0,TObject::kWriteDelete,0);
 		file_poles->Close("R");
+
+		/*////////
+
+		for(int sheet = 0; sheet < testObs.numChans + 1; sheet++){
+
+			auto log_abs_det = [&](double* x, double* p){
+				return log10(abs(testObs.amplitudes[ampindex].getDenominator(comp(x[0], x[1]), sheet).determinant()));
+				//MatrixXcd temp = (comp(x[0], x[1]) - comp(115,0.5)) * (comp(x[0], x[1]) - comp(118,0.7)) * (comp(x[0], x[1]) - comp(115,-0.5)) * (comp(x[0], x[1]) - comp(118,-0.7)) * MatrixXcd({{1}});
+				//return log(abs(temp.determinant()));
+			};
+
+			testObs.PolePlotGraph2D(inputfile, polefile, sheet, grid_Re_sx, grid_Re_dx, grid_Im_sx, grid_Im_dx);
+
+			testObs.PolePlotGraph1D(inputfile, polefile, sheet, grid_Re_sx, grid_Re_dx, grid_Im_sx, grid_Im_dx);
+
+			testObs.PoleColormapPlotFunc2D(inputfile, log_abs_det, sheet, "log_abs_det", grid_Re_sx, grid_Re_dx, grid_Im_sx, grid_Im_dx); 
+
+		}
+		
+		////////*/
 
 	}
 
