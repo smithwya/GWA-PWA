@@ -65,7 +65,7 @@ class polesearcher {
     
         double val = 0; 
 
-        MatrixXcd cmat = testObs.amplitudes.at(wvindex).getDenominator(comp(params[0], params[1]), sh); 
+        MatrixXcd cmat = testObs.amplitudes.at(wvindex).getDenominator(comp(params[0], params[1]), sh); //cout << "sh " << sh << endl;
         //MatrixXcd cmat = (comp(params[0],params[1]) - comp(115,0.5)) * (comp(params[0],params[1]) - comp(118,0.7)) * (comp(params[0],params[1]) - comp(115,-0.5)) * (comp(params[0],params[1]) - comp(118,-0.7)) * MatrixXcd({{1}}); //mock example
 
         comp det = cmat.determinant();

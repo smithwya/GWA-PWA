@@ -306,7 +306,7 @@ comp amplitude::getIntegral(comp s,int k,int sheet){
 
 	bool sh = int(pow(2,sheet) - 1) & int(pow(2,k));
 
-	if(sh) result += 2. * getRhoN(s,k,sheet);
+	if(sh) result += 2. * getRhoN(s,k,sheet);//cout << sheet << "	" << result << endl;
 
 	//cout << "result before = " << result << endl; // .
 	
@@ -318,8 +318,8 @@ comp amplitude::getIntegral(comp s,int k,int sheet){
 	//cout << "ciao" << endl; 
 	if(abs(s.imag()) < 2 * epsilon){
 		double sreal = s.real();//cout << "integral[" << sreal << ", " << k << "]" << endl;
-		//result += getIntegral(sreal, k);
-		comp result = getIntegral(sreal, k);
+		result += getIntegral(sreal, k);
+		//comp result = getIntegral(sreal, k);
 		integralList[skpair] = result;
 		return result;
 	}

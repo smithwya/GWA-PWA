@@ -1,13 +1,13 @@
 SetSeed(2)
 FitRegion(10.65,11.2062)
 
-FittingSequence({"Simplex"})
-FittingParameters({100000, 10000, 0.001, 1})
+FittingSequence({"Minuit", "Migrad"})
+FittingParameters({10000, 100, 0.001, 1}, {10000, 100, 0.001, 1})
 InclChi2Weight(1)
 ExclChi2Weight(14)
-ReducedChi2CutOff(3000000)
+ReducedChi2CutOff(30)
 
-ChooseAnAction("Fit")
+ChooseAnAction("Polesearch")
 
 DoRandomize(Yes)
 IncludeAlsoInclusiveCrossSection(Yes)

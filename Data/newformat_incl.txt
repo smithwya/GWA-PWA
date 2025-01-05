@@ -6,7 +6,7 @@ InclChi2Weight(1)
 ExclChi2Weight(10)
 ReducedChi2CutOff(10)
 
-ChooseAnAction("Fit")
+ChooseAnAction("Polesearch")
 
 DoRandomize(No)
 IncludeAlsoInclusiveCrossSection(Yes)
