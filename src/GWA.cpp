@@ -117,8 +117,8 @@ int main(int argc, char ** argv)
 
 	auto t_start = high_resolution_clock::now();
     auto t_end = high_resolution_clock::now();
-    auto delta_t = duration_cast<nanoseconds>(t_end-t_start);
-	auto delta_t_sec = duration_cast<seconds>(t_end-t_start);
+    auto delta_t = duration_cast<seconds>(t_end-t_start);
+	auto delta_t_nano = duration_cast<nanoseconds>(t_end-t_start);
 
 	string inputfile = (string) argv[1]; //just the core e.g. "fit73-36", without the path nor the extension
 	string polefile = "Poles/" + inputfile + "_poles.txt";
@@ -130,12 +130,12 @@ int main(int argc, char ** argv)
 	string polesfolder = "Poles/";
 	cout<<"[GWA] Initializing GWA..."<<endl;
 
-	auto t_start = high_resolution_clock::now();
+	t_start = high_resolution_clock::now();
 	cout<<"[IO] Reading inputfile...";
 	filereader formatReader(string("Data/") + inputfile + string(".txt"));
 
-	auto t_end = high_resolution_clock::now();
-	auto delta_t = duration_cast<seconds>(t_end-t_start);
+	t_end = high_resolution_clock::now();
+	delta_t = duration_cast<seconds>(t_end-t_start);
 	cout<<"done ("<<delta_t.count()<<"s)\n";
 
 	cout<<"[GWA] Initializing objects...";
@@ -168,7 +168,7 @@ int main(int argc, char ** argv)
 		//testObs.setexclchi2weight(formatReader.GetExclChi2Weight());
 		vector<double> steps = testObs.getStepSizes();
 		cout << testObs.getNumData()-steps.size() << endl;
-		cout << testObs.excl_chisq()/(testObs.getNumData()-steps.size()) << endl;return 0;
+		cout << testObs.excl_chisq()/(testObs.getNumData()-steps.size()) << endl;
 
 		//formatReader.writeMathematicaOutputFile("Math_2024-11-19_fit3.txt");return 0;
 	
@@ -251,8 +251,8 @@ int main(int argc, char ** argv)
 		}
 
 		t_end = high_resolution_clock::now();
-        delta_t = duration_cast<nanoseconds>(t_end-t_start);
-        cout<<"Precalculation of the integrals ended ("<<delta_t.count()<<"nanos)\n";
+        delta_t_nano = duration_cast<nanoseconds>(t_end-t_start);
+        cout<<"Precalculation of the integrals ended ("<<delta_t_nano.count()<<"nanos)\n";
 
 		/////////
 
@@ -517,8 +517,9 @@ int main(int argc, char ** argv)
                 t_start = high_resolution_clock::now();
                 min[l]->Minimize();
                 t_end = high_resolution_clock::now();
-                delta_t_sec = duration_cast<seconds>(t_end-t_start);
-                cout<<"done ("<<fitseq[l]<<": "<<delta_t_sec.count()<<"s)\n";
+                //delta_t_sec = duration_cast<seconds>(t_end-t_start);
+                delta_t = duration_cast<seconds>(t_end-t_start);
+                cout<<"done ("<<fitseq[l]<<": "<<delta_t.count()<<"s)\n";
 
 
 				//if(min[l]->Status() == 0){//|| min[l]->IsValidError() == false
@@ -744,7 +745,7 @@ int main(int argc, char ** argv)
 				}
 
 				for(int k = 0; k < poles.size(); k++){
-					letwrite << poles[k].real() << "	" << poles[k].imag() << "	" << f_val_poles[k] << "	" << pole_sheet[k] << "	" << wave_pole[k] << endl; 
+					letwrite << poles[k].real() << "	" << poles[k].imag() << "	" << f_val_poles[temp_Re.size()+k-2] << ampindex << "	" << sheet << endl; 
 					//cout << temp_Re[k] << temp_Im[k] << endl;
 					//cout << poles[k] << endl;
 				}
@@ -800,10 +801,16 @@ int main(int argc, char ** argv)
 				//for(MatrixXcd h: denomresidues) cout << h << endl << endl;
 
 				poles = {};
+				//f_val_poles = {};
+				testObs.amplitudes[ampindex].SetintegralList({});
+				ps.settestObs(testObs);
 
 			}
 
 			poles = {};
+			//f_val_poles = {};
+			testObs.amplitudes[ampindex].SetintegralList({});
+			ps.settestObs(testObs);
 
 		}
 

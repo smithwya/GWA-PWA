@@ -318,8 +318,8 @@ comp amplitude::getIntegral(comp s,int k,int sheet){
 	//cout << "ciao" << endl; 
 	if(abs(s.imag()) < 2 * epsilon){
 		double sreal = s.real();//cout << "integral[" << sreal << ", " << k << "]" << endl;
-		//result += getIntegral(sreal, k);
-		comp result = getIntegral(sreal, k);
+		result += getIntegral(sreal, k);
+		//comp result = getIntegral(sreal, k);
 		integralList[skpair] = result;
 		return result;
 	}
