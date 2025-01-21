@@ -4,15 +4,15 @@ CXX = $(shell root-config --cxx)
 LD = $(shell root-config --ld)
 
 #compiling flags
-CPPFLAGS := $(shell root-config --cflags) $(STDINCDIR) -I/usr/local/include/eigen3 -I/home/smithwya/eigen
+CPPFLAGS := $(shell root-config --cflags) $(STDINCDIR) -I$(EIGEN)
 CPPFLAGS += -O3
-CPPFLAGS += -fopenmp
+CPPFLAGS += -I/opt/homebrew/opt/libomp/include
 #CPPFLAGS += -g
 #CPPFLAGS += -pg
 #CPPFLAGS += -march=native
 
 #linking flags
-LDFLAGS := -Xlinker -rpath . $(shell root-config --glibs ) $(STDLIBDIR)
+LDFLAGS := -Xlinker -rpath . $(shell root-config --glibs ) $(STDLIBDIR) -L/opt/homebrew/opt/libomp/lib
 
 SRCDIR = src
 OBJDIR = obj

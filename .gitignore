@@ -372,3 +372,4 @@ pdf_folder.root
 "GWA PWA.vcxproj"
 "GWA PWA.vcxproj.filters"
 logs/
+Makefile
