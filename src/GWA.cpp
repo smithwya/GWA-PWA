@@ -505,6 +505,9 @@ int main(int argc, char ** argv)
 				} 
 
 				for(int i = 0; i < testObs.getNumAmps(); i++){
+					for(int k = nParams - numresmasses; k < nParams; k++){
+						min[l]->SetVariableLowerLimit(k + i * nParams, 0.);
+					}
 					if(testObs.amplitudes[i].getKMatType() == "kmat-CDD"){
 						for(int k = numremainingparamsperamp - numresmasses; k < nParams - numresmasses; k++){
 							min[l]->SetVariableLowerLimit(k + i * nParams, 0.);

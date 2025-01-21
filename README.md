@@ -7,4 +7,4 @@ Comments to the input file:
 #in fitparams for each call we specify the parameters SetMaxFunctionCalls, SetMaxIterations, SetTolerance, SetPrintLevel;
 
 Remember:
-1- CDD Kmat has positive coeffs whose positions in the list of fit parameters is hardcoded counted
+1- CDD Kmat has positive coeffs whose positions in the list of fit parameters is hardcoded counted; the same is for the Kmat poles.
