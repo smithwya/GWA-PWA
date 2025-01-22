@@ -1,15 +1,15 @@
 SetSeed(2)
 FitRegion(10.65,11.2062)
 
-FittingSequence({"Simplex"})
+FittingSequence({"Simplex","Migrad"})
 FittingParameters({100000, 10000, 0.001, 1})
 InclChi2Weight(1)
 ExclChi2Weight(14)
-ReducedChi2CutOff(3000000)
+ReducedChi2CutOff(30)
 
-ChooseAnAction("Polesearch")
+ChooseAnAction("Fit")
 
-DoRandomize(No)
+DoRandomize(Yes)
 IncludeAlsoInclusiveCrossSection(Yes)
 
 PolesearchGrid(113., 121., 31, -1.5, 1.5, 31)
