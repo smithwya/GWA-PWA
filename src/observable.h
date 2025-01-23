@@ -1444,7 +1444,7 @@ public:
 	    {
 	        double local_result = 0;  // Somma locale per ogni thread
 
-	        #pragma omp for nowait
+	        #pragma omp for schedule(dynamic)
 	        for (size_t pair_idx = 0; pair_idx < amp_chan_pairs.size(); ++pair_idx) {
 	            size_t amp_index = amp_chan_pairs[pair_idx].first;
 	            size_t chan_index = amp_chan_pairs[pair_idx].second;
@@ -1638,7 +1638,7 @@ public:
 		{
 			double local_sum = 0;  // Each thread has its local sum
 
-			#pragma omp for nowait
+			#pragma omp for schedule(dynamic)
 			for (int i = 0; i < data_InclCrossSec.sqrts.size(); i++) {
 				double x = data_InclCrossSec.sqrts[i];
 				double aux = 0;
