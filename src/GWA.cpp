@@ -501,7 +501,10 @@ int main(int argc, char ** argv)
 
 				//set the initial conditions and step sizes
 				for(int i = 0; i < nParams; i++){
-					min[l]->SetVariable(i,to_string(i),fitparams[i],steps[i]);
+					if(steps[i] < pow(10,-6)) {min[l]->SetFixedVariable(i,to_string(i),fitparams[i]);}
+					else{
+						min[l]->SetVariable(i,to_string(i),fitparams[i],steps[i]);
+					}
 				} 
 
 				for(int i = 0; i < testObs.getNumAmps(); i++){
